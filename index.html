@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Arms Race — Compute, Power & Benchmarks</title>
+<meta name="description" content="Track the AI infrastructure race — who has the most compute, power, and the best frontier models. Live data from Epoch AI, METR, and Artificial Analysis.">
+<meta property="og:title" content="AI Arms Race — Compute, Power & Benchmarks">
+<meta property="og:description" content="Track the AI infrastructure race — compute buildout, power capacity, frontier model benchmarks, and METR time horizons across the top AI labs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://adi-wasserman.github.io/ai-arms-race/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI Arms Race — Compute, Power & Benchmarks">
+<meta name="twitter:description" content="Who has the most compute and the best AI? Live dashboard tracking OpenAI, Google, Meta, xAI, and Anthropic.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(180deg,#050510,#080820 30%,#0a0a2e 60%,#0d0d1a);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;scroll-behavior:smooth;--m:'SF Mono',Menlo,monospace;--t2:rgba(255,255,255,.5);--t3:rgba(255,255,255,.3);--t4:rgba(255,255,255,.15);--bd:rgba(255,255,255,.08)}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(5,5,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 28px;height:48px;gap:24px}
+.nb{font-size:14px;font-weight:700;letter-spacing:3px;background:linear-gradient(90deg,#fff,rgba(255,255,255,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav a{font-size:11px;letter-spacing:1.5px;color:var(--t3);text-decoration:none;font-weight:600;padding:14px 0;border-bottom:2px solid transparent}
+nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
+.S{padding:80px 28px 40px}
+.st{font-size:22px;font-weight:700;letter-spacing:3px;background:linear-gradient(90deg,#fff,rgba(255,255,255,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ss{font-size:11px;color:var(--t3);letter-spacing:2px;display:block;margin-bottom:20px}
+.R{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.T{display:inline-flex;border-radius:6px;border:1px solid var(--bd);overflow:hidden}
+.T button{padding:5px 12px;font-size:10px;letter-spacing:1px;font-weight:600;cursor:pointer;border:none;color:var(--t3);background:transparent;font-family:inherit}
+.T button.on{color:#fff;background:rgba(255,255,255,.1)}
+.sep{width:1px;height:18px;background:var(--bd)}
+.fn{font-size:11px;color:var(--t3);line-height:1.6}
+.fn a{color:rgba(255,255,255,.55);text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);text-underline-offset:2px;transition:color .15s}
+.fn a:hover{color:#fff}
+.P{padding:3px 10px;font-size:10px;letter-spacing:1px;border:1px solid var(--bd);border-radius:4px;background:transparent;color:var(--t3);cursor:pointer;font-family:inherit;font-weight:600}
+.P.on{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18)}
+#tt{position:fixed;pointer-events:none;background:rgba(8,8,28,.95);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 16px;min-width:260px;backdrop-filter:blur(12px);z-index:2000;opacity:0;transition:opacity .12s;font-size:12px}
+#map{height:55vh;min-height:400px;border-radius:10px;border:1px solid var(--bd)}
+#mapPanel{height:55vh;min-height:400px}
+@media(max-width:900px){#mapPanel{display:none}}
+.leaflet-container{background:#070720!important;cursor:default!important}
+.leaflet-popup-content-wrapper{background:#0c0c28;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px}
+.leaflet-popup-tip{background:#0c0c28}
+.mp{display:flex;align-items:center;gap:5px;padding:3px 9px 3px 5px;border-radius:16px;font-size:10px;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid;backdrop-filter:blur(4px)}
+.mp:hover{transform:scale(1.1);z-index:900!important}
+.mp.bld{animation:pls 2s ease-in-out infinite}
+.mp .dt{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+@keyframes pls{0%,100%{box-shadow:0 0 6px rgba(var(--g),.2)}50%{box-shadow:0 0 16px rgba(var(--g),.5)}}
+/* ─── Data table ───────────────────────────────────────────── */
+.dt-wrap{border:1px solid var(--bd);border-radius:10px;overflow:hidden;overflow-x:auto;background:rgba(255,255,255,.015)}
+.dt-tbl{width:100%;border-collapse:collapse}
+.dt-tbl th{position:sticky;top:0;background:rgba(8,8,28,.95);backdrop-filter:blur(8px);padding:10px 12px;font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:700;text-align:left;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none;white-space:nowrap}
+.dt-tbl th:hover{color:#fff}
+.dt-tbl th.asc::after{content:" ↑";color:var(--t3)}
+.dt-tbl th.desc::after{content:" ↓";color:var(--t3)}
+.dt-tbl td{padding:10px 12px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;white-space:nowrap}
+.dt-tbl tr{cursor:pointer;transition:background .1s}
+.dt-tbl tr:hover{background:rgba(255,255,255,.04)}
+.dt-tbl tr.sel{background:rgba(255,255,255,.06)}
+.dt-tbl .rk{width:32px;font-family:var(--m);font-size:11px;color:var(--t3);text-align:center}
+.dt-tbl .nm{white-space:normal;min-width:160px;max-width:280px}
+.dt-tbl .mono{font-family:var(--m);font-size:11px}
+.obs-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600;margin:1px 2px;border:1px solid}
+.obs-badge.pos{color:rgba(0,255,135,.8);border-color:rgba(0,255,135,.2);background:rgba(0,255,135,.06)}
+.obs-badge.neg{color:rgba(255,68,68,.8);border-color:rgba(255,68,68,.2);background:rgba(255,68,68,.06)}
+.conf-bar{display:inline-block;height:4px;border-radius:2px;vertical-align:middle;margin-left:6px}
+
+/* ─── Slide-in drawer ──────────────────────────────────────── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;width:520px;max-width:92vw;height:100vh;background:linear-gradient(180deg,#0a0a24,#080818);border-left:1px solid var(--bd);z-index:3001;transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);overflow-y:auto;overflow-x:hidden}
+.drawer.open{transform:translateX(0)}
+.drawer-close{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(8,8,28,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
+.drawer-close button{background:none;border:1px solid var(--bd);border-radius:6px;color:#fff;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.drawer-close button:hover{background:rgba(255,255,255,.1)}
+.drawer-body{padding:0 20px 40px}
+
+/* ─── Vertical stepper timeline ────────────────────────────── */
+.vtl{position:relative;padding:16px 0 0 28px}
+.vtl::before{content:"";position:absolute;left:9px;top:24px;bottom:8px;width:2px;background:rgba(255,255,255,.06);border-radius:1px}
+.vtl-item{position:relative;padding:0 0 20px}
+.vtl-dot{position:absolute;left:-23px;top:3px;width:10px;height:10px;border-radius:50%;border:2px solid var(--t4);background:#0a0a24}
+.vtl-item.past .vtl-dot{border-color:rgba(0,255,135,.5);background:rgba(0,255,135,.15)}
+.vtl-item.future .vtl-dot{border-color:var(--t4);background:transparent}
+.vtl-date{font-family:var(--m);font-size:10px;margin-bottom:3px}
+.vtl-text{font-size:11px;color:var(--t2);line-height:1.45}
+.vtl-metrics{display:flex;gap:12px;margin-top:4px;font-family:var(--m);font-size:10px;color:var(--t3)}
+
+/* ─── Winner matrix ────────────────────────────────────────── */
+.wm{border:1px solid var(--bd);border-radius:10px;background:rgba(255,255,255,.015)}
+.wm table{width:100%;border-collapse:collapse;min-width:700px}
+.wm th{padding:14px 14px;font-size:11px;letter-spacing:1.5px;color:var(--t2);font-weight:700;text-align:center;border-bottom:1px solid rgba(255,255,255,.12);background:rgba(8,8,28,.97);backdrop-filter:blur(12px);position:sticky;top:48px;z-index:20}
+.wm th:first-child{text-align:left;min-width:220px}
+.wm th:nth-child(2){text-align:left;min-width:140px}
+.wm td{padding:12px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.wm td:first-child{text-align:left;padding-left:16px}
+.wm td:nth-child(2){text-align:left}
+.wm tr:hover{background:rgba(255,255,255,.03)}
+.wm .mc{padding:10px 6px}
+.wm-cell{display:inline-flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;border-radius:8px;min-width:62px;position:relative}
+.wm-cell.g{background:rgba(255,215,0,.15);border:2px solid rgba(255,215,0,.45);box-shadow:0 0 12px rgba(255,215,0,.10)}
+.wm-cell.g .wm-score{font-size:16px}
+.wm-cell.g .wm-rank{background:rgba(255,215,0,.20);color:#ffd700;padding:1px 6px;border-radius:4px}
+.wm-cell.s{background:rgba(192,192,192,.10);border:2px solid rgba(192,192,192,.30)}
+.wm-cell.s .wm-rank{color:#c0c0c0}
+.wm-cell.b{background:rgba(205,127,50,.08);border:2px solid rgba(205,127,50,.25)}
+.wm-cell.b .wm-rank{color:#cd7f32}
+.wm-cell.x{background:transparent;border:1px solid var(--bd)}
+.wm-cell.x .wm-rank{color:var(--t4)}
+.wm-cell.na{background:transparent;border:1px solid transparent}
+.wm-score{font-family:var(--m);font-size:14px;font-weight:700}
+.wm-rank{font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--t3)}
+.wm-domain{padding:20px 16px 10px!important;border-bottom:none!important;background:rgba(255,255,255,.04);border-top:2px solid rgba(255,255,255,.10)!important}
+.wm-domain span{font-size:16px;font-weight:800;letter-spacing:2.5px;color:#fff}
+.wm-bench td:first-child{border-left:3px solid rgba(255,255,255,.12);padding-left:24px!important}
+.domain-sep{font-size:9px;letter-spacing:2px;color:var(--t4);font-weight:700;margin:28px 0 12px;padding-top:16px;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+<nav><span class="nb">AI ARMS RACE</span><a href="#race" class="on">THE RACE</a><a href="#geomap">GEO MAP</a><a href="#sites">INTEL</a><a href="#models">MODELS</a></nav>
+
+<section class="S" id="race">
+<span class="st">THE AI ARMS RACE</span>
+<span class="ss">WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT ERA (2023–)</span>
+<div class="R" style="gap:24px;margin-bottom:16px">
+<div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">LEADER TODAY</div><div id="st1"></div></div>
+<div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">TOTAL COMPUTE</div><div id="st2"></div></div>
+<div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">TOTAL POWER</div><div id="st3"></div></div>
+<div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">LEAD CHANGES</div><div id="st4"></div></div>
+<div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">DATA</div><div id="st5" style="font-size:12px;color:var(--t2)">Loading…</div></div>
+</div>
+<div class="R">
+<div class="T" id="tM"><button class="on" onclick="App.setMetric('h100e')">H100e</button><button onclick="App.setMetric('power')">POWER</button></div>
+<div class="sep"></div>
+<div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">TRACKED FACILITIES</button><button onclick="App.setScope('fleet')">+ FLEET EST.</button></div>
+<div class="sep"></div>
+<div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">FULL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED</button></div>
+<div id="leg" style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto"></div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:12px">
+<div style="flex:1;min-width:0;position:relative;height:55vh;min-height:340px"><canvas id="ch"></canvas></div>
+<div style="width:260px;flex-shrink:0;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;padding:14px;max-height:55vh;overflow-y:auto">
+<div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:600">WHO'S WINNING</div>
+<div id="lbd" style="font-size:11px;font-family:var(--m);color:var(--t2);margin:4px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--bd)"></div>
+<div id="lbr"></div>
+</div>
+</div>
+<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Tracked Facilities = satellite-verified sites (~15% of global compute) · + Fleet Est. = adds Gemini TPU + Anthropic AWS fleet estimates · Est. Dedicated = allocation bands by facility ownership tier · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
+</section>
+
+<section class="S" id="geomap">
+<span class="st">GEO MAP</span><span class="ss">WHERE AI INFRASTRUCTURE IS BEING BUILT · HOVER OR CLICK ANY PIN</span>
+<div class="R" style="justify-content:space-between">
+<div class="T" id="tFm"><button class="on" onclick="App.setStatus('ALL')">ALL</button><button onclick="App.setStatus('OP')">● LIVE</button><button onclick="App.setStatus('BLD')">◐ BUILDING</button><button onclick="App.setStatus('PLN')">○ PLANNED</button></div>
+<div style="display:flex;gap:8px"><button id="rUS" onclick="App.setRegion('us')" style="padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:1px;border:1px solid var(--bd);border-radius:6px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-family:inherit">🇺🇸 US · 25</button><span style="color:var(--t4);align-self:center">→</span><button id="rUE" onclick="App.setRegion('uae')" style="padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:1px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t3);cursor:pointer;font-family:inherit">🇦🇪 UAE · 1</button></div>
+</div>
+<div style="display:flex;gap:16px">
+<div style="flex:1;min-width:0"><div id="map"></div></div>
+<div id="mapPanel" style="width:320px;flex-shrink:0;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;overflow:hidden"><div id="prev"></div></div>
+</div>
+<div class="fn" style="margin-top:8px">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (facility locations + status) · Satellite tiles: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI World Imagery</a> · Labels: <a href="https://carto.com/basemaps" target="_blank">CARTO Dark Labels</a> · Map: <a href="https://leafletjs.com" target="_blank">Leaflet 1.9</a></div>
+</section>
+
+<section class="S" id="sites">
+<span class="st">INTEL</span><span class="ss">SATELLITE-DERIVED CONSTRUCTION ANALYSIS · WHO'S BUILDING WHAT, AND HOW FAST</span>
+<div id="scnt" style="font-size:12px;color:var(--t2);margin-bottom:10px"></div>
+<div class="R" id="lf"></div>
+<div class="R">
+<div class="T" id="tFc"><button class="on" onclick="App.setStatus('ALL')">ALL</button><button onclick="App.setStatus('OP')">LIVE</button><button onclick="App.setStatus('BLD')">BUILDING</button><button onclick="App.setStatus('PLN')">PLANNED</button></div>
+</div>
+<div class="dt-wrap"><table class="dt-tbl"><thead id="dtHead"></thead><tbody id="dtBody"></tbody></table></div>
+<div class="fn" style="margin-top:8px">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (H100e, power, cost, timelines) · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a> · Satellite preview: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI World Imagery</a> · Confidence scores derived from construction phase, power ramp, and observation count · ±6mo/±1.4×</div>
+</section>
+<div class="drawer-overlay" id="drOverlay" onclick="App.closeDrawer()"></div>
+<div class="drawer" id="drPanel"><div class="drawer-close"><span id="drTitle" style="font-size:13px;font-weight:700"></span><button onclick="App.closeDrawer()">✕ CLOSE</button></div><div class="drawer-body" id="drBody"></div></div>
+
+<section class="S" id="models">
+<span class="st">MODELS</span><span class="ss">FRONTIER MODEL BENCHMARKS · WHICH LAB IS PRODUCING THE BEST AI</span>
+<div id="modelSection"></div>
+
+<div style="margin-top:40px">
+<div style="font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:4px">METR TIME HORIZONS</div>
+<div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:14px">HOW LONG A TASK (MEASURED BY HUMAN EXPERT TIME) CAN AN AI AGENT COMPLETE WITH 50% RELIABILITY?</div>
+<div style="position:relative;height:55vh;min-height:400px"><canvas id="metrChart"></canvas></div>
+<div class="fn" style="margin-top:8px">DATA: <a href="https://metr.org/time-horizons/" target="_blank">METR Time Horizons TH1.1</a> (updated Mar 3, 2026) · Raw data: <a href="https://metr.org/assets/benchmark_results_1_1.yaml" target="_blank">benchmark_results_1_1.yaml</a> · Analysis: <a href="https://github.com/METR/eval-analysis-public" target="_blank">GitHub</a> · Tasks drawn from <a href="https://metr.org/blog/2024-11-22-evaluating-r-d-capabilities-of-llms/" target="_blank">RE-Bench</a>, <a href="https://arxiv.org/html/2503.17354v1" target="_blank">HCAST</a>, and SWAA · Paper: <a href="https://arxiv.org/abs/2503.14499" target="_blank">arXiv:2503.14499</a> · Doubling time ~4 months · Linear scale (hours)</div>
+</div>
+
+<div class="fn" style="margin-top:8px">DATA: <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank">Artificial Analysis v4.0</a> (Intelligence Index, speed, pricing) · <a href="https://gpqa-diamond.github.io" target="_blank">GPQA Diamond</a> · <a href="https://www.swebench.com" target="_blank">SWE-bench Verified</a> (Princeton NLP) · <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a> (ARC Prize Foundation) · <a href="https://artofproblemsolving.com/wiki/index.php/AIME" target="_blank">AIME 2025</a> (AMC/MAA) · <a href="https://mmmu-benchmark.github.io" target="_blank">MMMU-Pro</a> · <a href="https://last-exam.ai" target="_blank">HLE</a> (CAIS) · <a href="https://osworld.github.io" target="_blank">OSWorld</a> · <a href="https://openai.com/index/browsecomp" target="_blank">BrowseComp</a> · Scores are a snapshot — update per new model release</div>
+</section>
+<div style="padding:16px 28px 40px"><div class="fn">AI Arms Race · Data: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live fetch + cached fallback) · Satellite: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI</a> · ±6mo/±1.4× · Benchmarks: <a href="https://artificialanalysis.ai" target="_blank">Artificial Analysis</a>, <a href="https://www.swebench.com" target="_blank">SWE-bench</a>, <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a>, <a href="https://last-exam.ai" target="_blank">HLE</a>, <a href="https://osworld.github.io" target="_blank">OSWorld</a> + provider system cards (snapshot — update per release)</div></div>
+<div id="tt"></div>
+
+<script>
+// ─── Global error handler — logs runtime errors to console ────
+window.onerror = function(msg, src, line, col, err) {
+  console.error('[Runtime] ' + msg + ' (line ' + line + ')' + (err && err.stack ? '\n' + err.stack.split('\n').slice(0,3).join('\n') : ''));
+  return false;
+};
+
+// ═══════════════════════════════════════════════════════════════
+// 1. CONFIG — constants only, never mutated at runtime
+// ═══════════════════════════════════════════════════════════════
+var CFG = Object.freeze({
+  today: new Date().toISOString().slice(0, 10),
+
+  labs: ["OpenAI", "Gemini", "Meta", "xAI", "Anthropic"],
+
+  colors: {
+    OpenAI: "#00ff87", Gemini: "#4285f4", Meta: "#00d4ff",
+    xAI: "#ff4444", Anthropic: "#ffaa00"
+  },
+
+  chips: {
+    OpenAI: "GB200/H100", Gemini: "TPUv4-v7", Meta: "H100/B200",
+    xAI: "H100/H200/GB200", Anthropic: "Trainium2+TPUv7"
+  },
+
+  // Handle → parent lab mapping (fallback used when Epoch fetch fails)
+  labMap: {
+    "Amazon Canton Mississippi": "Anthropic",
+    "Amazon Ridgeland Mississippi": "Anthropic",
+    "Anthropic-Amazon Project Rainier New Carlisle Indiana": "Anthropic",
+    "Crusoe Goodnight Texas": "Gemini",
+    "Google Pryor Oklahoma": "Gemini",
+    "Google New Albany Ohio": "Gemini",
+    "Google Omaha Nebraska": "Gemini",
+    "Google Cedar Rapids Iowa": "Gemini",
+    "Google Council Bluffs Iowa": "Gemini",
+    "Meta Hyperion Holly Ridge Louisiana": "Meta",
+    "Meta Prometheus New Albany Ohio": "Meta",
+    "Meta Temple Texas": "Meta",
+    "Microsoft Fairwater Fayetteville Georgia": "OpenAI",
+    "Microsoft Fairwater Mount Pleasant Wisconsin": "OpenAI",
+    "Microsoft Goodyear Arizona": "OpenAI",
+    "OpenAI-Oracle Stargate Abilene Texas": "OpenAI",
+    "OpenAI-Oracle Stargate Abu Dhabi": "OpenAI",
+    "OpenAI Stargate Shackelford": "OpenAI",
+    "xAI Colossus 1 Memphis Tennessee": "xAI",
+    "xAI Colossus 2 Memphis Tennessee": "xAI",
+    "Alibaba Zhangbei Zhangjiakou Hebei": "Other",
+    "Coreweave Helios Afton Texas": "Other",
+    "QTS Cedar Rapids Iowa": "Other",
+    EGC: "Gemini",
+    EAI: "Anthropic"
+  },
+
+  // Satellite coordinates [lat, lon]
+  coords: {
+    "Amazon Canton Mississippi": [32.59, -90.09],
+    "Amazon Ridgeland Mississippi": [32.4, -90.2],
+    "Anthropic-Amazon Project Rainier New Carlisle Indiana": [41.69, -86.46],
+    "Crusoe Goodnight Texas": [35.02, -101.31],
+    "Google Pryor Oklahoma": [36.24, -95.33],
+    "Google New Albany Ohio": [40.06, -82.76],
+    "Google Omaha Nebraska": [41.34, -96.09],
+    "Google Cedar Rapids Iowa": [41.92, -91.72],
+    "Google Council Bluffs Iowa": [41.17, -95.79],
+    "Meta Hyperion Holly Ridge Louisiana": [32.5, -91.64],
+    "Meta Prometheus New Albany Ohio": [40.07, -82.75],
+    "Meta Temple Texas": [31.13, -97.37],
+    "Microsoft Fairwater Fayetteville Georgia": [33.45, -84.52],
+    "Microsoft Fairwater Mount Pleasant Wisconsin": [42.67, -87.9],
+    "Microsoft Goodyear Arizona": [33.41, -112.37],
+    "OpenAI-Oracle Stargate Abilene Texas": [32.5, -99.78],
+    "OpenAI-Oracle Stargate Abu Dhabi": [24.15, 54.44],
+    "OpenAI Stargate Shackelford": [32.55, -99.56],
+    "xAI Colossus 1 Memphis Tennessee": [35.06, -90.16],
+    "xAI Colossus 2 Memphis Tennessee": [34.99, -90.03],
+    "Coreweave Helios Afton Texas": [33.77, -100.87]
+  },
+
+  // Cached timeline rows: [date, handle, h100e, powerMW]
+  rawTimeline: [
+    ["2023-03-10","Meta Prometheus New Albany Ohio",87675,249],
+    ["2024-02-18","Google New Albany Ohio",46431,217],
+    ["2024-04-08","Google Omaha Nebraska",54940,95],
+    ["2024-07-19","Google Pryor Oklahoma",62851,195],
+    ["2024-07-27","Google New Albany Ohio",101555,312],
+    ["2024-08-11","xAI Colossus 1 Memphis Tennessee",25000,44],
+    ["2024-09-02","xAI Colossus 1 Memphis Tennessee",100000,174],
+    ["2024-11-19","Google Omaha Nebraska",109880,189],
+    ["2024-11-19","Google Council Bluffs Iowa",109939,190],
+    ["2024-12-25","Microsoft Fairwater Fayetteville Georgia",75181,87],
+    ["2025-02-02","Meta Prometheus New Albany Ohio",127687,319],
+    ["2025-02-17","xAI Colossus 1 Memphis Tennessee",200000,349],
+    ["2025-03-09","Google New Albany Ohio",235426,543],
+    ["2025-04-13","Microsoft Fairwater Fayetteville Georgia",463498,537],
+    ["2025-04-13","Microsoft Goodyear Arizona",205145,263],
+    ["2025-06-23","Amazon Canton Mississippi",214348,341],
+    ["2025-06-23","Anthropic-Amazon Project Rainier New Carlisle Indiana",300087,478],
+    ["2025-06-28","OpenAI-Oracle Stargate Abilene Texas",127337,147],
+    ["2025-07-22","xAI Colossus 1 Memphis Tennessee",275796,424],
+    ["2025-08-06","Meta Prometheus New Albany Ohio",274150,464],
+    ["2025-08-06","Meta Temple Texas",173248,198],
+    ["2025-08-27","Microsoft Fairwater Fayetteville Georgia",531161,615],
+    ["2025-09-17","xAI Colossus 1 Memphis Tennessee",226552,348],
+    ["2025-09-20","Meta Prometheus New Albany Ohio",350308,540],
+    ["2025-09-26","OpenAI-Oracle Stargate Abilene Texas",254674,295],
+    ["2025-10-19","xAI Colossus 2 Memphis Tennessee",277918,276],
+    ["2025-10-29","Meta Prometheus New Albany Ohio",426467,615],
+    ["2025-11-07","xAI Colossus 1 Memphis Tennessee",275796,498],
+    ["2025-11-30","Meta Prometheus New Albany Ohio",502625,691],
+    ["2025-12-23","Anthropic-Amazon Project Rainier New Carlisle Indiana",471566,751],
+    ["2026-01-13","xAI Colossus 2 Memphis Tennessee",353508,351],
+    ["2026-02-12","Meta Prometheus New Albany Ohio",704103,891],
+    ["2026-02-27","Meta Prometheus New Albany Ohio",794365,981],
+    ["2026-03-23","Anthropic-Amazon Project Rainier New Carlisle Indiana",685914,1092],
+    ["2026-03-26","Microsoft Fairwater Fayetteville Georgia",919478,1065],
+    ["2026-03-29","Google Cedar Rapids Iowa",121646,105],
+    ["2026-03-31","Microsoft Fairwater Mount Pleasant Wisconsin",558828,555],
+    ["2026-04-01","Google New Albany Ohio",393461,679],
+    ["2026-04-01","OpenAI-Oracle Stargate Abilene Texas",509348,590],
+    ["2026-05-08","Google Omaha Nebraska",220137,284],
+    ["2026-05-13","xAI Colossus 2 Memphis Tennessee",1389591,1379],
+    ["2026-05-17","Google Pryor Oklahoma",515686,584],
+    ["2026-05-19","Amazon Ridgeland Mississippi",171479,273],
+    ["2026-05-28","Meta Prometheus New Albany Ohio",884627,1070],
+    ["2026-06-15","Crusoe Goodnight Texas",168093,133],
+    ["2026-06-21","Anthropic-Amazon Project Rainier New Carlisle Indiana",771653,1229],
+    ["2026-07-01","OpenAI-Oracle Stargate Abilene Texas",1018696,1180],
+    ["2026-08-26","Meta Prometheus New Albany Ohio",974889,1160],
+    ["2026-09-18","Amazon Canton Mississippi",514436,819],
+    ["2026-10-01","Meta Prometheus New Albany Ohio",1176366,1360],
+    ["2026-12-01","OpenAI-Oracle Stargate Abu Dhabi",252653,280],
+    ["2027-01-24","Google Omaha Nebraska",371635,379],
+    ["2027-02-04","Microsoft Fairwater Mount Pleasant Wisconsin",1117655,1109],
+    ["2027-02-22","Google Cedar Rapids Iowa",262344,209],
+    ["2027-03-03","OpenAI-Oracle Stargate Abilene Texas",2499218,2121],
+    ["2027-05-15","Microsoft Fairwater Mount Pleasant Wisconsin",3154582,2219],
+    ["2027-05-23","Google Cedar Rapids Iowa",414509,314],
+    ["2027-07-01","Crusoe Goodnight Texas",1379749,1088],
+    ["2027-07-26","Google Omaha Nebraska",579799,474],
+    ["2027-09-17","Microsoft Fairwater Mount Pleasant Wisconsin",5191509,3328],
+    ["2027-09-21","Amazon Ridgeland Mississippi",633151,1008],
+    ["2027-11-24","Google Cedar Rapids Iowa",593266,418],
+    ["2028-01-01","Meta Hyperion Holly Ridge Louisiana",4152951,2262],
+    ["2028-01-01","OpenAI-Oracle Stargate Abu Dhabi",1972096,1400],
+    ["2028-05-22","Google Cedar Rapids Iowa",802277,523],
+    ["2028-11-18","Google Cedar Rapids Iowa",1046642,627]
+  ],
+
+  // Fleet estimates: [date, handle, h100e, powerMW]
+  fleetEstimates: [
+    ["2026-06-01","EGC",600000,265],
+    ["2026-09-01","EGC",1500000,653],
+    ["2026-12-01","EGC",2500000,1080],
+    ["2027-06-01","EGC",3070000,1330],
+    ["2026-07-01","EAI",466000,204],
+    ["2026-10-01","EAI",1165000,510],
+    ["2027-01-01","EAI",1864000,816],
+    ["2027-06-01","EAI",2330000,1020]
+  ],
+
+  // Allocation confidence bands: what % of each facility is dedicated to the attributed lab
+  // Tier 1: Purpose-built / single-tenant (90-100%)
+  // Tier 2: Cloud provider with strategic partnership (20-45%)
+  // Tier 3: General hyperscaler infrastructure (15-35%)
+
+  // Frontier model benchmarks — snapshot March 2026
+  // Sources: Artificial Analysis v4.0, LMSYS Arena, provider system cards, independent evals
+  // Scores are % unless noted. null = not available / not reported
+  models: [
+    {
+      name: "GPT-5.4", lab: "OpenAI", released: "2026-03-05",
+      aaIndex: 57,     // Artificial Analysis Intelligence Index v4.0
+      gpqa: 92.8,      // GPQA Diamond (PhD-level science)
+      swebench: 74.9,  // SWE-bench Verified (coding)
+      swebenchPro: 57.7, // SWE-bench Pro (multi-language)
+      arcAgi2: 73.3,   // ARC-AGI-2 (abstract reasoning), Pro: 83.3
+      aime: 100,       // AIME 2025 (competition math)
+      mmmuPro: 81.2,   // MMMU-Pro (multimodal reasoning)
+      hle: null,       // Humanity's Last Exam
+      gdpval: 83,      // GDPval (real-world knowledge work)
+      osworld: 75.0,   // OSWorld (computer use) — surpasses human 72.4%
+      browsecomp: 82.7, // BrowseComp (web browsing)
+      speed: 109,      // tokens/sec (approx via provider API)
+      costIn: 2.50,    // $/M input tokens
+      costOut: 15.00,  // $/M output tokens
+      context: 1000,   // context window (K tokens)
+      notes: "First model to surpass human performance on desktop computer use. Ties Gemini 3.1 Pro on AA Intelligence Index. Native tool search reduces tokens 47%."
+    },
+    {
+      name: "Gemini 3.1 Pro", lab: "Gemini", released: "2026-02-19",
+      aaIndex: 57,
+      gpqa: 94.3,      // Highest of any model
+      swebench: 80.6,
+      swebenchPro: null,
+      arcAgi2: 77.1,   // Highest standard-tier score
+      aime: 91.2,      // 100% with code execution
+      mmmuPro: 81.0,
+      hle: 51.4,       // with tools
+      gdpval: null,
+      osworld: null,
+      browsecomp: null,
+      speed: 109.5,
+      costIn: 2.00,
+      costOut: 12.00,
+      context: 2000,   // 2M tokens — largest context window
+      notes: "Leads on 13 of 16 major benchmarks. Highest GPQA Diamond score of any model. Best price-performance ratio among frontier models. Only model with native video + audio input."
+    },
+    {
+      name: "Claude Opus 4.6", lab: "Anthropic", released: "2026-02-05",
+      aaIndex: 53,
+      gpqa: 91.3,
+      swebench: 80.8,  // Highest SWE-bench Verified (single attempt)
+      swebenchPro: null,
+      arcAgi2: null,
+      aime: 99.8,      // Flagged for potential contamination
+      mmmuPro: 85.1,   // Highest MMMU-Pro
+      hle: 53.0,       // Highest with tools
+      gdpval: 78.0,
+      osworld: 72.7,
+      browsecomp: 84.0, // Highest BrowseComp
+      speed: 72,
+      costIn: 15.00,
+      costOut: 75.00,
+      context: 200,    // 1M in beta
+      notes: "Highest SWE-bench Verified score (80.8%). Best coding model per independent evaluations. 128K max output — double any competitor. Leads HLE and BrowseComp. Highest MMMU-Pro for visual reasoning."
+    },
+    {
+      name: "Grok 4", lab: "xAI", released: "2025-12-11",
+      aaIndex: null,    // Not in AA top-tier rankings
+      gpqa: 88.0,
+      swebench: 75.0,
+      swebenchPro: null,
+      arcAgi2: null,
+      aime: null,
+      mmmuPro: null,
+      hle: null,
+      gdpval: null,
+      osworld: null,
+      browsecomp: null,
+      speed: 210,      // Fastest inference
+      costIn: 2.00,
+      costOut: 15.00,
+      context: 2000,   // 2M tokens
+      notes: "Four-agent multi-agent architecture (Grok, Harper, Benjamin, Lucas). Fastest inference among frontier models. Deep X/Twitter integration for real-time data. Grok 4.20 multi-agent variant still in training."
+    },
+    {
+      name: "Llama 4 Maverick", lab: "Meta", released: "2025-04-05",
+      aaIndex: null,    // Not competing at frontier tier
+      gpqa: null,
+      swebench: null,
+      swebenchPro: null,
+      arcAgi2: null,
+      aime: null,
+      mmmuPro: null,
+      hle: null,
+      gdpval: null,
+      osworld: null,
+      browsecomp: null,
+      speed: null,
+      costIn: 0,       // Open weights
+      costOut: 0,
+      context: 1000,
+      notes: "Open-weights model. Not competing at the frontier benchmark tier despite Meta having the 2nd-most compute infrastructure. MoE architecture. Significant gap to proprietary frontier models."
+    }
+  ],
+
+  // Benchmark metadata for display
+  benchmarks: {
+    aaIndex:     { label: "AA INDEX",     domain: "Overall",    max: 100, desc: "Artificial Analysis Intelligence Index v4.0 — composite of 10 evaluations", source: "Artificial Analysis (independent)" },
+    gpqa:        { label: "GPQA ◇",      domain: "Science",    max: 100, desc: "GPQA Diamond — PhD-level science questions, expert accuracy ~65%", source: "GPQA Dataset · Verified by Epoch AI + AA" },
+    swebench:    { label: "SWE-BENCH",    domain: "Coding",     max: 100, desc: "SWE-bench Verified — real GitHub bug fixes, 500 issues", source: "Princeton NLP · swebench.com" },
+    arcAgi2:     { label: "ARC-AGI-2",    domain: "Reasoning",  max: 100, desc: "ARC-AGI-2 — abstract visual reasoning, resists memorization", source: "ARC Prize Foundation · arcprize.org" },
+    aime:        { label: "AIME '25",     domain: "Math",       max: 100, desc: "AIME 2025 — competition math, 45 problems, answers 0-999", source: "AMC/MAA · AA independent eval" },
+    mmmuPro:     { label: "MMMU-PRO",     domain: "Multimodal", max: 100, desc: "MMMU-Pro — expert-level multimodal visual reasoning", source: "mmmu-benchmark.github.io" },
+    hle:         { label: "HLE",          domain: "Frontier",   max: 100, desc: "Humanity's Last Exam — 2,500 expert questions, intended as final academic eval", source: "CAIS (Dan Hendrycks) · last-exam.ai" },
+    gdpval:      { label: "GDPval",       domain: "Work",       max: 100, desc: "GDPval — real-world knowledge work across 44 occupations, 9 industries", source: "OpenAI · AA independent verification via GDPval-AA" },
+    osworld:     { label: "OSWorld",      domain: "Agents",     max: 100, desc: "OSWorld — desktop computer use, human baseline 72.4%", source: "osworld.ai · Provider system cards" },
+    browsecomp:  { label: "BROWSE",       domain: "Agents",     max: 100, desc: "BrowseComp — web browsing and information retrieval", source: "browsecomp.github.io · Provider system cards" }
+  },
+
+  // Domain groupings for the "by domain" view
+  domains: [
+    { key: "science",    label: "SCIENTIFIC REASONING", benchmarks: ["gpqa"],          icon: "🔬" },
+    { key: "coding",     label: "CODING",               benchmarks: ["swebench"],      icon: "💻" },
+    { key: "reasoning",  label: "ABSTRACT REASONING",   benchmarks: ["arcAgi2"],       icon: "🧩" },
+    { key: "math",       label: "MATHEMATICS",           benchmarks: ["aime"],          icon: "📐" },
+    { key: "multimodal", label: "MULTIMODAL",            benchmarks: ["mmmuPro"],       icon: "👁️" },
+    { key: "agents",     label: "AGENTS & TOOL USE",     benchmarks: ["osworld", "browsecomp", "gdpval"], icon: "🤖" },
+    { key: "frontier",   label: "FRONTIER DIFFICULTY",   benchmarks: ["hle"],           icon: "🎯" }
+  ],
+  allocations: {
+    // xAI — owned, single-tenant, 100% dedicated
+    "xAI Colossus 1 Memphis Tennessee":          { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, single-tenant" },
+    "xAI Colossus 2 Memphis Tennessee":          { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, single-tenant" },
+    // Meta — owned, no cloud business, 100% dedicated
+    "Meta Prometheus New Albany Ohio":            { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, no cloud business" },
+    "Meta Temple Texas":                         { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, no cloud business" },
+    "Meta Hyperion Holly Ridge Louisiana":       { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, no cloud business" },
+    // OpenAI/Oracle Stargate — purpose-built JV
+    "OpenAI-Oracle Stargate Abilene Texas":      { low: 0.90, high: 1.0,  tier: 1, basis: "Purpose-built JV for OpenAI" },
+    "OpenAI-Oracle Stargate Abu Dhabi":          { low: 0.85, high: 1.0,  tier: 1, basis: "Purpose-built JV for OpenAI" },
+    "OpenAI Stargate Shackelford":               { low: 0.90, high: 1.0,  tier: 1, basis: "Purpose-built JV for OpenAI" },
+    // Anthropic/Amazon Rainier — named partnership, Trainium-based
+    "Anthropic-Amazon Project Rainier New Carlisle Indiana": { low: 0.85, high: 0.95, tier: 1, basis: "Named partnership, Trainium" },
+    // Microsoft Azure — multi-tenant, OpenAI is priority customer
+    "Microsoft Fairwater Fayetteville Georgia":  { low: 0.25, high: 0.40, tier: 2, basis: "Azure multi-tenant, OpenAI priority" },
+    "Microsoft Fairwater Mount Pleasant Wisconsin": { low: 0.25, high: 0.40, tier: 2, basis: "Azure multi-tenant, OpenAI priority" },
+    "Microsoft Goodyear Arizona":                { low: 0.25, high: 0.40, tier: 2, basis: "Azure multi-tenant, OpenAI priority" },
+    // Amazon AWS — general regions, Anthropic is one of many customers
+    "Amazon Canton Mississippi":                 { low: 0.15, high: 0.25, tier: 2, basis: "AWS general region" },
+    "Amazon Ridgeland Mississippi":              { low: 0.15, high: 0.25, tier: 2, basis: "AWS general region" },
+    // Google — multi-purpose, partial TPU for Gemini
+    "Google New Albany Ohio":                     { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
+    "Google Omaha Nebraska":                     { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
+    "Google Pryor Oklahoma":                     { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
+    "Google Cedar Rapids Iowa":                  { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
+    "Google Council Bluffs Iowa":                { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
+    // Crusoe — contracted for Gemini training
+    "Crusoe Goodnight Texas":                    { low: 0.80, high: 0.95, tier: 1, basis: "Contracted for Gemini training" },
+    // Fleet estimates — dedicated by definition
+    "EGC":                                       { low: 0.80, high: 0.95, tier: 1, basis: "Google/Gemini TPU fleet estimate" },
+    "EAI":                                       { low: 0.85, high: 0.95, tier: 1, basis: "Anthropic fleet estimate" }
+  },
+
+  // METR Time Horizons — 50% task-completion time horizon (TH1.1, last updated Mar 3 2026)
+  // Source: https://metr.org/time-horizons/ + benchmark_results_1_1.yaml
+  // Each entry: [release date, model name, 50% horizon in minutes, show label (1=yes)]
+  // Doubling time ~123 days (4 months) since 2023
+  metrHorizons: [
+    ["2019-02-14", "GPT-2",              0.15,  1],
+    ["2020-06-11", "GPT-3",              0.25,  1],
+    ["2022-03-15", "GPT-3.5",            0.4,   1],
+    ["2023-03-14", "GPT-4",              1.2,   1],
+    ["2024-05-13", "GPT-4o",             3.2,   0],
+    ["2024-09-12", "o1",                 8.5,   0],
+    ["2025-01-31", "DeepSeek-R1",        7.8,   0],
+    ["2025-02-24", "Claude 3.7 Sonnet",  12,    0],
+    ["2025-04-16", "o3",                 19,    1],
+    ["2025-04-16", "o4-mini",            14,    0],
+    ["2025-06-27", "DeepSeek-V3",        4.8,   0],
+    ["2025-07-20", "Grok 4",            42,    0],
+    ["2025-08-06", "GPT-5",             137,   1],
+    ["2025-08-06", "Claude Opus 4.1",    95,   0],
+    ["2025-09-30", "Claude Sonnet 4.5",  88,   0],
+    ["2025-11-19", "GPT-5.1 Codex Max", 178,   0],
+    ["2025-12-19", "Claude Opus 4.5",   289,   1],
+    ["2026-01-15", "GPT-5.2 (high)",    330,   1],
+    ["2026-02-03", "Gemini 3 Pro",      270,   0],
+    ["2026-02-05", "Claude Opus 4.6",   870,   1],
+    ["2026-02-20", "GPT-5.3 Codex",    540,   0]
+  ]
+});
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 2. DATA — pure functions, no DOM access, no state mutation
+//    Every function takes explicit inputs and returns a result.
+//    You can test any of these in the browser console.
+// ═══════════════════════════════════════════════════════════════
+var Data = (function() {
+
+  // --- Formatters (pure) ---
+  function formatH100(v) {
+    return v >= 1e6 ? (v / 1e6).toFixed(1) + "M"
+         : v >= 1e3 ? Math.round(v / 1e3) + "K"
+         : "" + v;
+  }
+
+  function formatPower(v) {
+    return v >= 1e3 ? (v / 1e3).toFixed(2) + " GW" : Math.round(v) + " MW";
+  }
+
+  function formatAxis(v) {
+    return v >= 1e3 ? (v / 1e3).toFixed(1) + "GW" : v > 0 ? Math.round(v) + "MW" : "0";
+  }
+
+  function shortName(title) {
+    return title
+      .replace(/^(OpenAI[- ]?(Oracle )?|Microsoft |Meta |Google |Anthropic[- ]Amazon |xAI |Crusoe |Amazon )/i, "")
+      .split(",")[0].split("(")[0].trim().split(" ").slice(0, 3).join(" ");
+  }
+
+  // --- Classification ---
+  function classifyLab(users, owner) {
+    var s = (users || "").toLowerCase();
+    var w = (owner || "").toLowerCase();
+    return s.indexOf("openai") >= 0 ? "OpenAI"
+         : s.indexOf("google deepmind") >= 0 ? "Gemini"
+         : s.indexOf("meta") >= 0 ? "Meta"
+         : s.indexOf("xai") >= 0 ? "xAI"
+         : s.indexOf("anthropic") >= 0 ? "Anthropic"
+         : s.indexOf("microsoft") >= 0 ? "OpenAI"
+         : w.indexOf("google") >= 0 ? "Gemini"
+         : w.indexOf("amazon") >= 0 ? "Anthropic"
+         : w.indexOf("oracle") >= 0 ? "OpenAI"
+         : "Other";
+  }
+
+  // --- Time series aggregation ---
+  // Takes flat entry list [{date, dc, h, p}], labMap, and labs array.
+  // Returns cumulative snapshots grouped by lab.
+  function buildTimeSeries(entries, labMap, labs) {
+    var sorted = _.sortBy(entries, "date");
+    var snapH = {}, snapP = {};
+    var dates = _.uniq(_.map(sorted, "date")).sort();
+    var byDate = _.groupBy(sorted, "date");
+    return dates.map(function(d) {
+      (byDate[d] || []).forEach(function(e) {
+        snapH[e.dc] = e.h;
+        snapP[e.dc] = e.p;
+      });
+      var pt = { date: d };
+      labs.forEach(function(c) { pt[c] = 0; pt[c + "_pw"] = 0; });
+      Object.keys(snapH).forEach(function(dc) {
+        var lab = labMap[dc] || "Other";
+        if (pt[lab] !== undefined) {
+          pt[lab] += snapH[dc] || 0;
+          pt[lab + "_pw"] += snapP[dc] || 0;
+        }
+      });
+      pt.tH = labs.reduce(function(s, c) { return s + (pt[c] || 0); }, 0);
+      pt.tP = labs.reduce(function(s, c) { return s + (pt[c + "_pw"] || 0); }, 0);
+      return pt;
+    });
+  }
+
+  // --- Time series with allocation percentages ---
+  // Same as buildTimeSeries but multiplies each entry's values by the allocation pct.
+  // bound = "low" | "high"
+  function buildAllocatedTimeSeries(entries, labMap, labs, allocations, bound) {
+    var sorted = _.sortBy(entries, "date");
+    var snapH = {}, snapP = {};
+    var dates = _.uniq(_.map(sorted, "date")).sort();
+    var byDate = _.groupBy(sorted, "date");
+    return dates.map(function(d) {
+      (byDate[d] || []).forEach(function(e) {
+        snapH[e.dc] = e.h;
+        snapP[e.dc] = e.p;
+      });
+      var pt = { date: d };
+      labs.forEach(function(c) { pt[c] = 0; pt[c + "_pw"] = 0; });
+      Object.keys(snapH).forEach(function(dc) {
+        var lab = labMap[dc] || "Other";
+        if (pt[lab] !== undefined) {
+          var alloc = allocations[dc];
+          var pct = alloc ? (bound === "low" ? alloc.low : alloc.high) : 1.0;
+          pt[lab] += (snapH[dc] || 0) * pct;
+          pt[lab + "_pw"] += (snapP[dc] || 0) * pct;
+        }
+      });
+      pt.tH = labs.reduce(function(s, c) { return s + (pt[c] || 0); }, 0);
+      pt.tP = labs.reduce(function(s, c) { return s + (pt[c + "_pw"] || 0); }, 0);
+      return pt;
+    });
+  }
+
+  // --- Lead change detection ---
+  // Returns [{date, leader, value, prev}] for each time the #1 lab changes.
+  function detectLeadChanges(series, metric, labs) {
+    var useH100 = metric === "h100e";
+    var changes = [], prev = null;
+    series.forEach(function(pt) {
+      var mx = 0, mc = "";
+      labs.forEach(function(c) {
+        var v = useH100 ? (pt[c] || 0) : (pt[c + "_pw"] || 0);
+        if (v > mx) { mx = v; mc = c; }
+      });
+      if (mc && mc !== prev && mx > 0) {
+        changes.push({ date: pt.date, leader: mc, value: mx, prev: prev });
+        prev = mc;
+      }
+    });
+    return changes;
+  }
+
+  // --- Confidence scoring model ---
+  // Takes a single DC object and its timeline entries.
+  // Returns { score, phase, label, color, powerPct, currentPower, maxPower,
+  //           description, phaseLabel, finalDate, category }
+  function scoreConfidence(dc, timeline, today, colors) {
+    var sorted = _.sortBy(timeline, "date");
+    var past = sorted.filter(function(t) { return t.date <= today; });
+    var future = sorted.filter(function(t) { return t.date > today; });
+    var last = sorted[sorted.length - 1];
+    var current = past[past.length - 1];
+
+    // Detect construction phase from text signals
+    var phase = 0;
+    var allText = sorted.map(function(t) { return t.st.toLowerCase(); }).join(" ");
+    if (allText.indexOf("operational") >= 0)                                              phase = Math.max(phase, 4);
+    if (allText.indexOf("roof complete") >= 0 || allText.indexOf("chiller") >= 0 || allText.indexOf("generator") >= 0) phase = Math.max(phase, 3);
+    if (allText.indexOf("construction") >= 0 || allText.indexOf("foundation") >= 0)      phase = Math.max(phase, 2);
+    if (allText.indexOf("land clearing") >= 0)                                            phase = Math.max(phase, 1);
+    if (current && current.p > 0) phase = Math.max(phase, 4);
+
+    var currentPower = current ? current.p || 0 : 0;
+    var maxPower = last ? last.p || 0 : 0;
+    var powerPct = maxPower > 0 ? Math.min(1, currentPower / maxPower) : 0;
+
+    var growing = future.length > 0 && maxPower > 0 && currentPower < maxPower * 0.85;
+    if (currentPower > 0 && !growing && future.length === 0) phase = 5;
+
+    var firstDate = sorted[0] ? sorted[0].date : null;
+    var finalDate = last ? last.date : null;
+
+    if (!firstDate || !finalDate) {
+      return {
+        score: 0, phase: phase, label: "NO DATA", color: "#555",
+        powerPct: powerPct, currentPower: currentPower, maxPower: maxPower,
+        description: "No data", phaseLabel: "Unknown", finalDate: finalDate, category: "PLN"
+      };
+    }
+
+    var totalSpan = new Date(finalDate) - new Date(firstDate);
+    var elapsed = new Date(today) - new Date(firstDate);
+    var timePct = totalSpan > 0 ? Math.min(1, Math.max(0, elapsed / totalSpan)) : 0;
+    var delta = powerPct - timePct;
+
+    // Composite score
+    var score;
+    if (phase >= 5)      score = 98;
+    else if (phase >= 4) score = 70 + Math.round(powerPct * 25) + Math.max(0, Math.round(delta * 10));
+    else if (phase >= 2) { score = 40 + Math.round(timePct * 30) + phase * 5; if (past.length >= 3) score += 10; }
+    else if (phase >= 1) score = 15 + Math.round(timePct * 15);
+    else                 score = 0;
+
+    // Penalty for delays
+    if (allText.indexOf("pause") >= 0 || allText.indexOf("delay") >= 0)
+      score = Math.max(5, score - 15);
+
+    score = Math.max(0, Math.min(98, score));
+
+    // Category: operational / building / planned
+    var category = (!growing && currentPower > 0) ? "OP"
+                 : (currentPower > 0 || phase >= 1) ? "BLD"
+                 : "PLN";
+
+    // Override for live sites — they're done, not "on track"
+    if (category === "OP") {
+      score = 100;
+    }
+
+    // Label + color bands
+    var label, color;
+    if (score === 100)        { label = "LIVE";        color = colors.OpenAI; }
+    else if (score >= 85)     { label = "ON TRACK";    color = colors.OpenAI; }
+    else if (score >= 65)     { label = "LIKELY";       color = colors.Anthropic; }
+    else if (score >= 40)     { label = "UNCERTAIN";    color = "#ff8800"; }
+    else if (score >= 15)     { label = "EARLY";         color = colors.Meta; }
+    else if (score > 0)       { label = "MINIMAL";       color = "#666"; }
+    else                      { label = "NOT STARTED";   color = "#444"; }
+
+    var phaseLabels = ["Not Started", "Clearing", "Construction", "Equipment", "Operational", "Ramped"];
+    var desc = past.length + " obs, " + future.length + " proj. ";
+    if (powerPct > 0) desc += Math.round(powerPct * 100) + "% peak. ";
+    if (phase === 0 && currentPower === 0) desc = "No activity. ";
+    desc += "±6mo/±1.4×.";
+
+    return {
+      score: score, phase: phase, label: label, color: color,
+      powerPct: powerPct, currentPower: currentPower, maxPower: maxPower,
+      description: desc, phaseLabel: phaseLabels[Math.min(phase, 5)],
+      finalDate: finalDate, category: category
+    };
+  }
+
+  // --- Observation extraction from timeline text ---
+  function extractObservations(timeline) {
+    var obs = [];
+    var allText = timeline.map(function(t) { return t.st.toLowerCase(); }).join(" ");
+    var r;
+
+    r = allText.match(/(\d+)\s*cooling\s*tower/);
+    if (r) obs.push({ icon: "🗼", cat: "COOLING", value: r[1] + " towers", meta: "~30MW/tower", signal: "+" });
+
+    r = allText.match(/(\d+)\s*(air[- ]cooled\s*)?chiller/);
+    if (r) obs.push({ icon: "❄️", cat: "CHILLERS", value: r[1] + " units", meta: "Power via cooling model", signal: "+" });
+
+    if (allText.indexOf("roof complete") >= 0)
+      obs.push({ icon: "🏗️", cat: "ROOF", value: "Complete", meta: "→ Live ~5-7mo", signal: "+" });
+
+    if (allText.indexOf("generator") >= 0 && (allText.indexOf("installed") >= 0 || allText.indexOf("in place") >= 0))
+      obs.push({ icon: "⚡", cat: "GENERATORS", value: "Installed", meta: "Backup ready", signal: "+" });
+
+    if (allText.indexOf("substation") >= 0 && (allText.indexOf("complete") >= 0 || allText.indexOf("connected") >= 0))
+      obs.push({ icon: "🔌", cat: "SUBSTATION", value: "Connected", meta: "Grid live", signal: "+" });
+
+    if (allText.indexOf("turbine") >= 0 || allText.indexOf("natural gas") >= 0)
+      obs.push({ icon: "🔥", cat: "TURBINES", value: "On-site", meta: "Dedicated power", signal: "+" });
+
+    if (allText.indexOf("pause") >= 0 || allText.indexOf("delay") >= 0)
+      obs.push({ icon: "⚠️", cat: "DELAY", value: "Noted", meta: "Timeline risk", signal: "-" });
+
+    return obs;
+  }
+
+  // --- Flexible column resolver ---
+  // Handles column name variations (Epoch has changed these before).
+  // Returns the value for the first matching column name in the row.
+  function col(row, candidates, fallback) {
+    for (var i = 0; i < candidates.length; i++) {
+      if (row[candidates[i]] != null && row[candidates[i]] !== "") return row[candidates[i]];
+    }
+    // Fuzzy: check all keys for substring match
+    var keys = Object.keys(row);
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i].toLowerCase();
+      for (var j = 0; j < keys.length; j++) {
+        if (keys[j].toLowerCase().indexOf(c) >= 0 || c.indexOf(keys[j].toLowerCase()) >= 0) {
+          if (row[keys[j]] != null && row[keys[j]] !== "") return row[keys[j]];
+        }
+      }
+    }
+    return fallback !== undefined ? fallback : null;
+  }
+
+  // --- DMS coordinate to decimal ---
+  function dmsToDecimal(dms) {
+    if (typeof dms === "number") return dms;
+    if (!dms || typeof dms !== "string") return null;
+    var m = dms.match(/(\d+)[°](\d+)[''′](\d+(?:\.\d+)?)[""″]?\s*([NSEW])/i);
+    if (!m) {
+      var n = parseFloat(dms);
+      return isNaN(n) ? null : n;
+    }
+    var dec = parseInt(m[1]) + parseInt(m[2]) / 60 + parseFloat(m[3]) / 3600;
+    if (m[4] === "S" || m[4] === "s" || m[4] === "W" || m[4] === "w") dec = -dec;
+    return dec;
+  }
+
+  // --- Epoch AI data fetch (with CORS proxy fallback) ---
+  var EPOCH_DC_URL = "https://epoch.ai/data/data_centers/data_centers.csv";
+  var EPOCH_TL_URL = "https://epoch.ai/data/data_centers/data_center_timelines.csv";
+  var CORS_PROXIES = [
+    "",  // Direct first
+    "https://corsproxy.io/?",
+    "https://api.allorigins.win/raw?url="
+  ];
+
+  function fetchWithFallback(url) {
+    var attempt = 0;
+    var PER_ATTEMPT_MS = 4000;
+    function tryNext() {
+      if (attempt >= CORS_PROXIES.length) return Promise.reject(new Error("All fetch attempts failed for " + url));
+      var prefix = CORS_PROXIES[attempt];
+      var fetchUrl = prefix ? prefix + encodeURIComponent(url) : url;
+      attempt++;
+
+      // Per-attempt timeout via AbortController (with fallback)
+      var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timer = setTimeout(function() { if (controller) controller.abort(); }, PER_ATTEMPT_MS);
+      var opts = { mode: "cors" };
+      if (controller) opts.signal = controller.signal;
+
+      return fetch(fetchUrl, opts).then(function(r) {
+        clearTimeout(timer);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      }).then(function(text) {
+        // Validate we got CSV, not an error page
+        if (text.length < 100 || (text.indexOf("Handle") < 0 && text.indexOf("Date") < 0)) throw new Error("Invalid CSV response");
+        console.log("[Epoch] Fetched " + url.split("/").pop() + " via " + (prefix || "direct") + " (" + text.length + " bytes)");
+        return text;
+      }).catch(function(err) {
+        clearTimeout(timer);
+        console.warn("[Epoch] Attempt " + attempt + " failed for " + url.split("/").pop() + ": " + err.message);
+        return tryNext();
+      });
+    }
+    return tryNext();
+  }
+
+  function fetchEpoch() {
+    return Promise.all([
+      fetchWithFallback(EPOCH_DC_URL),
+      fetchWithFallback(EPOCH_TL_URL)
+    ]).then(function(res) {
+      var dcParsed = Papa.parse(res[0], { header: true, skipEmptyLines: true, dynamicTyping: true });
+      var tlParsed = Papa.parse(res[1], { header: true, skipEmptyLines: true, dynamicTyping: true });
+      if (dcParsed.errors.length > 0) console.warn("[Epoch] DC parse errors:", dcParsed.errors.slice(0, 3));
+      if (tlParsed.errors.length > 0) console.warn("[Epoch] TL parse errors:", tlParsed.errors.slice(0, 3));
+      console.log("[Epoch] Parsed " + dcParsed.data.length + " DC rows, " + tlParsed.data.length + " TL rows");
+      if (dcParsed.data.length > 0) console.log("[Epoch] DC columns:", Object.keys(dcParsed.data[0]).join(", "));
+      if (tlParsed.data.length > 0) console.log("[Epoch] TL columns:", Object.keys(tlParsed.data[0]).join(", "));
+      return { dcRows: dcParsed.data, tlRows: tlParsed.data };
+    });
+  }
+
+  // --- Parse raw Epoch CSV rows into app-ready structures ---
+  function parseEpochData(dcRows, tlRows) {
+    // Column name candidates (primary + known variants)
+    var DC_HANDLE = ["Handle", "handle", "Name"];
+    var DC_TITLE  = ["Title", "title", "Display Name", "Data center"];
+    var DC_PROJECT= ["Project", "project"];
+    var DC_OWNER  = ["Owner", "owner"];
+    var DC_USERS  = ["Users", "users", "Primary users"];
+    var DC_H100E  = ["Current H100 equivalents", "H100 equivalents", "Current H100e", "H100e"];
+    var DC_POWER  = ["Current power (MW)", "Power (MW)", "Current power"];
+    var DC_COST   = ["Current total capital cost (2025 USD billions)", "Total capital cost (2025 USD billions)", "Capital cost"];
+    var DC_LAT    = ["Latitude", "latitude", "lat"];
+    var DC_LON    = ["Longitude", "longitude", "lon", "lng"];
+
+    var TL_DATE   = ["Date", "date"];
+    var TL_DC     = ["Data center", "data center", "Handle", "handle"];
+    var TL_STATUS = ["Construction status", "construction status", "Status"];
+    var TL_H100E  = ["H100 equivalents", "H100e", "h100e"];
+    var TL_POWER  = ["Power (MW)", "power (MW)", "Power"];
+    var TL_BLDGS  = ["Buildings operational", "buildings operational", "Buildings"];
+
+    var labMap = {};
+    dcRows.forEach(function(r) {
+      var handle = col(r, DC_HANDLE);
+      if (handle) labMap[handle] = classifyLab(col(r, DC_USERS, ""), col(r, DC_OWNER, ""));
+    });
+    labMap.EGC = "Gemini";
+    labMap.EAI = "Anthropic";
+
+    var dataCenters = dcRows.filter(function(r) { return col(r, DC_HANDLE); }).map(function(r) {
+      var handle = col(r, DC_HANDLE);
+      return {
+        handle: handle,
+        title: col(r, DC_TITLE) || handle,
+        pj: col(r, DC_PROJECT, ""),
+        co: labMap[handle] || "Other",
+        h: Number(col(r, DC_H100E, 0)) || 0,
+        pw: Number(col(r, DC_POWER, 0)) || 0,
+        cs: Number(col(r, DC_COST, 0)) || 0,
+        lat: dmsToDecimal(col(r, DC_LAT)),
+        lon: dmsToDecimal(col(r, DC_LON))
+      };
+    });
+
+    var timeline = tlRows.filter(function(r) { return col(r, TL_DATE) && col(r, TL_DC); }).map(function(r) {
+      return {
+        date: col(r, TL_DATE),
+        dc: col(r, TL_DC),
+        st: col(r, TL_STATUS, ""),
+        h: Number(col(r, TL_H100E, 0)) || 0,
+        p: Number(col(r, TL_POWER, 0)) || 0,
+        buildings: Number(col(r, TL_BLDGS, 0)) || 0
+      };
+    });
+
+    var entries = tlRows.filter(function(r) {
+      return col(r, TL_DATE) && col(r, TL_DC) && ((col(r, TL_H100E) != null && col(r, TL_H100E) !== "") || (col(r, TL_POWER) > 0));
+    }).map(function(r) {
+      return { date: col(r, TL_DATE), dc: col(r, TL_DC), h: Number(col(r, TL_H100E, 0)) || 0, p: Number(col(r, TL_POWER, 0)) || 0 };
+    });
+
+    console.log("[Epoch] parseEpochData: " + dataCenters.length + " DCs, " + timeline.length + " timeline events, " + entries.length + " entries, " + Object.keys(labMap).length + " lab mappings");
+
+    return { labMap: labMap, dataCenters: dataCenters, timeline: timeline, entries: entries };
+  }
+
+  // --- Build fallback data from hardcoded config ---
+  function buildFallbackData(rawTimeline, defaultLabMap) {
+    var handles = {};
+    rawTimeline.forEach(function(r) { handles[r[1]] = true; });
+
+    var dataCenters = Object.keys(handles).map(function(k) {
+      var rows = rawTimeline.filter(function(r) { return r[1] === k; });
+      var last = rows[rows.length - 1];
+      return { handle: k, title: k, pj: "", co: defaultLabMap[k] || "Other", h: last[2], pw: last[3], cs: 0 };
+    });
+
+    var timeline = rawTimeline.map(function(r) {
+      return { date: r[0], dc: r[1], st: "", h: r[2], p: r[3], buildings: 0 };
+    });
+
+    var entries = rawTimeline.map(function(r) {
+      return { date: r[0], dc: r[1], h: r[2], p: r[3] };
+    });
+
+    return { labMap: defaultLabMap, dataCenters: dataCenters, timeline: timeline, entries: entries };
+  }
+
+  // --- Parse raw row arrays into entry objects ---
+  function parseRawRows(rows) {
+    return rows.map(function(r) { return { date: r[0], dc: r[1], h: r[2], p: r[3] }; });
+  }
+
+  // Public API
+  return {
+    formatH100: formatH100,
+    formatPower: formatPower,
+    formatAxis: formatAxis,
+    shortName: shortName,
+    classifyLab: classifyLab,
+    col: col,
+    dmsToDecimal: dmsToDecimal,
+    buildTimeSeries: buildTimeSeries,
+    buildAllocatedTimeSeries: buildAllocatedTimeSeries,
+    detectLeadChanges: detectLeadChanges,
+    scoreConfidence: scoreConfidence,
+    extractObservations: extractObservations,
+    fetchEpoch: fetchEpoch,
+    parseEpochData: parseEpochData,
+    buildFallbackData: buildFallbackData,
+    parseRawRows: parseRawRows
+  };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// 3. STORE — single state object, one update path
+//    All UI reads from here. All user actions write here.
+// ═══════════════════════════════════════════════════════════════
+var Store = (function() {
+
+  // --- UI state (what the user has selected) ---
+  var state = {
+    metric:       "h100e",   // "h100e" | "power"
+    scope:        "tracked", // "tracked" | "fleet"
+    allocView:    "full",    // "full" | "dedicated"
+    hoveredLab:   null,      // lab name or null
+    labFilter:    "ALL",     // "ALL" | lab name
+    statusFilter: "ALL",     // "ALL" | "OP" | "BLD" | "PLN"
+    sortBy:       "conf",    // "conf" | "h100e" | "power"
+    expandedDC:   null       // handle string or null
+  };
+
+  // --- Computed data (derived from Epoch fetch or fallback) ---
+  var computed = {
+    labMap:       {},         // handle → lab
+    dataCenters:  [],         // [{handle, title, pj, co, h, pw, cs}]
+    timeline:     [],         // [{date, dc, st, h, p, buildings}]
+    seriesEpoch:  [],         // time series (Epoch only, 100% attribution)
+    seriesFull:   [],         // time series (Epoch + fleet, 100% attribution)
+    seriesEpochLow:  [],     // time series (Epoch, low allocation estimate)
+    seriesEpochHigh: [],     // time series (Epoch, high allocation estimate)
+    seriesFullLow:   [],     // time series (Epoch + fleet, low allocation)
+    seriesFullHigh:  []      // time series (Epoch + fleet, high allocation)
+  };
+
+  // --- Subscriber pattern ---
+  var listeners = [];
+
+  function subscribe(fn) {
+    listeners.push(fn);
+  }
+
+  function notify() {
+    listeners.forEach(function(fn) { fn(state, computed); });
+  }
+
+  function set(patch) {
+    Object.assign(state, patch);
+    notify();
+  }
+
+  function setData(data) {
+    Object.assign(computed, data);
+    state._dataVersion = (state._dataVersion || 0) + 1;
+    notify();
+  }
+
+  function get() { return state; }
+  function getData() { return computed; }
+
+  // --- Derived accessors (convenience) ---
+  function activeSeries() {
+    if (state.allocView === "dedicated") {
+      // Return midpoint of low/high allocation estimates
+      var low = state.scope === "fleet" ? computed.seriesFullLow : computed.seriesEpochLow;
+      var high = state.scope === "fleet" ? computed.seriesFullHigh : computed.seriesEpochHigh;
+      if (!low.length) return low;
+      return low.map(function(lPt, i) {
+        var hPt = high[i] || lPt;
+        var pt = { date: lPt.date };
+        CFG.labs.forEach(function(c) {
+          pt[c] = Math.round(((lPt[c] || 0) + (hPt[c] || 0)) / 2);
+          pt[c + "_pw"] = Math.round(((lPt[c + "_pw"] || 0) + (hPt[c + "_pw"] || 0)) / 2);
+        });
+        pt.tH = CFG.labs.reduce(function(s, c) { return s + (pt[c] || 0); }, 0);
+        pt.tP = CFG.labs.reduce(function(s, c) { return s + (pt[c + "_pw"] || 0); }, 0);
+        return pt;
+      });
+    }
+    return state.scope === "fleet" ? computed.seriesFull : computed.seriesEpoch;
+  }
+
+  function activeSeriesLow() {
+    return state.scope === "fleet" ? computed.seriesFullLow : computed.seriesEpochLow;
+  }
+
+  function activeSeriesHigh() {
+    return state.scope === "fleet" ? computed.seriesFullHigh : computed.seriesEpochHigh;
+  }
+
+  function getValue(point, lab) {
+    return state.metric === "power" ? (point[lab + "_pw"] || 0) : (point[lab] || 0);
+  }
+
+  return {
+    get: get, getData: getData,
+    set: set, setData: setData,
+    subscribe: subscribe, notify: notify,
+    activeSeries: activeSeries,
+    activeSeriesLow: activeSeriesLow,
+    activeSeriesHigh: activeSeriesHigh,
+    getValue: getValue
+  };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// 4. UI — reads Store, writes DOM, never mutates state directly
+//    Broken into composable render functions.
+// ═══════════════════════════════════════════════════════════════
+var UI = (function() {
+
+  // --- Chart instance + map state (DOM-tied, lives here) ---
+  var chartInstance = null;
+  var leafletMap = null;
+  var mapPins = [];
+  var mapMarkers = {};
+
+  // ─── Stat bar ───────────────────────────────────────────────
+  function renderStats(state, data) {
+    var series = Store.activeSeries();
+    var past = series.filter(function(x) { return x.date <= CFG.today; });
+    var current = past.length ? past[past.length - 1] : null;
+    if (!current) return;
+
+    var maxVal = 0, leader = "";
+    CFG.labs.forEach(function(lab) {
+      var v = Store.getValue(current, lab);
+      if (v > maxVal) { maxVal = v; leader = lab; }
+    });
+
+    var leaderH = current[leader] || 0;
+    var leaderP = current[leader + "_pw"] || 0;
+
+    document.getElementById("st1").innerHTML =
+      '<span style="font-size:18px;font-weight:700;font-family:var(--m);color:' + CFG.colors[leader] + '">' + leader + '</span>' +
+      '<div style="font-size:10px;color:var(--t3);margin-top:2px">' + Data.formatH100(leaderH) + ' H100e · ' + Data.formatPower(leaderP) + '</div>';
+
+    document.getElementById("st2").innerHTML =
+      '<span style="font-size:18px;font-weight:700;font-family:var(--m)">' + Data.formatH100(current.tH) + '</span>' +
+      '<span style="font-size:10px;color:var(--t3);margin-left:3px">H100e</span>';
+
+    document.getElementById("st3").innerHTML =
+      '<span style="font-size:18px;font-weight:700;font-family:var(--m)">' + Data.formatPower(current.tP) + '</span>' +
+      '<span style="font-size:10px;color:var(--t3);margin-left:3px">all labs</span>';
+
+    var lc = Data.detectLeadChanges(series, state.metric, CFG.labs);
+    var pastChanges = lc.filter(function(x) { return x.date <= CFG.today; }).length;
+    var futureChanges = lc.filter(function(x) { return x.date > CFG.today; }).length;
+
+    document.getElementById("st4").innerHTML =
+      '<span style="font-size:18px;font-weight:700;font-family:var(--m)">' + pastChanges + '</span>' +
+      '<span style="font-size:10px;color:var(--t3)"> obs +' + futureChanges + ' proj</span>';
+  }
+
+  // ─── Legend ─────────────────────────────────────────────────
+  function renderLegend(state, data) {
+    var el = document.getElementById("leg");
+    el.innerHTML = "";
+    var series = Store.activeSeries();
+    if (!series.length) return;
+
+    CFG.labs.forEach(function(c) {
+      if (!series.some(function(x) { return (x[c] || 0) > 0; })) return;
+      var d = document.createElement("div");
+      d.style.cssText = "display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none";
+      d.innerHTML = '<div style="width:7px;height:7px;border-radius:50%;background:' + CFG.colors[c] + '"></div>' +
+                    '<span style="font-size:10px;color:rgba(255,255,255,.6)">' + c + '</span>';
+      d.onmouseenter = function() { Store.set({ hoveredLab: c }); };
+      d.onmouseleave = function() { Store.set({ hoveredLab: null }); };
+      el.appendChild(d);
+    });
+  }
+
+  // ─── Chart highlight on legend hover ────────────────────────
+  function styleChartHover(state) {
+    if (!chartInstance) return;
+    var hv = state.hoveredLab;
+    chartInstance.data.datasets.forEach(function(ds) {
+      var lab = ds.label;
+      var isHighBand = lab.indexOf(" high") > 0;
+      if (isHighBand) {
+        var baseLab = lab.replace(" high", "");
+        var dimmed = hv && hv !== baseLab;
+        ds.borderColor = dimmed ? "transparent" : (CFG.colors[baseLab] || "#555") + "55";
+        ds.backgroundColor = dimmed ? "transparent" : (CFG.colors[baseLab] || "#555") + "18";
+        return;
+      }
+      var dimmed = hv && hv !== lab;
+      ds.borderWidth = hv === lab ? 3 : 1.8;
+      ds.borderColor = dimmed ? (CFG.colors[lab] || "#555") + "30" : (CFG.colors[lab] || "#555");
+    });
+    chartInstance.update("none");
+  }
+
+  // ─── Leaderboard ────────────────────────────────────────────
+  function renderLeaderboard(state, data, dateSnap) {
+    var series = Store.activeSeries();
+    var pt;
+    if (dateSnap) pt = series.find(function(x) { return x.date === dateSnap; });
+    if (!pt) {
+      var past = series.filter(function(x) { return x.date <= CFG.today; });
+      pt = past.length ? past[past.length - 1] : null;
+    }
+    if (!pt) return;
+
+    var isPast = !dateSnap || dateSnap <= CFG.today;
+    document.getElementById("lbd").innerHTML =
+      '<span style="color:' + (isPast ? "#00ff87" : "var(--t4)") + '">●</span> ' +
+      moment(dateSnap || CFG.today).format("MMM YYYY") + (isPast ? "" : " (proj)");
+
+    var rows = CFG.labs.map(function(c) {
+      return { c: c, h: pt[c] || 0, p: pt[c + "_pw"] || 0 };
+    }).filter(function(x) { return x.h > 0 || x.p > 0; });
+
+    rows.sort(function(a, b) {
+      return state.metric === "power" ? b.p - a.p : b.h - a.h;
+    });
+
+    var maxVal = Math.max.apply(null, rows.map(function(r) {
+      return state.metric === "power" ? r.p : r.h;
+    })) || 1;
+
+    var totalH = rows.reduce(function(s, r) { return s + r.h; }, 0);
+    var totalP = rows.reduce(function(s, r) { return s + r.p; }, 0);
+
+    document.getElementById("lbr").innerHTML = rows.map(function(r, i) {
+      var rank = i + 1;
+      var rc = rank === 1 ? "rgba(255,215,0,.15)" : rank === 2 ? "rgba(192,192,192,.1)" : rank === 3 ? "rgba(205,127,50,.1)" : "rgba(255,255,255,.04)";
+      var tc = rank === 1 ? "#ffd700" : rank === 2 ? "#c0c0c0" : rank === 3 ? "#cd7f32" : "var(--t3)";
+      var barW = Math.round((state.metric === "power" ? r.p : r.h) / maxVal * 100);
+      return '<div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)">' +
+        '<div style="width:20px;height:20px;border-radius:50%;background:' + rc + ';color:' + tc + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--m)">' + rank + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:11px;font-weight:600;color:' + CFG.colors[r.c] + '">' + r.c + '</div>' +
+          '<div style="font-size:9px;font-family:var(--m);color:var(--t2);margin-top:1px"><b style="color:#fff">' + Data.formatH100(r.h) + '</b> · <b style="color:#fff">' + Data.formatPower(r.p) + '</b></div>' +
+          '<div style="height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;width:' + barW + '%;background:' + CFG.colors[r.c] + ';border-radius:2px;transition:width .25s"></div></div>' +
+        '</div></div>';
+    }).join("") +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;font-size:10px;font-weight:600">' +
+      '<span style="color:var(--t3)">TOTAL</span>' +
+      '<span style="font-family:var(--m);color:var(--t2)">' + Data.formatH100(totalH) + ' · ' + Data.formatPower(totalP) + '</span></div>';
+  }
+
+  // ─── Chart tooltip ──────────────────────────────────────────
+  function chartTooltip(context) {
+    var chart = context.chart;
+    var tooltip = context.tooltip;
+    var el = document.getElementById("tt");
+
+    if (tooltip.opacity === 0) { el.style.opacity = "0"; renderLeaderboard(Store.get(), Store.getData(), null); return; }
+
+    var dateSnap = tooltip.dataPoints && tooltip.dataPoints[0] && tooltip.dataPoints[0].raw ? tooltip.dataPoints[0].raw.x : null;
+    if (!dateSnap) { el.style.opacity = "0"; renderLeaderboard(Store.get(), Store.getData(), null); return; }
+
+    renderLeaderboard(Store.get(), Store.getData(), dateSnap);
+
+    var isPast = dateSnap <= CFG.today;
+    var series = Store.activeSeries();
+    var pt = series.find(function(x) { return x.date === dateSnap; }) || {};
+
+    var badge = isPast
+      ? '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(0,255,135,.15);color:#00ff87;font-weight:600">OBS</span>'
+      : '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.08);color:var(--t3);font-weight:600">PROJ</span>';
+
+    var items = CFG.labs.filter(function(c) {
+      return (pt[c] || 0) > 0 || (pt[c + "_pw"] || 0) > 0;
+    }).map(function(c) {
+      return { c: c, h: pt[c] || 0, p: pt[c + "_pw"] || 0 };
+    });
+    items.sort(function(a, b) { return Store.get().metric === "power" ? b.p - a.p : b.h - a.h; });
+
+    var totalH = items.reduce(function(s, i) { return s + i.h; }, 0);
+    var totalP = items.reduce(function(s, i) { return s + i.p; }, 0);
+
+    var rows = items.map(function(i) {
+      return '<div style="display:flex;justify-content:space-between;padding:1px 0">' +
+        '<span style="color:' + CFG.colors[i.c] + ';font-weight:500;flex:1">' + i.c + '</span>' +
+        '<span style="font-family:var(--m);width:55px;text-align:right;color:rgba(255,255,255,.8)">' + Data.formatH100(i.h) + '</span>' +
+        '<span style="font-family:var(--m);width:60px;text-align:right;color:rgba(255,255,255,.8)">' + Data.formatPower(i.p) + '</span></div>';
+    }).join("");
+
+    el.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<span style="color:#fff;font-size:13px;font-weight:600">' + moment(dateSnap).format("MMM YYYY") + '</span>' + badge + '</div>' +
+      rows +
+      '<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:5px;padding-top:5px;display:flex;justify-content:space-between;font-weight:600;font-size:11px">' +
+        '<span style="color:var(--t2)">TOTAL</span>' +
+        '<span style="font-family:var(--m);width:55px;text-align:right">' + Data.formatH100(totalH) + '</span>' +
+        '<span style="font-family:var(--m);width:60px;text-align:right">' + Data.formatPower(totalP) + '</span></div>';
+
+    el.style.opacity = "1";
+    var ps = chart.canvas.getBoundingClientRect();
+    var lx = ps.left + tooltip.caretX + 14;
+    var ty = ps.top + tooltip.caretY - 20;
+    if (lx + 270 > window.innerWidth) lx = ps.left + tooltip.caretX - 280;
+    if (ty < 10) ty = 10;
+    el.style.left = lx + "px";
+    el.style.top = ty + "px";
+  }
+
+  // ─── Main chart ─────────────────────────────────────────────
+  function renderChart(state, data) {
+    if (chartInstance) chartInstance.destroy();
+
+    var allSeries = Store.activeSeries();
+    var d = allSeries.filter(function(x) { return x.date >= "2023-01-01"; });
+    if (!d.length) return;
+
+    var ctx = document.getElementById("ch").getContext("2d");
+    var isPower = state.metric === "power";
+    var maxDate = d[d.length - 1].date;
+    var todayMs = new Date(CFG.today + "T00:00:00").getTime();
+
+    // Annotations: today line + projected zone + lead changes
+    var leadChanges = Data.detectLeadChanges(allSeries, state.metric, CFG.labs);
+    var annotations = {
+      today: {
+        type: "line", scaleID: "x", value: CFG.today,
+        borderColor: "rgba(255,255,255,.4)", borderWidth: 1.5, borderDash: [5, 4],
+        label: { display: true, content: "TODAY", position: "start", color: "rgba(255,255,255,.6)",
+                 font: { size: 10, weight: "bold" }, backgroundColor: "rgba(5,5,16,.85)", padding: 4, borderRadius: 4 }
+      },
+      projZone: { type: "box", xMin: CFG.today, xMax: maxDate, backgroundColor: "rgba(255,255,255,.01)", borderWidth: 0 }
+    };
+
+    leadChanges.forEach(function(change, i) {
+      if (!change.prev) return;
+      annotations["lc" + i] = {
+        type: "line", scaleID: "x", value: change.date,
+        borderColor: (CFG.colors[change.leader] || "#fff") + "88", borderWidth: 1.5,
+        borderDash: change.date <= CFG.today ? [] : [4, 3],
+        label: { display: true, content: change.leader + " leads", position: "start",
+                 color: CFG.colors[change.leader] || "#fff",
+                 font: { size: 9, weight: "600" }, backgroundColor: "rgba(5,5,16,.85)", padding: 4, borderRadius: 4 }
+      };
+    });
+
+    var activeLabs = CFG.labs.filter(function(c) {
+      return d.some(function(x) { return (Store.getValue(x, c) || 0) > 0; });
+    });
+
+    var datasets = [];
+
+    if (state.allocView === "dedicated") {
+      // In dedicated mode: show bands (high fill → low) + low line per lab
+      var dLow = Store.activeSeriesLow().filter(function(x) { return x.date >= "2023-01-01"; });
+      var dHigh = Store.activeSeriesHigh().filter(function(x) { return x.date >= "2023-01-01"; });
+
+      activeLabs.forEach(function(c) {
+        var color = CFG.colors[c] || "#555";
+        // High bound — thin solid line, fills down to low bound
+        datasets.push({
+          label: c + " high",
+          data: dHigh.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
+          borderColor: color + "55", borderWidth: 0.8, pointRadius: 0, pointHitRadius: 0,
+          stepped: "after",
+          fill: "+1",
+          backgroundColor: color + "18"
+        });
+        // Low bound — solid for observed, dashed for projected (same as full capacity)
+        datasets.push({
+          label: c,
+          data: dLow.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
+          borderColor: color, backgroundColor: "transparent",
+          borderWidth: 1.8, pointRadius: 0, pointHitRadius: 8,
+          stepped: "after", fill: false,
+          segment: { borderDash: function(ctx2) { return ctx2.p0.parsed.x >= todayMs ? [6, 4] : []; } }
+        });
+      });
+    } else {
+      // Full capacity or conservative: single line per lab
+      activeLabs.forEach(function(c) {
+        datasets.push({
+          label: c,
+          data: d.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
+          borderColor: CFG.colors[c] || "#555", backgroundColor: "transparent",
+          borderWidth: 1.8, pointRadius: 0, pointHitRadius: 8, stepped: "after", fill: false,
+          segment: { borderDash: function(ctx2) { return ctx2.p0.parsed.x >= todayMs ? [6, 4] : []; } }
+        });
+      });
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: "line",
+      data: { datasets: datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { type: "time", time: { unit: "quarter", displayFormats: { quarter: "MMM YY" } },
+               grid: { color: "rgba(255,255,255,.04)" },
+               ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 }, maxTicksLimit: 12 } },
+          y: { grid: { color: "rgba(255,255,255,.04)" },
+               ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 },
+                         callback: function(v) { return isPower ? Data.formatAxis(v) : Data.formatH100(v); } },
+               beginAtZero: true,
+               title: { display: true, text: isPower ? "Power" : "H100 Equiv.", color: "rgba(255,255,255,.2)", font: { size: 10 } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false, external: chartTooltip },
+          annotation: { annotations: annotations }
+        }
+      }
+    });
+  }
+
+  // ─── Satellite tile grid (shared by map preview + card hero) ─
+  // Generate satellite imagery centered precisely on coordinates using ESRI's export API.
+  // This avoids all tile-grid math — we request a bounding box in lat/lon and get back
+  // a single image at exactly the right size, perfectly centered.
+  function satelliteImgURL(lat, lon, widthPx, heightPx, spanKm) {
+    // At any latitude, convert km span to degree offsets
+    var latPerKm = 1 / 111.32;                           // ~constant
+    var lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180));
+    var halfLatSpan = (spanKm / 2) * latPerKm;
+    // Adjust lon span to match pixel aspect ratio
+    var halfLonSpan = (spanKm / 2) * lonPerKm * (widthPx / heightPx);
+
+    var bbox = [
+      lon - halfLonSpan, lat - halfLatSpan,
+      lon + halfLonSpan, lat + halfLatSpan
+    ].join(",");
+
+    return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export" +
+           "?bbox=" + bbox + "&bboxSR=4326&imageSR=4326" +
+           "&size=" + widthPx + "," + heightPx +
+           "&format=jpg&f=image";
+  }
+
+  function satelliteHTML(lat, lon, width, height, spanKm) {
+    var url = satelliteImgURL(lat, lon, width * 2, height * 2, spanKm || 2);
+    return '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;display:block">';
+  }
+
+  // ─── Map init ───────────────────────────────────────────────
+  function initMap(state, data) {
+    // Support re-initialization (e.g., fallback → live data)
+    if (leafletMap) { try { leafletMap.remove(); } catch(e) {} leafletMap = null; mapPins = []; }
+
+    leafletMap = L.map("map", {
+      zoomControl: false, scrollWheelZoom: false, dragging: false,
+      doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false
+    }).setView([37.5, -96], 5);
+
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19 }).addTo(leafletMap);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 19, opacity: 0.6 }).addTo(leafletMap);
+
+    var dcHash = {};
+    data.dataCenters.forEach(function(dc) { dcHash[dc.handle] = dc; });
+
+    data.dataCenters.forEach(function(dc) {
+      var xy = CFG.coords[dc.handle];
+      if (!xy || dc.co === "Other") return;
+
+      var cl = CFG.colors[dc.co] || "#555";
+      var tl = data.timeline.filter(function(t) { return t.dc === dc.handle; });
+      var cf = Data.scoreConfidence(dc, tl, CFG.today, CFG.colors);
+
+      var icon = cf.category === "OP" ? "●" : cf.category === "BLD" ? "◐" : "○";
+      var hr = parseInt(cl.slice(1, 3), 16), hg = parseInt(cl.slice(3, 5), 16), hb = parseInt(cl.slice(5, 7), 16);
+
+      var pin = L.marker(xy, {
+        icon: L.divIcon({
+          className: "",
+          html: '<div class="mp ' + (cf.category === "BLD" ? "bld" : "") + '" data-dc="' + dc.handle.replace(/"/g, "&quot;") + '" ' +
+                'style="--g:' + hr + ',' + hg + ',' + hb + ';border-color:' + cl + (cf.category === "PLN" ? "55" : "aa") +
+                ';background:rgba(8,8,28,' + (cf.category === "OP" ? 0.88 : 0.75) + ');color:' + cl + '">' +
+                '<div class="dt" style="background:' + cl + ';opacity:' + (cf.category === "PLN" ? 0.4 : 1) + '"></div>' +
+                icon + " " + Data.shortName(dc.title) + "</div>",
+          iconSize: [0, 0], iconAnchor: [-8, 14]
+        })
+      });
+
+      pin.bindTooltip("<b>" + dc.title + "</b><br><span style='color:" + cl + "'>" + dc.co +
+        "</span> · <span style='color:" + cf.color + "'>" + cf.score + "%</span>",
+        { direction: "top", offset: [50, -14] });
+
+      pin.on("click", function() {
+        renderMapPreview(dc);
+        Store.set({ expandedDC: dc.handle });
+      });
+
+      mapPins.push({ pin: pin, dc: dc, category: cf.category });
+      pin.addTo(leafletMap);
+    });
+
+    // Hover via event delegation
+    document.getElementById("map").addEventListener("mouseover", function(e) {
+      var t = e.target;
+      while (t && t !== this) {
+        if (t.classList && t.classList.contains("mp")) {
+          var h = t.getAttribute("data-dc");
+          if (h && dcHash[h]) renderMapPreview(dcHash[h]);
+          return;
+        }
+        t = t.parentElement;
+      }
+    });
+
+    setTimeout(function() { leafletMap.invalidateSize(); }, 500);
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(x) { if (x.isIntersecting) leafletMap.invalidateSize(); });
+    }, { threshold: 0.1 }).observe(document.getElementById("geomap"));
+  }
+
+  // ─── Map preview panel ──────────────────────────────────────
+  function renderMapPreview(dc) {
+    try {
+      var xy = CFG.coords[dc.handle];
+      if (!xy) return;
+
+      var cl = CFG.colors[dc.co] || "#555";
+      var tl = Store.getData().timeline.filter(function(t) { return t.dc === dc.handle; });
+      var cf = Data.scoreConfidence(dc, tl, CFG.today, CFG.colors);
+      var obs = Data.extractObservations(tl);
+      var pv = document.getElementById("prev");
+      if (!pv) return;
+
+      // Satellite header (320×220 preview, ~2km span)
+      var satHTML = '<div style="height:220px;overflow:hidden;position:relative;background:#070720">' +
+        satelliteHTML(xy[0], xy[1], 320, 220, 2) +
+        '<div style="position:absolute;top:8px;left:8px;z-index:10;background:rgba(5,5,16,.88);padding:4px 10px;border-radius:5px;font-size:10px;font-weight:600;border:1px solid ' + cl + '33">' +
+        '<span style="color:' + cl + '">' + dc.co + '</span> · ' + Data.shortName(dc.title) + '</div></div>';
+
+      // Observations
+      var obsHTML = "";
+      if (obs.length) {
+        obsHTML = obs.map(function(o) {
+          var oc = o.signal === "+" ? "rgba(0,255,135,.6)" : o.signal === "-" ? "rgba(255,68,68,.6)" : "var(--t3)";
+          return '<div style="margin-bottom:2px">' + o.icon + ' <span style="color:' + oc + ';font-weight:600">' + o.value +
+                 '</span> <span style="color:var(--t4);font-size:9px">' + o.meta + '</span></div>';
+        }).join("");
+      }
+
+      // Latest status
+      var statusHTML = "";
+      var sorted = tl.slice().sort(function(a, b) { return a.date > b.date ? -1 : 1; });
+      var latest = sorted[0];
+      if (latest && latest.st) {
+        var st = latest.st.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").substring(0, 160);
+        statusHTML = '<span style="color:var(--t3)">' + latest.date + ":</span> " + st;
+      } else {
+        statusHTML = cf.description;
+      }
+
+      pv.innerHTML = satHTML +
+        '<div style="padding:14px;overflow-y:auto;max-height:calc(55vh - 234px)">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">' +
+            '<div><div style="font-size:14px;font-weight:700">' + dc.title + '</div>' +
+            '<div style="font-size:10px;letter-spacing:1px;color:' + cl + ';margin-top:2px">' + dc.co + (dc.pj ? " · " + dc.pj.replace(/#\w+/g, "").trim() : "") + '</div>' +
+            '<div style="font-size:9px;color:var(--t3);margin-top:1px">' + (CFG.chips[dc.co] || "") + '</div></div>' +
+            '<div style="text-align:right"><div style="font-size:22px;font-weight:700;font-family:var(--m);color:' + cf.color + '">' + cf.score + '<span style="font-size:11px">%</span></div>' +
+            '<div style="font-size:9px;letter-spacing:1px;color:' + cf.color + '">' + cf.label + '</div></div></div>' +
+          '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px">' +
+            '<div><div style="font-size:9px;color:var(--t3);letter-spacing:1px">POWER NOW</div><div style="font-size:13px;font-weight:700;font-family:var(--m);margin-top:1px">' + (cf.currentPower ? Data.formatPower(cf.currentPower) : "0 MW") + '</div></div>' +
+            '<div><div style="font-size:9px;color:var(--t3);letter-spacing:1px">PEAK</div><div style="font-size:13px;font-weight:700;font-family:var(--m);margin-top:1px">' + (cf.maxPower ? Data.formatPower(cf.maxPower) : "—") + '</div></div>' +
+            '<div><div style="font-size:9px;color:var(--t3);letter-spacing:1px">COMPUTE</div><div style="font-size:13px;font-weight:700;font-family:var(--m);margin-top:1px">' + (dc.h ? Data.formatH100(dc.h) + " H100e" : "—") + '</div></div>' +
+            '<div><div style="font-size:9px;color:var(--t3);letter-spacing:1px">PHASE</div><div style="font-size:13px;font-weight:700;font-family:var(--m);margin-top:1px">' + cf.phaseLabel + '</div></div></div>' +
+          '<div style="margin-bottom:8px"><div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + Math.round(cf.powerPct * 100) + '%;background:' + cf.color + ';border-radius:2px"></div></div>' +
+          '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-top:3px"><span>' + Math.round(cf.powerPct * 100) + '% of peak</span><span>' + (cf.finalDate ? moment(cf.finalDate).format("MMM YY") : "") + '</span></div></div>' +
+          (obsHTML ? '<div style="font-size:10px;color:var(--t2);line-height:1.5;margin-bottom:6px">' + obsHTML + '</div>' : '') +
+          '<div style="font-size:10px;color:var(--t2);line-height:1.4;padding:6px 8px;background:rgba(255,255,255,.02);border-radius:4px">' + statusHTML + '</div></div>';
+    } catch (err) {
+      console.error("renderMapPreview error:", err);
+    }
+  }
+
+  // ─── Map region toggle ──────────────────────────────────────
+  function setRegion(region) {
+    if (!leafletMap) return;
+    if (region === "us") {
+      leafletMap.setView([37.5, -96], 5);
+      document.getElementById("rUS").style.background = "rgba(255,255,255,.1)";
+      document.getElementById("rUS").style.color = "#fff";
+      document.getElementById("rUE").style.background = "transparent";
+      document.getElementById("rUE").style.color = "var(--t3)";
+    } else {
+      leafletMap.setView([24.15, 54.44], 10);
+      document.getElementById("rUE").style.background = "rgba(255,255,255,.1)";
+      document.getElementById("rUE").style.color = "#fff";
+      document.getElementById("rUS").style.background = "transparent";
+      document.getElementById("rUS").style.color = "var(--t3)";
+    }
+  }
+
+  // ─── Map pin filtering ──────────────────────────────────────
+  function filterMapPins(state) {
+    if (!leafletMap) return;
+    var sf = state.statusFilter;
+    mapPins.forEach(function(mp) {
+      var show = sf === "ALL" || mp.category === sf;
+      if (show && !leafletMap.hasLayer(mp.pin)) mp.pin.addTo(leafletMap);
+      if (!show && leafletMap.hasLayer(mp.pin)) leafletMap.removeLayer(mp.pin);
+    });
+  }
+
+  // ─── Lab filter buttons ─────────────────────────────────────
+  function renderLabFilter(state, data) {
+    var el = document.getElementById("lf");
+    var companies = ["ALL"].concat(CFG.labs.filter(function(c) {
+      return data.dataCenters.some(function(d) { return d.co === c; });
+    }));
+    el.innerHTML = '<span style="font-size:10px;color:var(--t3);letter-spacing:1px;margin-right:2px">LAB</span>' +
+      companies.map(function(c) {
+        return '<button class="P' + (c === state.labFilter ? " on" : "") + '" onclick="App.setLabFilter(\'' + c + '\')">' + c + '</button>';
+      }).join("");
+  }
+
+  // ─── Observation badges (compact pill-style) ─────────────────
+  function obsBadgesHTML(obs) {
+    if (!obs.length) return '<span style="color:var(--t4);font-size:10px">—</span>';
+    return obs.map(function(o) {
+      var cls = o.signal === "+" ? "pos" : o.signal === "-" ? "neg" : "";
+      return '<span class="obs-badge ' + cls + '">' + o.icon + ' ' + o.value + '</span>';
+    }).join("");
+  }
+
+  // ─── Observation detail blocks (for drawer) ─────────────────
+  function obsDetailHTML(obs) {
+    if (!obs.length) return '<div style="color:var(--t4);font-size:11px;padding:8px 0">No observations detected</div>';
+    return '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px 0">' + obs.map(function(o) {
+      var cls = o.signal === "+" ? "pos" : o.signal === "-" ? "neg" : "";
+      var bg = o.signal === "+" ? "rgba(0,255,135,.04)" : o.signal === "-" ? "rgba(255,68,68,.04)" : "rgba(255,255,255,.02)";
+      var bc = o.signal === "+" ? "rgba(0,255,135,.15)" : o.signal === "-" ? "rgba(255,68,68,.15)" : "var(--bd)";
+      var tc = o.signal === "+" ? "rgba(0,255,135,.7)" : o.signal === "-" ? "rgba(255,68,68,.7)" : "var(--t3)";
+      return '<div style="flex:1;min-width:140px;padding:12px;border-radius:8px;background:' + bg + ';border:1px solid ' + bc + '">' +
+        '<div style="font-size:20px;margin-bottom:4px">' + o.icon + '</div>' +
+        '<div style="font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:600">' + o.cat + '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:' + tc + ';margin-top:2px">' + o.value + '</div>' +
+        '<div style="font-size:10px;color:var(--t3);margin-top:2px">' + o.meta + '</div></div>';
+    }).join("") + '</div>';
+  }
+
+  // ─── Vertical stepper timeline (for drawer) ─────────────────
+  function stepperTimelineHTML(tl, today) {
+    if (!tl.length) return '<div style="color:var(--t4);font-size:11px;padding:8px 0">No timeline data</div>';
+    var sorted = _.sortBy(tl, "date");
+    var html = '<div class="vtl">';
+    sorted.forEach(function(t) {
+      var isPast = t.date <= today;
+      var st = t.st.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+      html += '<div class="vtl-item ' + (isPast ? "past" : "future") + '">' +
+        '<div class="vtl-dot"></div>' +
+        '<div class="vtl-date" style="color:' + (isPast ? "rgba(0,255,135,.6)" : "var(--t3)") + '">' +
+          t.date + (isPast ? '' : ' <span style="opacity:.5">⏳</span>') + '</div>' +
+        (st ? '<div class="vtl-text">' + st + '</div>' : '') +
+        '<div class="vtl-metrics">' +
+          (t.h ? '<span>' + Data.formatH100(t.h) + 'e</span>' : '') +
+          (t.p ? '<span>' + Data.formatPower(t.p) + '</span>' : '') +
+        '</div></div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ─── Table header ───────────────────────────────────────────
+  var tableSortCol = "conf";
+  var tableSortDir = "desc";
+
+  function renderTableHead() {
+    var cols = [
+      { key: "rank",  label: "#",          width: "36px" },
+      { key: "status",label: "STATUS",     width: "60px" },
+      { key: "name",  label: "SITE",       width: "" },
+      { key: "lab",   label: "LAB",        width: "90px" },
+      { key: "conf",  label: "CONFIDENCE", width: "110px" },
+      { key: "power", label: "POWER",      width: "85px" },
+      { key: "peak",  label: "PEAK",       width: "85px" },
+      { key: "h100e", label: "H100e",      width: "80px" },
+      { key: "cost",  label: "COST",       width: "70px" },
+      { key: "obs",   label: "SIGNALS",    width: "160px" }
+    ];
+    document.getElementById("dtHead").innerHTML = '<tr>' + cols.map(function(c) {
+      var sortCls = "";
+      if (c.key === tableSortCol) sortCls = tableSortDir === "asc" ? " asc" : " desc";
+      var w = c.width ? 'width:' + c.width + ';' : '';
+      return '<th class="' + sortCls + '" style="' + w + '" onclick="App.tableSort(\'' + c.key + '\')">' + c.label + '</th>';
+    }).join("") + '</tr>';
+  }
+
+  // ─── Table body (main INTEL view) ───────────────────────────
+  function renderTable(state, data) {
+    var allDCs = data.dataCenters.filter(function(d) { return d.co !== "Other"; });
+    var filtered = allDCs.slice();
+
+    if (state.labFilter !== "ALL")
+      filtered = filtered.filter(function(d) { return d.co === state.labFilter; });
+
+    var entries = filtered.map(function(dc) {
+      var tl = data.timeline.filter(function(t) { return t.dc === dc.handle; });
+      var cf = Data.scoreConfidence(dc, tl, CFG.today, CFG.colors);
+      var obs = Data.extractObservations(tl);
+      return { dc: dc, cf: cf, tl: _.sortBy(tl, "date"), obs: obs };
+    });
+
+    // Status filter
+    if (state.statusFilter !== "ALL")
+      entries = entries.filter(function(d) { return d.cf.category === state.statusFilter; });
+
+    // Sort
+    var col = tableSortCol, dir = tableSortDir;
+    entries.sort(function(a, b) {
+      var va, vb;
+      if (col === "conf")       { va = a.cf.score; vb = b.cf.score; }
+      else if (col === "h100e") { va = a.dc.h || 0; vb = b.dc.h || 0; }
+      else if (col === "power") { va = a.cf.currentPower || 0; vb = b.cf.currentPower || 0; }
+      else if (col === "peak")  { va = a.cf.maxPower || 0; vb = b.cf.maxPower || 0; }
+      else if (col === "cost")  { va = a.dc.cs || 0; vb = b.dc.cs || 0; }
+      else if (col === "name")  { va = a.dc.title.toLowerCase(); vb = b.dc.title.toLowerCase(); return dir === "asc" ? (va < vb ? -1 : 1) : (va > vb ? -1 : 1); }
+      else if (col === "lab")   { va = a.dc.co; vb = b.dc.co; return dir === "asc" ? (va < vb ? -1 : 1) : (va > vb ? -1 : 1); }
+      else if (col === "obs")   { va = a.obs.length; vb = b.obs.length; }
+      else if (col === "status") { var so = {OP:3,BLD:2,PLN:1}; va = so[a.cf.category]||0; vb = so[b.cf.category]||0; }
+      else { va = a.cf.score; vb = b.cf.score; }
+      return dir === "asc" ? va - vb : vb - va;
+    });
+
+    // Status counts
+    var totalCount = allDCs.length;
+    var shownCount = entries.length;
+    var opCount = allDCs.filter(function(d) {
+      return Data.scoreConfidence(d, data.timeline.filter(function(t) { return t.dc === d.handle; }), CFG.today, CFG.colors).category === "OP";
+    }).length;
+    var bldCount = allDCs.filter(function(d) {
+      return Data.scoreConfidence(d, data.timeline.filter(function(t) { return t.dc === d.handle; }), CFG.today, CFG.colors).category === "BLD";
+    }).length;
+
+    document.getElementById("scnt").innerHTML =
+      '<b style="color:#fff">' + shownCount + '</b>/' + totalCount +
+      ' · <span style="color:' + CFG.colors.OpenAI + '">● ' + opCount + ' Live</span>' +
+      ' · <span style="color:' + CFG.colors.Anthropic + '">◐ ' + bldCount + ' Building</span>' +
+      ' · <span style="color:#666">○ ' + (totalCount - opCount - bldCount) + ' Planned</span>';
+
+    renderTableHead();
+
+    document.getElementById("dtBody").innerHTML = entries.map(function(it, i) {
+      var dc = it.dc, cf = it.cf, obs = it.obs;
+      var c = CFG.colors[dc.co] || "#555";
+      var statusIcon = cf.category === "OP" ? '<span style="color:' + c + '">●</span>'
+                     : cf.category === "BLD" ? '<span style="color:' + c + '">◐</span>'
+                     : '<span style="color:#555">○</span>';
+      var sel = state.expandedDC === dc.handle ? " sel" : "";
+      var confBar = '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span class="mono" style="color:' + cf.color + ';font-weight:700">' + cf.score + '</span>' +
+        '<div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;min-width:40px;max-width:60px">' +
+          '<div style="height:100%;width:' + cf.score + '%;background:' + cf.color + ';border-radius:2px"></div></div>' +
+        '<span style="font-size:9px;color:' + cf.color + ';letter-spacing:.5px">' + cf.label + '</span></div>';
+
+      return '<tr class="' + sel + '" onclick="App.openDrawer(\'' + dc.handle.replace(/'/g, "\\'") + '\')">' +
+        '<td class="rk">' + (i + 1) + '</td>' +
+        '<td style="text-align:center">' + statusIcon + '</td>' +
+        '<td class="nm"><div style="font-weight:600;font-size:12px">' + Data.shortName(dc.title) + '</div>' +
+          '<div style="font-size:9px;color:var(--t3);margin-top:1px">' + dc.title.split(" ").slice(-2).join(", ") + '</div></td>' +
+        '<td><span style="color:' + c + ';font-weight:600;font-size:11px">' + dc.co + '</span></td>' +
+        '<td>' + confBar + '</td>' +
+        '<td class="mono">' + (cf.currentPower ? Data.formatPower(cf.currentPower) : '<span style="color:var(--t4)">—</span>') + '</td>' +
+        '<td class="mono">' + (cf.maxPower ? Data.formatPower(cf.maxPower) : '<span style="color:var(--t4)">—</span>') + '</td>' +
+        '<td class="mono">' + (dc.h ? Data.formatH100(dc.h) : '<span style="color:var(--t4)">—</span>') + '</td>' +
+        '<td class="mono">' + (dc.cs ? '$' + dc.cs.toFixed(1) + 'B' : '<span style="color:var(--t4)">—</span>') + '</td>' +
+        '<td>' + obsBadgesHTML(obs) + '</td></tr>';
+    }).join("");
+  }
+
+  // ─── Drawer content ─────────────────────────────────────────
+  function renderDrawer(state, data) {
+    var handle = state.expandedDC;
+    if (!handle) {
+      document.getElementById("drOverlay").classList.remove("open");
+      document.getElementById("drPanel").classList.remove("open");
+      return;
+    }
+
+    var dc = data.dataCenters.find(function(d) { return d.handle === handle; });
+    if (!dc) return;
+
+    var tl = data.timeline.filter(function(t) { return t.dc === handle; });
+    var cf = Data.scoreConfidence(dc, tl, CFG.today, CFG.colors);
+    var obs = Data.extractObservations(tl);
+    var sortedTL = _.sortBy(tl, "date");
+    var c = CFG.colors[dc.co] || "#555";
+    var xy = CFG.coords[dc.handle];
+
+    document.getElementById("drTitle").innerHTML =
+      '<span style="color:' + c + '">' + dc.co + '</span><span style="color:var(--t3);font-weight:400"> · </span>' + Data.shortName(dc.title);
+
+    var html = '';
+
+    // Satellite hero
+    if (xy) {
+      html += '<div style="height:200px;overflow:hidden;border-radius:10px;margin:20px 0 16px;position:relative;background:#070720">' +
+        satelliteHTML(xy[0], xy[1], 480, 200, 2) +
+        '<div style="position:absolute;bottom:8px;right:8px;background:rgba(5,5,16,.8);padding:3px 8px;border-radius:4px;font-size:9px;color:var(--t3)">ESRI Satellite</div></div>';
+    }
+
+    // Score + phase header
+    html += '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">' +
+      '<div style="text-align:center"><div style="font-size:36px;font-weight:800;font-family:var(--m);color:' + cf.color + ';line-height:1">' + cf.score + '<span style="font-size:14px">%</span></div>' +
+      '<div style="font-size:9px;letter-spacing:1.5px;color:' + cf.color + ';font-weight:700">' + cf.label + '</div></div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:16px;font-weight:700">' + dc.title + '</div>' +
+        '<div style="font-size:11px;color:' + c + ';margin-top:2px">' + dc.co + (dc.pj ? ' · ' + dc.pj.replace(/#\w+/g, '').trim() : '') + '</div>' +
+        '<div style="font-size:10px;color:var(--t3);margin-top:1px">' + (CFG.chips[dc.co] || '') + '</div></div></div>';
+
+    // Progress bar
+    html += '<div style="margin-bottom:20px"><div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">' +
+      '<div style="height:100%;width:' + Math.round(cf.powerPct * 100) + '%;background:' + cf.color + ';border-radius:3px;transition:width .3s"></div></div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-top:4px"><span>' + cf.phaseLabel + '</span><span>' + Math.round(cf.powerPct * 100) + '% of peak</span>' +
+      (cf.finalDate ? '<span>' + moment(cf.finalDate).format("MMM YY") + '</span>' : '') + '</div></div>';
+
+    // Stats grid
+    html += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">' +
+      ['POWER NOW|' + (cf.currentPower ? Data.formatPower(cf.currentPower) : '0 MW'),
+       'PEAK|' + (cf.maxPower ? Data.formatPower(cf.maxPower) : '—'),
+       'COMPUTE|' + (dc.h ? Data.formatH100(dc.h) + ' H100e' : '—'),
+       'COST|' + (dc.cs ? '$' + dc.cs.toFixed(1) + 'B' : '—')
+      ].map(function(s) {
+        var p = s.split('|');
+        return '<div style="padding:12px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--bd)">' +
+          '<div style="font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:600">' + p[0] + '</div>' +
+          '<div style="font-size:16px;font-weight:700;font-family:var(--m);margin-top:4px">' + p[1] + '</div></div>';
+      }).join("") + '</div>';
+
+    // Observations section
+    html += '<div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:700;margin-bottom:4px">SATELLITE OBSERVATIONS</div>';
+    html += obsDetailHTML(obs);
+
+    // Description
+    html += '<div style="font-size:11px;color:var(--t2);line-height:1.5;padding:10px 12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--bd);margin:12px 0">' + cf.description + '</div>';
+
+    // Timeline
+    html += '<div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:700;margin-bottom:4px;margin-top:20px">TIMELINE · ' + sortedTL.length + ' MILESTONES</div>';
+    html += stepperTimelineHTML(sortedTL, CFG.today);
+
+    document.getElementById("drBody").innerHTML = html;
+    document.getElementById("drOverlay").classList.add("open");
+    document.getElementById("drPanel").classList.add("open");
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // MODELS SECTION — single unified benchmark table
+  // ═══════════════════════════════════════════════════════════════
+
+  function renderModels() {
+    var el = document.getElementById("modelSection");
+    if (!el) return;
+
+    var models = CFG.models;
+    var domains = CFG.domains;
+    var bMeta = CFG.benchmarks;
+
+    // Helper: rank scores, return cell HTML
+    function scoreCell(value, allValues, lab) {
+      var c = CFG.colors[lab] || "#fff";
+      if (value === null || value === undefined) return '<td class="mc"><span class="wm-cell na"><span class="wm-score" style="color:var(--t4)">—</span></span></td>';
+      var valid = allValues.filter(function(v) { return v !== null && v !== undefined; });
+      var sorted = valid.slice().sort(function(a, b) { return b - a; });
+      var rank = sorted.indexOf(value) + 1;
+      if (rank === 0) rank = 1;
+      var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
+      var badge = rank === 1 ? "1ST" : rank === 2 ? "2ND" : rank === 3 ? "3RD" : "#" + rank;
+      return '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + value + '</span><span class="wm-rank">' + badge + '</span></span></td>';
+    }
+
+    var html = '';
+
+    // Snapshot date
+    html += '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">All scores from independent evaluations or provider system cards · <span style="color:var(--t3)">Snapshot Mar 2026</span></div>';
+
+    // Table start
+    html += '<div class="wm"><table><thead><tr>';
+    html += '<th style="text-align:left;min-width:220px">BENCHMARK</th>';
+    html += '<th style="text-align:left;min-width:150px">SOURCE</th>';
+    models.forEach(function(m) {
+      var c = CFG.colors[m.lab] || "#555";
+      html += '<th><div style="color:' + c + ';font-size:12px;font-weight:700">' + m.name + '</div><div style="color:var(--t3);font-size:10px;font-weight:400;margin-top:2px">' + m.lab + '</div></th>';
+    });
+    html += '</tr></thead><tbody>';
+
+    // Overall row
+    var aaScores = models.map(function(m) { return m.aaIndex; });
+    html += '<tr style="background:rgba(255,255,255,.03)">';
+    html += '<td style="padding:16px"><div style="font-size:15px;font-weight:700;color:#fff">⭐ AA Intelligence Index</div>';
+    html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">Composite of 10 evaluations across agents, coding, scientific reasoning, and general knowledge</div></td>';
+    html += '<td style="vertical-align:top;padding-top:16px"><div style="font-size:12px;color:var(--t2);font-weight:600">Artificial Analysis</div><div style="font-size:11px;color:var(--t3)">Independent · v4.0</div></td>';
+    models.forEach(function(m) {
+      html += scoreCell(m.aaIndex, aaScores, m.lab);
+    });
+    html += '</tr>';
+
+    // Domain groups
+    domains.forEach(function(d) {
+      // Domain header row — prominent separator
+      html += '<tr><td class="wm-domain" colspan="' + (models.length + 2) + '">';
+      html += '<span>' + d.icon + ' ' + d.label + '</span></td></tr>';
+
+      // Benchmark rows within domain
+      d.benchmarks.forEach(function(bk) {
+        var meta = bMeta[bk];
+        if (!meta) return;
+
+        var allScores = models.map(function(m) { return m[bk]; });
+
+        html += '<tr class="wm-bench">';
+        html += '<td style="padding:14px 14px 14px 24px"><div style="font-size:14px;font-weight:600;color:#fff">' + meta.label + '</div>';
+        html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">' + meta.desc + '</div></td>';
+        html += '<td style="vertical-align:top;padding-top:14px"><div style="font-size:12px;color:var(--t2);font-weight:600">' + (meta.source || '—').split('·')[0].trim() + '</div>';
+        var sourceParts = (meta.source || '').split('·');
+        if (sourceParts.length > 1) html += '<div style="font-size:11px;color:var(--t3);margin-top:1px">' + sourceParts.slice(1).join('·').trim() + '</div>';
+        html += '</td>';
+        models.forEach(function(m) {
+          html += scoreCell(m[bk], allScores, m.lab);
+        });
+        html += '</tr>';
+      });
+    });
+
+    // Speed / Cost / Context section
+    html += '<tr><td class="wm-domain" colspan="' + (models.length + 2) + '">';
+    html += '<span>⚡ SPEED · COST · CONTEXT</span></td></tr>';
+
+    // Speed row
+    var speedScores = models.map(function(m) { return m.speed; });
+    html += '<tr class="wm-bench">';
+    html += '<td style="padding:14px 14px 14px 24px"><div style="font-size:14px;font-weight:600;color:#fff">Output Speed</div>';
+    html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">Tokens per second via provider API</div></td>';
+    html += '<td style="vertical-align:top;padding-top:14px"><div style="font-size:12px;color:var(--t2);font-weight:600">Artificial Analysis</div><div style="font-size:11px;color:var(--t3)">72hr rolling avg</div></td>';
+    models.forEach(function(m) {
+      if (m.speed === null) {
+        html += '<td class="mc"><span class="wm-cell na"><span class="wm-score" style="color:var(--t4)">—</span></span></td>';
+      } else {
+        var valid = speedScores.filter(function(v) { return v !== null; });
+        var sorted = valid.slice().sort(function(a, b) { return b - a; });
+        var rank = sorted.indexOf(m.speed) + 1;
+        var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
+        var badge = rank === 1 ? "1ST" : rank === 2 ? "2ND" : rank === 3 ? "3RD" : "#" + rank;
+        var c = CFG.colors[m.lab] || "#fff";
+        html += '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + m.speed + '</span><span class="wm-rank">' + badge + ' · t/s</span></span></td>';
+      }
+    });
+    html += '</tr>';
+
+    // Cost row (lower is better)
+    html += '<tr class="wm-bench">';
+    html += '<td style="padding:14px 14px 14px 24px"><div style="font-size:14px;font-weight:600;color:#fff">Input Cost</div>';
+    html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">$ per million input tokens via provider API</div></td>';
+    html += '<td style="vertical-align:top;padding-top:14px"><div style="font-size:12px;color:var(--t2);font-weight:600">Provider pricing</div><div style="font-size:11px;color:var(--t3)">Mar 2026</div></td>';
+    var costScores = models.map(function(m) { return m.costIn; });
+    var validCosts = costScores.filter(function(v) { return v !== null && v > 0; });
+    var costSorted = validCosts.slice().sort(function(a, b) { return a - b; });
+    models.forEach(function(m) {
+      var c = CFG.colors[m.lab] || "#fff";
+      if (m.costIn === 0) {
+        html += '<td class="mc"><span class="wm-cell g"><span class="wm-score" style="color:#00ff87">Free</span><span class="wm-rank">Open</span></span></td>';
+      } else {
+        var rank = costSorted.indexOf(m.costIn) + 1;
+        var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
+        var badge = rank === 1 ? "Cheapest" : rank === 2 ? "2nd" : rank === 3 ? "3rd" : "#" + rank;
+        html += '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">$' + m.costIn + '</span><span class="wm-rank">' + badge + '</span></span></td>';
+      }
+    });
+    html += '</tr>';
+
+    // Context row
+    html += '<tr class="wm-bench">';
+    html += '<td style="padding:14px 14px 14px 24px"><div style="font-size:14px;font-weight:600;color:#fff">Context Window</div>';
+    html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">Maximum input tokens (K = thousands)</div></td>';
+    html += '<td style="vertical-align:top;padding-top:14px"><div style="font-size:12px;color:var(--t2);font-weight:600">Provider docs</div><div style="font-size:11px;color:var(--t3)">Mar 2026</div></td>';
+    var ctxScores = models.map(function(m) { return m.context; });
+    models.forEach(function(m) {
+      var c = CFG.colors[m.lab] || "#fff";
+      var valid = ctxScores.filter(function(v) { return v !== null; });
+      var sorted = valid.slice().sort(function(a, b) { return b - a; });
+      var rank = sorted.indexOf(m.context) + 1;
+      var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
+      var badge = rank === 1 ? "Largest" : m.context + "K";
+      html += '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + (m.context >= 1000 ? (m.context/1000) + 'M' : m.context + 'K') + '</span><span class="wm-rank">' + badge + '</span></span></td>';
+    });
+    html += '</tr>';
+
+    html += '</tbody></table></div>';
+
+    // Key finding
+    var goldCounts = {};
+    domains.forEach(function(d) {
+      d.benchmarks.forEach(function(bk) {
+        var allScores = models.map(function(m) { return m[bk]; });
+        var valid = allScores.filter(function(v) { return v !== null && v !== undefined; });
+        if (!valid.length) return;
+        var maxVal = Math.max.apply(null, valid);
+        models.forEach(function(m) {
+          if (m[bk] === maxVal) goldCounts[m.name] = (goldCounts[m.name] || 0) + 1;
+        });
+      });
+    });
+    var leaders = Object.keys(goldCounts).sort(function(a, b) { return goldCounts[b] - goldCounts[a]; });
+    if (leaders.length > 1) {
+      html += '<div style="margin-top:16px;padding:14px 18px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:8px;font-size:13px;color:var(--t2);line-height:1.6">';
+      html += '<span style="font-size:10px;letter-spacing:1.5px;color:var(--t3);font-weight:700">KEY FINDING</span><br>';
+      html += 'No single model dominates all benchmarks. ';
+      leaders.forEach(function(name, i) {
+        var model = CFG.models.find(function(m) { return m.name === name; });
+        var c = model ? CFG.colors[model.lab] || "#fff" : "#fff";
+        html += '<b style="color:' + c + '">' + name + '</b> leads ' + goldCounts[name] + ' benchmark' + (goldCounts[name] > 1 ? 's' : '');
+        if (i < leaders.length - 2) html += ', ';
+        else if (i === leaders.length - 2) html += ', and ';
+      });
+      html += '. Scores sourced from Artificial Analysis, Epoch AI, LMSYS Arena, GPQA, SWE-bench, ARC Prize, CAIS, and provider system cards (Mar 2026 snapshot).</div>';
+    }
+
+    // Model notes
+    html += '<div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
+    models.forEach(function(m) {
+      var c = CFG.colors[m.lab] || "#555";
+      html += '<div style="padding:14px;border-radius:8px;border:1px solid var(--bd);background:rgba(255,255,255,.015)">';
+      html += '<div style="font-size:14px;font-weight:700;color:' + c + '">' + m.name + '</div>';
+      html += '<div style="font-size:11px;color:var(--t3);margin-top:2px">' + m.lab + ' · Released ' + m.released + '</div>';
+      html += '<div style="font-size:12px;color:var(--t2);margin-top:8px;line-height:1.5">' + m.notes + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+  }
+
+  // ─── METR Time Horizons chart ──────────────────────────────
+  var metrChartInstance = null;
+  function renderMetr() {
+    var canvas = document.getElementById("metrChart");
+    if (!canvas || !CFG.metrHorizons) return;
+    if (metrChartInstance) { metrChartInstance.destroy(); metrChartInstance = null; }
+
+    var DOT = "#2d8a4e";
+
+    function fmtH(m) {
+      if (m >= 60) return (m / 60).toFixed(1) + " hours";
+      if (m >= 1) return Math.round(m) + " min";
+      return (m * 60).toFixed(0) + " sec";
+    }
+
+    // Build scatter data — Y in hours, compute per-point radius array
+    var points = [];
+    var radii = [];
+    CFG.metrHorizons.forEach(function(row) {
+      points.push({ x: row[0], y: row[2] / 60, labelName: row[1], rawMin: row[2], showLabel: row[3] });
+      radii.push(row[3] ? 7 : 5);
+    });
+
+    // Exponential trend curve — fit through the bulk of models
+    // Anchor: GPT-5 (Aug 2025, 137 min), doubling ~150 days
+    // This passes near GPT-4 (~1min,2023), o3 (~19min,Apr25), GPT-5.2 (~5.5h,Jan26)
+    // Claude Opus 4.6 sits ABOVE the trend (matching METR page)
+    var trendData = [];
+    var anchorDate = new Date("2025-08-06").getTime();
+    var anchorVal = 137 / 60; // hours
+    var doublingMs = 150 * 86400000;
+    for (var d = new Date("2019-01-01"); d <= new Date("2027-01-01"); d.setDate(d.getDate() + 7)) {
+      var elapsed = d.getTime() - anchorDate;
+      var val = anchorVal * Math.pow(2, elapsed / doublingMs);
+      if (val <= 16) trendData.push({ x: d.toISOString().slice(0, 10), y: val });
+    }
+
+    var datasets = [
+      {
+        label: "Frontier models (50% time horizon)",
+        data: points,
+        backgroundColor: DOT,
+        borderColor: DOT,
+        pointRadius: radii,
+        pointHoverRadius: 10,
+        pointHitRadius: 5,
+        showLine: false,
+        order: 1
+      },
+      {
+        label: "Exponential trend",
+        data: trendData,
+        borderColor: "rgba(45,138,78,.4)",
+        borderWidth: 2.5,
+        borderDash: [10, 6],
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        pointHitRadius: 0,
+        showLine: true,
+        fill: false,
+        order: 2
+      }
+    ];
+
+    // ── Annotations: model labels + task descriptions ──
+    var annotations = {};
+
+    // Model name labels (matching METR page style — only key models labeled)
+    points.forEach(function(pt, i) {
+      if (!pt.showLabel) return;
+      var isHigh = pt.y > 3;
+      annotations["m" + i] = {
+        type: "label",
+        xValue: pt.x,
+        yValue: pt.y,
+        content: [pt.labelName],
+        color: "rgba(255,255,255,.8)",
+        font: { size: 11, weight: "600" },
+        xAdjust: 14,
+        yAdjust: isHigh ? -14 : 8,
+        backgroundColor: "transparent",
+        textAlign: "left"
+      };
+    });
+
+    // Task descriptions — pinned to Y-axis with dash, matching METR page exactly
+    // Uses line annotations with label at "start" position (left edge)
+    var tasks = [
+      { h: 1,   text: "Fix bugs in small Python libraries" },
+      { h: 2.5, text: "Exploit a buffer overflow in libiec61850" },
+      { h: 4,   text: "Train adversarially robust image model" },
+      { h: 8,   text: "Exploit a vulnerable Ethereum smart contract" }
+    ];
+    tasks.forEach(function(t, i) {
+      annotations["tl" + i] = {
+        type: "line",
+        yMin: t.h, yMax: t.h,
+        borderColor: "rgba(255,255,255,.06)",
+        borderWidth: 1,
+        borderDash: [3, 3],
+        label: {
+          display: true,
+          content: "— " + t.text,
+          position: "start",
+          color: "rgba(255,255,255,.35)",
+          font: { size: 10 },
+          backgroundColor: "transparent",
+          padding: { left: 0, right: 0, top: 0, bottom: 0 }
+        }
+      };
+    });
+
+    metrChartInstance = new Chart(canvas.getContext("2d"), {
+      type: "scatter",
+      data: { datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "point", intersect: true },
+        hover: { mode: "point", intersect: true },
+        layout: { padding: { top: 10, right: 30, bottom: 10 } },
+        scales: {
+          x: {
+            type: "time",
+            time: { unit: "year", displayFormats: { year: "YYYY" } },
+            min: "2019-01-01", max: "2026-09-01",
+            grid: { color: "rgba(255,255,255,.04)" },
+            ticks: { color: "rgba(255,255,255,.4)", font: { size: 12 } }
+          },
+          y: {
+            type: "linear", min: -0.5, max: 16,
+            grid: { color: "rgba(255,255,255,.04)" },
+            ticks: {
+              color: "rgba(255,255,255,.45)", font: { size: 12, weight: "600" },
+              stepSize: 1,
+              callback: function(v) {
+                if (v < 0) return "";
+                if (v === 0) return "0";
+                if (v === 0.5) return "30 min";
+                return v + (v === 1 ? " hour" : " hours");
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "rgba(255,255,255,.4)", font: { size: 11 },
+              usePointStyle: true, pointStyle: "circle", padding: 16,
+              filter: function(item) { return item.datasetIndex < 2; }
+            }
+          },
+          annotation: { annotations: annotations },
+          tooltip: {
+            backgroundColor: "rgba(8,8,28,.96)", borderColor: "rgba(255,255,255,.12)", borderWidth: 1,
+            titleColor: "#fff", titleFont: { size: 13, weight: "700" },
+            bodyColor: "rgba(255,255,255,.7)", bodyFont: { size: 12 },
+            padding: 12,
+            filter: function(item) { return item.datasetIndex === 0; },
+            callbacks: {
+              title: function(items) { return items[0].raw.labelName || ""; },
+              afterTitle: function(items) {
+                var d = items[0].raw.x;
+                var date = new Date(d);
+                var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                return "Release: " + months[date.getMonth()] + " " + date.getFullYear();
+              },
+              label: function(ctx) {
+                var m = ctx.raw.rawMin;
+                var str;
+                if (m >= 60) str = (m / 60).toFixed(1) + " hours";
+                else if (m >= 1) str = Math.round(m) + " minutes";
+                else str = Math.round(m * 60) + " seconds";
+                return "Task Length: " + str;
+              },
+              afterLabel: function(ctx) {
+                return "Version: TH 1.1";
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ─── Toggle button styling helpers ──────────────────────────
+  function syncToggleButtons(state) {
+    // Metric toggle
+    document.querySelectorAll("#tM button").forEach(function(b, i) {
+      b.className = (i === 0 && state.metric === "h100e") || (i === 1 && state.metric === "power") ? "on" : "";
+    });
+    // Scope toggle
+    document.querySelectorAll("#tS button").forEach(function(b, i) {
+      b.className = (i === 0 && state.scope === "tracked") || (i === 1 && state.scope === "fleet") ? "on" : "";
+    });
+    // Allocation view toggle
+    document.querySelectorAll("#tA button").forEach(function(b, i) {
+      b.className = (i === 0 && state.allocView === "full") || (i === 1 && state.allocView === "dedicated") ? "on" : "";
+    });
+    // Status filter (both map and card toggles)
+    document.querySelectorAll("#tFm button,#tFc button").forEach(function(b) {
+      var txt = b.textContent.trim();
+      b.className = (state.statusFilter === "ALL" && txt === "ALL") ||
+                     (state.statusFilter === "OP" && txt.indexOf("LIVE") >= 0) ||
+                     (state.statusFilter === "BLD" && txt.indexOf("BUILD") >= 0) ||
+                     (state.statusFilter === "PLN" && txt.indexOf("PLAN") >= 0) ? "on" : "";
+    });
+  }
+
+  // ─── Master render (called on every state change) ───────────
+  var prevState = {};
+
+  function render(state, data) {
+    var hasDCs = data.dataCenters && data.dataCenters.length > 0;
+    var hasSeries = Store.activeSeries().length > 0;
+
+    syncToggleButtons(state);
+
+    // Chart + stats only need time series data
+    if (hasSeries) {
+      renderStats(state, data);
+      renderLeaderboard(state, data, null);
+    }
+
+    var dataChanged = state._dataVersion !== prevState._dataVersion;
+
+    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.allocView !== prevState.allocView || dataChanged)) {
+      renderLegend(state, data);
+      renderChart(state, data);
+    }
+
+    if (state.hoveredLab !== prevState.hoveredLab) {
+      styleChartHover(state);
+    }
+
+    // Table + drawer + map need dataCenters
+    if (hasDCs) {
+      if (state.labFilter !== prevState.labFilter ||
+          state.statusFilter !== prevState.statusFilter ||
+          state.metric !== prevState.metric ||
+          state.scope !== prevState.scope ||
+          dataChanged ||
+          !prevState._initialized) {
+        renderLabFilter(state, data);
+        renderTable(state, data);
+        filterMapPins(state);
+      }
+
+      if (state.expandedDC !== prevState.expandedDC) {
+        renderDrawer(state, data);
+        renderTable(state, data);
+      }
+    }
+
+    // Models section — renders once, reads from CFG
+    if (dataChanged || !prevState._initialized) {
+      renderModels();
+      renderMetr();
+    }
+
+    prevState = Object.assign({}, state, { _initialized: true });
+  }
+
+  // Public API
+  return {
+    render: render,
+    initMap: initMap,
+    setRegion: setRegion,
+    renderMapPreview: renderMapPreview,
+    renderTable: renderTable,
+    renderDrawer: renderDrawer,
+    renderModels: renderModels,
+    renderMetr: renderMetr,
+    tableSortCol: function() { return tableSortCol; },
+    tableSortDir: function() { return tableSortDir; },
+    setTableSort: function(col, dir) { tableSortCol = col; tableSortDir = dir; }
+  };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// 5. APP — wiring layer, the only place that connects
+//    Store, Data, UI, DOM events, and fetch lifecycle.
+//    Exposes a minimal global API for onclick handlers.
+// ═══════════════════════════════════════════════════════════════
+var App = (function() {
+
+  // --- Actions (called from onclick handlers) ---
+  function setMetric(m)     { Store.set({ metric: m }); }
+  function setScope(s)      { Store.set({ scope: s }); }
+  function setAllocView(v)  { Store.set({ allocView: v }); }
+  function setStatus(s)     { Store.set({ statusFilter: s }); }
+  function setLabFilter(f)  { Store.set({ labFilter: f }); }
+  function setSort(s)       { Store.set({ sortBy: s }); }
+  function setRegion(r)     { UI.setRegion(r); }
+
+  function openDrawer(handle) {
+    Store.set({ expandedDC: handle });
+  }
+
+  function closeDrawer() {
+    Store.set({ expandedDC: null });
+  }
+
+  function tableSort(col) {
+    var curCol = UI.tableSortCol();
+    var curDir = UI.tableSortDir();
+    if (col === curCol) {
+      UI.setTableSort(col, curDir === "desc" ? "asc" : "desc");
+    } else {
+      // Default to desc for numeric, asc for text
+      var textCols = ["name", "lab"];
+      UI.setTableSort(col, textCols.indexOf(col) >= 0 ? "asc" : "desc");
+    }
+    UI.renderTable(Store.get(), Store.getData());
+  }
+
+  // Keep toggleCard for backward compat (map pin clicks)
+  function toggleCard(event, handle) {
+    openDrawer(handle);
+  }
+
+  // --- Nav scroll spy ---
+  function initNavSpy() {
+    window.addEventListener("scroll", function() {
+      ["race", "geomap", "sites", "models"].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 100) {
+          document.querySelectorAll("nav a").forEach(function(a) {
+            a.classList.toggle("on", a.getAttribute("href") === "#" + id);
+          });
+        }
+      });
+    });
+    // ESC to close drawer
+    window.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && Store.get().expandedDC) closeDrawer();
+    });
+  }
+
+  // --- Bootstrap ---
+  function init() {
+    initNavSpy();
+
+    // Subscribe UI.render to all state changes
+    Store.subscribe(UI.render);
+
+    // Build fallback data from config
+    var fallback = Data.buildFallbackData(CFG.rawTimeline, CFG.labMap);
+    var epochEntries = Data.parseRawRows(CFG.rawTimeline);
+    var fleetEntries = Data.parseRawRows(CFG.fleetEstimates);
+
+    // Set initial data (fallback)
+    Store.setData({
+      labMap: fallback.labMap,
+      dataCenters: fallback.dataCenters,
+      timeline: fallback.timeline,
+      seriesEpoch: Data.buildTimeSeries(epochEntries, fallback.labMap, CFG.labs),
+      seriesFull: Data.buildTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs),
+      seriesEpochLow: Data.buildAllocatedTimeSeries(epochEntries, fallback.labMap, CFG.labs, CFG.allocations, "low"),
+      seriesEpochHigh: Data.buildAllocatedTimeSeries(epochEntries, fallback.labMap, CFG.labs, CFG.allocations, "high"),
+      seriesFullLow: Data.buildAllocatedTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs, CFG.allocations, "low"),
+      seriesFullHigh: Data.buildAllocatedTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs, CFG.allocations, "high")
+    });
+
+    // Init map + preview IMMEDIATELY with fallback data (don't wait for fetch)
+    UI.initMap(Store.get(), Store.getData());
+    document.getElementById("prev").innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px"><div style="font-size:28px;opacity:.15">🛰️</div><div style="font-size:11px;color:var(--t3);letter-spacing:1px">HOVER OR CLICK A SITE</div></div>';
+
+    // Try live Epoch fetch (with 12s timeout to avoid hanging on CORS proxies)
+    var fetchStart = Date.now();
+    var FETCH_TIMEOUT = 12000;
+
+    var fetchPromise = Data.fetchEpoch();
+    var timeoutPromise = new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error("Fetch timed out after " + (FETCH_TIMEOUT / 1000) + "s")); }, FETCH_TIMEOUT);
+    });
+
+    Promise.race([fetchPromise, timeoutPromise]).then(function(raw) {
+      var parsed = Data.parseEpochData(raw.dcRows, raw.tlRows);
+      var elapsed = ((Date.now() - fetchStart) / 1000).toFixed(1);
+
+      // Both CSVs must parse successfully for live data to work.
+      if (parsed.dataCenters.length === 0) {
+        console.warn("[Epoch] DC parse returned 0 rows — keeping fallback. Elapsed: " + elapsed + "s");
+        document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:#ffaa00;font-size:10px;margin-left:4px"> ● CACHED</span>';
+        return;
+      }
+
+      // Merge live coordinates from CSV into runtime coords lookup
+      parsed.dataCenters.forEach(function(dc) {
+        if (dc.lat != null && dc.lon != null && !CFG.coords[dc.handle]) {
+          CFG.coords[dc.handle] = [dc.lat, dc.lon];
+          console.log("[Epoch] Added live coords for new facility: " + dc.handle + " [" + dc.lat.toFixed(2) + ", " + dc.lon.toFixed(2) + "]");
+        }
+      });
+
+      var liveEntries = parsed.entries;
+
+      Store.setData({
+        labMap: parsed.labMap,
+        dataCenters: parsed.dataCenters,
+        timeline: parsed.timeline,
+        seriesEpoch: Data.buildTimeSeries(liveEntries, parsed.labMap, CFG.labs),
+        seriesFull: Data.buildTimeSeries(liveEntries.concat(fleetEntries), parsed.labMap, CFG.labs),
+        seriesEpochLow: Data.buildAllocatedTimeSeries(liveEntries, parsed.labMap, CFG.labs, CFG.allocations, "low"),
+        seriesEpochHigh: Data.buildAllocatedTimeSeries(liveEntries, parsed.labMap, CFG.labs, CFG.allocations, "high"),
+        seriesFullLow: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), parsed.labMap, CFG.labs, CFG.allocations, "low"),
+        seriesFullHigh: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), parsed.labMap, CFG.labs, CFG.allocations, "high")
+      });
+
+      console.log("[Epoch] ✅ LIVE data loaded in " + elapsed + "s — " + parsed.dataCenters.length + " DCs, " + liveEntries.length + " entries");
+      document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:#00ff87;font-size:10px;margin-left:4px"> ● LIVE</span>';
+
+      // Re-init map with live data
+      UI.initMap(Store.get(), Store.getData());
+      document.getElementById("prev").innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px"><div style="font-size:28px;opacity:.15">🛰️</div><div style="font-size:11px;color:var(--t3);letter-spacing:1px">HOVER OR CLICK A SITE</div></div>';
+
+    }).catch(function(err) {
+      var elapsed = ((Date.now() - fetchStart) / 1000).toFixed(1);
+      console.warn("[Epoch] ❌ Fetch failed after " + elapsed + "s: " + (err && err.message || err) + " — using cached data");
+      document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:#ffaa00;font-size:10px;margin-left:4px"> ● CACHED</span>';
+    });
+  }
+
+  // Public API (exposed to onclick handlers in HTML)
+  return {
+    init: init,
+    setMetric: setMetric,
+    setScope: setScope,
+    setAllocView: setAllocView,
+    setStatus: setStatus,
+    setLabFilter: setLabFilter,
+    setSort: setSort,
+    setRegion: setRegion,
+    openDrawer: openDrawer,
+    closeDrawer: closeDrawer,
+    tableSort: tableSort,
+    toggleCard: toggleCard
+  };
+})();
+
+// ─── Go ───────────────────────────────────────────────────────
+try { 
+  App.init();
+  // Compact health check (console only, no UI noise)
+  setTimeout(function() {
+    var d = Store.getData();
+    var libs = [typeof Chart, typeof L, typeof moment, typeof Papa, typeof _].filter(function(t){ return t === "undefined"; });
+    console.log("[Health] " + (libs.length ? "❌ Missing libs: " + libs.length : "✅ All libs loaded")
+      + " | DCs: " + (d.dataCenters ? d.dataCenters.length : 0)
+      + " | Series: " + (d.seriesEpoch ? d.seriesEpoch.length : 0) + " pts"
+      + " | Models: " + CFG.models.length
+      + " | Today: " + CFG.today);
+  }, 2500);
+} catch(e) { 
+  console.error('Init failed:', e);
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:48px;left:0;right:0;z-index:9999;background:#ff0033;color:#fff;padding:12px 28px;font-size:13px;font-family:monospace;white-space:pre-wrap';
+  d.textContent = '❌ INIT ERROR: ' + e.message + '\n' + (e.stack || '').split('\n').slice(0,3).join('\n');
+  document.body.appendChild(d);
+}
+</script>
+</body>
+</html>
