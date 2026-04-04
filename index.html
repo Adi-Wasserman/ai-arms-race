@@ -289,6 +289,8 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">TOTAL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED ⚠</button></div>
 <div class="sep"></div>
 <div class="T" id="tP"><button class="on" onclick="App.setProjection('current')">CURRENT</button><button onclick="App.setProjection('2029')">2029 PROJECTION ⚡</button></div>
+<div class="sep"></div>
+<div class="T" id="tV"><button class="on" onclick="App.setVelocity('absolute')">ABSOLUTE</button><button onclick="App.setVelocity('velocity')">GROWTH VELOCITY 📈</button></div>
 <div id="leg" style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto"></div>
 <button class="meth-toggle" onclick="var m=document.getElementById('methPanel');m.classList.toggle('show');this.textContent=m.classList.contains('show')?'▾ HIDE METHODOLOGY':'▸ METHODOLOGY'">▸ METHODOLOGY</button>
 </div>
@@ -398,6 +400,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <h3>CHANGELOG</h3>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Compute vs Performance scatter</strong> — New Chart.js scatter plot in MODELS section: H100e (X) vs AA Intelligence Index (Y), bubble-sized by power (GW), colored by lab. OLS trend line with R². Toggle between Observed (Apr 2026) and Projected (Jan 2029). Dynamic key finding with efficiency ranking. Tooltip shows model name, benchmark wins, capability/GW.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>URL hash state for deep linking</strong> — All view state (metric, scope, allocation, projections, scatter view, lab filter) serialized to URL hash. Share exact views via URLs like <span style="font-family:var(--m)">#models?scope=fleet&proj=2029</span>. Browser back/forward supported. 📋 SHARE VIEW button copies current URL to clipboard.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Growth Velocity view</strong> — New ABSOLUTE/VELOCITY toggle on the Race chart. Velocity mode computes trailing 12-month annualized growth rates per lab, showing ×/year instead of absolute H100e/MW. Reference lines at 1× (no growth) and 4×/yr. Dynamic key finding shows fastest-growing lab. Solves the chart compression problem when 2029 projections are active. URL hash support: <span style="font-family:var(--m)">velocity=velocity</span>.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>P2 improvements</strong> — Who's Winning mini scope toggle (SAT-VERIFIED ↔ +CLOUD-LEASE). Enhanced data banner with CSV version hash + fetch timestamp. 2029 projections in leaderboard rows (⚡ per-lab growth ×). Analyst cross-checks (SemiAnalysis + Artificial Analysis H100e). Interactive model selection with head-to-head wins, derived metrics, and column highlighting.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>2029 Projections engine</strong> — New "2029 PROJECTION ⚡" toggle on the Race chart. Per-lab compound growth extrapolation (4-5× compute/yr, ~2× power/yr) with widening uncertainty bands. Side-by-side Apr 2026 vs Jan 2029 comparison panel with growth assumptions per lab. Dynamic key finding updates with projected leader and total industry growth multiplier.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
@@ -995,6 +998,56 @@ var Data = (function() {
     return changes;
   }
 
+  // --- Growth velocity computation ---
+  // Takes a time series and returns annualized growth rates per lab.
+  // For each date, looks back ~12 months and computes: (current/past)^(12/monthsElapsed)
+  // Returns array of {date, lab: growthRate, lab_pw: growthRate, ...}
+  // Growth rates are expressed as annualized multipliers (e.g., 3.5 = 3.5×/year)
+  function buildVelocitySeries(series, labs) {
+    if (!series || series.length < 2) return [];
+    var LOOKBACK_DAYS = 365;  // 12 months
+
+    return series.map(function(pt, idx) {
+      var vPt = { date: pt.date };
+      var ptDate = new Date(pt.date + "T00:00:00").getTime();
+
+      labs.forEach(function(lab) {
+        var curH = pt[lab] || 0;
+        var curP = pt[lab + "_pw"] || 0;
+
+        // Find the best lookback point (~12 months ago)
+        var bestPt = null, bestDist = Infinity;
+        for (var j = idx - 1; j >= 0; j--) {
+          var prevDate = new Date(series[j].date + "T00:00:00").getTime();
+          var daysDiff = (ptDate - prevDate) / 86400000;
+          if (daysDiff < 30) continue;  // skip very short intervals (noise)
+          var dist = Math.abs(daysDiff - LOOKBACK_DAYS);
+          if (dist < bestDist) { bestDist = dist; bestPt = { pt: series[j], days: daysDiff }; }
+          if (daysDiff > LOOKBACK_DAYS * 1.5) break;  // don't search too far
+        }
+
+        if (!bestPt || !bestPt.pt) {
+          vPt[lab] = null;
+          vPt[lab + "_pw"] = null;
+          return;
+        }
+
+        var prevH = bestPt.pt[lab] || 0;
+        var prevP = bestPt.pt[lab + "_pw"] || 0;
+        var yearsElapsed = bestPt.days / 365.25;
+
+        // Annualized growth rate: (current/past)^(1/years)
+        vPt[lab] = (prevH > 0 && curH > 0) ? Math.pow(curH / prevH, 1 / yearsElapsed) : null;
+        vPt[lab + "_pw"] = (prevP > 0 && curP > 0) ? Math.pow(curP / prevP, 1 / yearsElapsed) : null;
+      });
+
+      return vPt;
+    }).filter(function(pt) {
+      // Only include points where at least one lab has a valid growth rate
+      return labs.some(function(lab) { return pt[lab] !== null; });
+    });
+  }
+
   // --- Confidence scoring model ---
   // Takes a single DC object and its timeline entries.
   // Returns { score, phase, label, color, powerPct, currentPower, maxPower,
@@ -1437,6 +1490,7 @@ var Data = (function() {
     buildTimeSeries: buildTimeSeries,
     buildAllocatedTimeSeries: buildAllocatedTimeSeries,
     detectLeadChanges: detectLeadChanges,
+    buildVelocitySeries: buildVelocitySeries,
     scoreConfidence: scoreConfidence,
     extractObservations: extractObservations,
     fetchEpoch: fetchEpoch,
@@ -1465,7 +1519,8 @@ var Store = (function() {
     sortBy:       "conf",    // "conf" | "h100e" | "power"
     expandedDC:   null,      // handle string or null
     projMode:     "current",  // "current" | "2029"
-    scatterView:  "observed"  // "observed" | "projected"
+    scatterView:  "observed", // "observed" | "projected"
+    velocityMode: "absolute"  // "absolute" | "velocity"
   };
 
   // --- Computed data (derived from Epoch fetch or fallback) ---
@@ -1653,9 +1708,27 @@ var UI = (function() {
       });
       var gap = maxVal > 0 && secondH > 0 ? Math.round((maxVal - secondH) / secondH * 100) : 0;
       var unit = state.metric === "power" ? "MW" : "H100e";
-      kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
-        (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
-        '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
+
+      if (state.velocityMode === "velocity") {
+        // Velocity-specific key finding: show who's growing fastest
+        var velocityData = Data.buildVelocitySeries(series.filter(function(x) { return x.date <= CFG.today; }), CFG.labs);
+        var recent = velocityData.length ? velocityData[velocityData.length - 1] : null;
+        if (recent) {
+          var rates = CFG.labs.map(function(lab) {
+            var key = state.metric === "power" ? lab + "_pw" : lab;
+            return { lab: lab, rate: recent[key] || 0 };
+          }).filter(function(r) { return r.rate > 0; }).sort(function(a, b) { return b.rate - a.rate; });
+          if (rates.length >= 2) {
+            kf.innerHTML = '📈 <strong>GROWTH VELOCITY:</strong> <strong style="color:' + CFG.colors[rates[0].lab] + '">' + rates[0].lab + '</strong> is growing fastest at <strong>' + rates[0].rate.toFixed(1) + '×/yr</strong>, followed by ' +
+              '<strong style="color:' + CFG.colors[rates[1].lab] + '">' + rates[1].lab + '</strong> at ' + rates[1].rate.toFixed(1) + '×/yr. ' +
+              '<span style="color:var(--t3)">Growth rates are annualized from trailing 12-month data. Sustained rates above 4×/yr require massive new facility buildout.</span>';
+          }
+        }
+      } else {
+        kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
+          (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
+          '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
+      }
     }
   }
 
@@ -1903,6 +1976,85 @@ var UI = (function() {
       return d.some(function(x) { return (Store.getValue(x, c) || 0) > 0; });
     });
 
+    // ── VELOCITY MODE: show annualized growth rates instead of absolutes ──
+    if (state.velocityMode === "velocity") {
+      var velocityData = Data.buildVelocitySeries(d, CFG.labs);
+      if (!velocityData.length) return;
+
+      var vDatasets = [];
+      activeLabs.forEach(function(c) {
+        var color = CFG.colors[c] || "#555";
+        var key = isPower ? c + "_pw" : c;
+        vDatasets.push({
+          label: c,
+          data: velocityData.filter(function(v) { return v[key] !== null; }).map(function(v) {
+            return { x: v.date, y: Math.round(v[key] * 100) / 100 };
+          }),
+          borderColor: color, backgroundColor: "transparent",
+          borderWidth: 1.8, pointRadius: 0, pointHitRadius: 8,
+          fill: false, tension: 0.3,
+          segment: { borderDash: function(ctx2) { return ctx2.p0.parsed.x >= todayMs ? [6, 4] : []; } }
+        });
+      });
+
+      // Add growth rate reference lines
+      var vAnnotations = {
+        today: annotations.today,
+        baseline: {
+          type: "line", yMin: 1, yMax: 1,
+          borderColor: "rgba(255,255,255,.15)", borderWidth: 1, borderDash: [4, 4],
+          label: { display: true, content: "1× (no growth)", position: "end",
+                   color: "rgba(255,255,255,.25)", font: { size: 9 }, backgroundColor: "transparent" }
+        },
+        fast: {
+          type: "line", yMin: 4, yMax: 4,
+          borderColor: "rgba(255,170,0,.1)", borderWidth: 1, borderDash: [2, 4],
+          label: { display: true, content: "4×/yr", position: "end",
+                   color: "rgba(255,170,0,.25)", font: { size: 9 }, backgroundColor: "transparent" }
+        }
+      };
+
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: { datasets: vDatasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          scales: {
+            x: { type: "time", time: { unit: "quarter", displayFormats: { quarter: "MMM YY" } },
+                 grid: { color: "rgba(255,255,255,.04)" },
+                 ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 }, maxTicksLimit: 12 } },
+            y: { grid: { color: "rgba(255,255,255,.04)" },
+                 ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 },
+                           callback: function(v) { return v.toFixed(1) + "×"; } },
+                 min: 0,
+                 suggestedMax: 8,
+                 title: { display: true, text: "Annualized Growth (×/yr)", color: "rgba(255,255,255,.2)", font: { size: 10 } } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "rgba(8,8,28,.96)", borderColor: "rgba(255,255,255,.12)", borderWidth: 1,
+              titleColor: "#fff", bodyColor: "rgba(255,255,255,.7)", padding: 10,
+              callbacks: {
+                title: function(items) {
+                  return items[0] ? moment(items[0].raw.x).format("MMM YYYY") + " — Growth Rate" : "";
+                },
+                label: function(ctx2) {
+                  var c = CFG.colors[ctx2.dataset.label] || "#fff";
+                  var v = ctx2.raw.y;
+                  return ctx2.dataset.label + ": " + (v ? v.toFixed(1) + "×/yr" : "—");
+                }
+              }
+            },
+            annotation: { annotations: vAnnotations }
+          }
+        }
+      });
+      return;  // Early return — velocity chart complete
+    }
+
+    // ── ABSOLUTE MODE (default) ──────────────────────────────
     var datasets = [];
 
     if (state.allocView === "dedicated" && !is2029) {
@@ -3277,6 +3429,10 @@ var UI = (function() {
     document.querySelectorAll("#tSc button").forEach(function(b, i) {
       b.className = (i === 0 && state.scatterView === "observed") || (i === 1 && state.scatterView === "projected") ? "on" : "";
     });
+    // Velocity toggle
+    document.querySelectorAll("#tV button").forEach(function(b, i) {
+      b.className = (i === 0 && state.velocityMode === "absolute") || (i === 1 && state.velocityMode === "velocity") ? "on" : "";
+    });
     // Status filter (both map and card toggles)
     document.querySelectorAll("#tFm button,#tFc button").forEach(function(b) {
       var txt = b.textContent.trim();
@@ -3304,7 +3460,7 @@ var UI = (function() {
 
     var dataChanged = state._dataVersion !== prevState._dataVersion;
 
-    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.allocView !== prevState.allocView || state.projMode !== prevState.projMode || dataChanged)) {
+    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.allocView !== prevState.allocView || state.projMode !== prevState.projMode || state.velocityMode !== prevState.velocityMode || dataChanged)) {
       renderLegend(state, data);
       renderChart(state, data);
       renderProjPanel(state);
@@ -3382,6 +3538,7 @@ var App = (function() {
   function setAllocView(v)  { Store.set({ allocView: v }); }
   function setProjection(p) { Store.set({ projMode: p }); }
   function setScatterView(v) { Store.set({ scatterView: v }); }
+  function setVelocity(v)    { Store.set({ velocityMode: v }); }
   function setStatus(s)     { Store.set({ statusFilter: s }); }
   function setLabFilter(f)  { Store.set({ labFilter: f }); }
   function setSort(s)       { Store.set({ sortBy: s }); }
@@ -3418,7 +3575,8 @@ var App = (function() {
   // Only non-default values are serialized to keep URLs clean.
   var DEFAULTS = {
     metric: "h100e", scope: "tracked", allocView: "full",
-    projMode: "current", scatterView: "observed", labFilter: "ALL"
+    projMode: "current", scatterView: "observed", labFilter: "ALL",
+    velocityMode: "absolute"
   };
   var VALID_SECTIONS = ["race", "geomap", "sites", "models"];
   var _suppressHashPush = false;  // prevent re-entrant updates
@@ -3442,6 +3600,7 @@ var App = (function() {
     if (params.alloc && (params.alloc === "full" || params.alloc === "dedicated")) patch.allocView = params.alloc;
     if (params.proj && (params.proj === "current" || params.proj === "2029")) patch.projMode = params.proj;
     if (params.scatter && (params.scatter === "observed" || params.scatter === "projected")) patch.scatterView = params.scatter;
+    if (params.velocity && (params.velocity === "absolute" || params.velocity === "velocity")) patch.velocityMode = params.velocity;
     if (params.lab) patch.labFilter = params.lab;
     return { section: VALID_SECTIONS.indexOf(section) >= 0 ? section : null, state: patch };
   }
@@ -3462,12 +3621,13 @@ var App = (function() {
     if (state.allocView !== DEFAULTS.allocView) params.push("alloc=" + state.allocView);
     if (state.projMode !== DEFAULTS.projMode) params.push("proj=" + state.projMode);
     if (state.scatterView !== DEFAULTS.scatterView) params.push("scatter=" + state.scatterView);
+    if (state.velocityMode !== DEFAULTS.velocityMode) params.push("velocity=" + state.velocityMode);
     if (state.labFilter !== DEFAULTS.labFilter) params.push("lab=" + encodeURIComponent(state.labFilter));
 
     var hash = "#" + section + (params.length ? "?" + params.join("&") : "");
     if (window.location.hash !== hash) {
       _suppressHashPush = true;
-      history.replaceState(null, "", hash);
+      try { history.replaceState(null, "", hash); } catch(e) { /* iframe / sandboxed context */ }
       _suppressHashPush = false;
     }
   }
@@ -3651,6 +3811,7 @@ var App = (function() {
     setAllocView: setAllocView,
     setProjection: setProjection,
     setScatterView: setScatterView,
+    setVelocity: setVelocity,
     setStatus: setStatus,
     setLabFilter: setLabFilter,
     setSort: setSort,
