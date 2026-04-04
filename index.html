@@ -338,10 +338,10 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:8px">
 <div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:600;margin-bottom:6px">GROWTH ASSUMPTIONS</div>
 <div id="projAssumptions" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-<div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5">Projections use per-lab compound growth rates derived from announced capex, facility pipelines, and chip roadmaps. Uncertainty bands widen ±15% base + 10%/year. Power growth lags compute due to chip efficiency improvements (~30% per generation). <strong style="color:rgba(255,170,0,.7)">These are extrapolations, not forecasts.</strong></div>
+<div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5">Projections use explicit per-lab Jan 2029 targets derived from Epoch satellite facility ramps (Layer 1) + sourced cloud-lease fleet growth (Layer 2). <strong>No speculative new facilities.</strong> Power is the binding constraint — new grid capacity requires 2-5 year interconnection queues. Chip efficiency improvements (GB200, Trainium3, Ironwood) are factored into H100e-per-MW ratios. Uncertainty bands widen ±8% base + 6%/year. <strong style="color:rgba(255,170,0,.7)">These are target-based interpolations, not compound growth forecasts.</strong></div>
 </div>
 </div>
-<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · 2029 Projection = per-lab compound growth extrapolation (compute 4-5×/yr, power ~2×/yr) with ±15%+10%/yr uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
+<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · 2029 Projection = power-constrained targets from Epoch satellite ramps + sourced cloud-lease fleet, ±20% uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
 <section class="S" id="geomap">
@@ -414,6 +414,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>URL hash state for deep linking</strong> — All view state (metric, scope, allocation, projections, scatter view, lab filter) serialized to URL hash. Share exact views via URLs like <span style="font-family:var(--m)">#models?scope=fleet&proj=2029</span>. Browser back/forward supported. 📋 SHARE VIEW button copies current URL to clipboard.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Growth Velocity view</strong> — New ABSOLUTE/VELOCITY toggle on the Race chart. Velocity mode computes trailing 12-month annualized growth rates per lab, showing ×/year instead of absolute H100e/MW. Reference lines at 1× (no growth) and 4×/yr. Dynamic key finding shows fastest-growing lab. Solves the chart compression problem when 2029 projections are active. URL hash support: <span style="font-family:var(--m)">velocity=velocity</span>.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Data Export</strong> — Export buttons on Race (CSV/JSON/PNG), Intel (CSV), and Models (Benchmarks CSV, Scatter PNG, METR PNG) sections. CSV includes all synthetic cloud-lease adjustments and current view state. JSON exports include projection bands and growth assumptions. Chart PNGs via Chart.js toBase64Image(). Export module: <span style="font-family:var(--m)">Export.exportRaceCSV()</span> etc.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Recalibrated 2029 projections (power-constrained)</strong> — Replaced compound growth model (which gave physically impossible 350M H100e) with target-based interpolation grounded in power constraints. Layer 1: Epoch satellite facility ramps. Layer 2: sourced cloud-lease fleet growth. No speculative Layer 3. Per-lab targets: OpenAI 12M, Gemini 9M, Anthropic 9M, Meta 6M, xAI 2.2M. Total ~38M H100e at ~27 GW. Uncertainty ±20%. Ease-out interpolation matches observed deceleration (7.4×→5.3×→2.6×→2.6×).</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>P2 improvements</strong> — Who's Winning mini scope toggle (SAT-VERIFIED ↔ +CLOUD-LEASE). Enhanced data banner with CSV version hash + fetch timestamp. 2029 projections in leaderboard rows (⚡ per-lab growth ×). Analyst cross-checks (SemiAnalysis + Artificial Analysis H100e). Interactive model selection with head-to-head wins, derived metrics, and column highlighting.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>2029 Projections engine</strong> — New "2029 PROJECTION ⚡" toggle on the Race chart. Per-lab compound growth extrapolation (4-5× compute/yr, ~2× power/yr) with widening uncertainty bands. Side-by-side Apr 2026 vs Jan 2029 comparison panel with growth assumptions per lab. Dynamic key finding updates with projected leader and total industry growth multiplier.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
@@ -836,23 +837,56 @@ var CFG = Object.freeze({
     ["2026-02-20", "GPT-5.3 Codex",    540,   0]
   ],
 
-  // 2029 Projection assumptions
-  // Compute: 4-5× per year (varies by lab based on announced pipeline)
-  // Power: ~2× per year after efficiency offsets (chip efficiency improves ~30%/gen)
-  // Sources: SemiAnalysis, Epoch AI methodology, public capex announcements
-  projGrowth: {
-    // Per-lab annual multipliers: [computeMultiplier, powerMultiplier]
-    // These reflect announced buildout pace + known constraints
-    OpenAI:    { compute: 4.5, power: 2.0, note: "Stargate JV pipeline ($100B+), Azure priority" },
-    Gemini:    { compute: 4.0, power: 1.8, note: "TPU cadence + cloud DCs, efficiency gains from Ironwood" },
-    Meta:      { compute: 4.2, power: 2.0, note: "Hyperion + Prometheus expansion, owned infra" },
-    xAI:       { compute: 5.0, power: 2.2, note: "Colossus rapid buildout, most aggressive ramp" },
-    Anthropic: { compute: 4.8, power: 2.0, note: "Three-cloud strategy (AWS+GCP+Azure), Trainium3 gen" }
+  // 2029 Projection — Power-Constrained Target Model
+  // Instead of compound growth (which gave physically impossible results),
+  // we set explicit Jan 2029 targets per lab derived from:
+  //   Layer 1: Epoch satellite facility ramps (already in rawTimeline through late 2028)
+  //   Layer 2: Cloud-lease fleet growth (extends CFG.fleetEstimates to 2029)
+  // No Layer 3 (speculative new facilities) — we only project what's sourced.
+  //
+  // Power is the binding constraint. New power sources:
+  //   - Grid interconnection queue: 2-5 year wait (DOE data)
+  //   - Substation construction: 18-36 months
+  //   - Natural gas bridge turbines: 12-18 months
+  //   - SMR/nuclear: not operational before 2030
+  //
+  // Chip efficiency improvements by 2029:
+  //   - GB200/B200: ~2.5× H100e per chip, ~1.2KW → ~2080 H100e/MW
+  //   - Trainium3: ~60% improvement over Trn2 → ~1490 H100e/MW
+  //   - TPU Ironwood: ~2.3× H100e, similar power → ~2140 H100e/MW
+  //   - Vera Rubin (NVIDIA next-gen): ~3× H100e est.
+  //
+  // Per-lab targets: [H100e, powerMW]
+  proj2029Targets: {
+    // OpenAI: Epoch projects ~10.8M by late 2028 via Stargate + Azure.
+    // Modest growth to 2029 from continued Stargate ramp + GB200 efficiency.
+    // Source: Epoch satellite data + Oracle/MS partnership announcements
+    OpenAI:    { h: 12000000, p: 10500, basis: "Stargate pipeline + GB200 ramp. Epoch tracks through 2028." },
+
+    // Gemini: Epoch projects ~4M satellite + EGC fleet grows to ~5M with Ironwood.
+    // Combined ~9M by 2029. Google has existing power capacity.
+    // Source: Epoch satellite + SemiAnalysis TPU fleet est. + Ironwood roadmap
+    Gemini:    { h: 9000000,  p: 5000,  basis: "Epoch satellite (~4M) + Ironwood TPU fleet (~5M). Existing power." },
+
+    // Meta: Epoch projects ~5.5M by 2028. All owned, no fleet additions.
+    // Hyperion Phase 1 (Holly Ridge) comes online Jan 2028.
+    // Source: Epoch satellite data
+    Meta:      { h: 6000000,  p: 3800,  basis: "Epoch satellite only. Owned infra, no cloud-lease." },
+
+    // xAI: Epoch projects ~1.7M through Colossus 1+2.
+    // Modest growth from continued Memphis expansion.
+    // Source: Epoch satellite data
+    xAI:       { h: 2200000,  p: 2000,  basis: "Colossus 1+2 ramp. Epoch satellite data." },
+
+    // Anthropic: Epoch tracks ~1.9M (Rainier + AWS DCs).
+    // Fleet adds: EAI-AWS ~1.5M (Trn3), EAI-GCP ~2.5M (Ironwood), EAI-AZR ~3M (Vera Rubin).
+    // Sources: Amazon Oct 2025, Anthropic Oct 2025, NVIDIA Nov 2025
+    Anthropic: { h: 9000000,  p: 5500,  basis: "Epoch satellite (~2M) + 3-cloud fleet (~7M). All sourced." }
   },
-  // Projection range: quarterly from latest data to Jan 2029
+  // Projection end date
   projEnd: "2029-01-01",
-  // Uncertainty band: ±factor around central projection (widens over time)
-  projUncertainty: { base: 0.15, perYear: 0.10 },
+  // Uncertainty band: ±20% (widens slightly over time)
+  projUncertainty: { base: 0.08, perYear: 0.06 },
 
   // Analyst cross-check estimates (H100e, as of Q1 2026)
   // These provide independent validation against Epoch satellite data
@@ -1387,24 +1421,29 @@ var Data = (function() {
   // Takes any time series and extrapolates quarterly to CFG.projEnd.
   // Returns { central: [...points], low: [...points], high: [...points] }
   // where each point has the same shape as buildTimeSeries output.
-  function buildProjections2029(series, labs, growth, projEnd, uncertainty) {
+  // --- Power-constrained 2029 projection engine ---
+  // Instead of compound growth, we interpolate from today's observed values
+  // to explicit per-lab Jan 2029 targets derived from:
+  //   - Epoch satellite facility ramps (Layer 1)
+  //   - Sourced cloud-lease fleet growth (Layer 2)
+  // Uses ease-out interpolation (fast early ramp, decelerating toward target)
+  // to match the observed deceleration pattern (7.4× → 5.3× → 2.6× → 2.6×).
+  function buildProjections2029(series, labs, targets, projEnd, uncertainty) {
     if (!series || !series.length) return { central: [], low: [], high: [] };
 
-    // Use the last OBSERVED point (date <= today) as the projection baseline.
-    // This is critical because live Epoch data may project past projEnd (Jan 2029),
-    // which would make elapsed negative and produce empty arrays.
+    // Anchor to today's observed values
     var today = CFG.today;
     var observed = series.filter(function(x) { return x.date <= today; });
     var anchor = observed.length ? observed[observed.length - 1] : series[series.length - 1];
     var anchorDate = new Date(anchor.date + "T00:00:00");
     var endDate = new Date(projEnd + "T00:00:00");
+    var totalMs = endDate - anchorDate;
 
-    if (anchorDate >= endDate) return { central: [], low: [], high: [] };
+    if (totalMs <= 0) return { central: [], low: [], high: [] };
 
     // Generate quarterly dates from anchor to projEnd
     var dates = [];
     var cur = new Date(anchorDate);
-    // Advance to next quarter boundary
     cur.setMonth(cur.getMonth() + 3 - (cur.getMonth() % 3));
     cur.setDate(1);
     while (cur <= endDate) {
@@ -1412,7 +1451,6 @@ var Data = (function() {
       cur = new Date(cur);
       cur.setMonth(cur.getMonth() + 3);
     }
-    // Always include the end date
     if (dates.length === 0 || dates[dates.length - 1] !== projEnd) {
       dates.push(projEnd);
     }
@@ -1420,31 +1458,38 @@ var Data = (function() {
     var central = [], low = [], high = [];
 
     dates.forEach(function(d) {
-      // Years elapsed since the observed anchor point
-      var elapsed = (new Date(d) - anchorDate) / (365.25 * 86400000);
+      var elapsed = (new Date(d) - anchorDate) / totalMs;  // 0→1 progress
       if (elapsed <= 0) return;
+      elapsed = Math.min(elapsed, 1);
+
+      // Ease-out: fast early ramp, decelerating toward target
+      // Matches observed pattern where most capacity comes online mid-period
+      var t = 1 - Math.pow(1 - elapsed, 1.8);
+
+      var yearsElapsed = (new Date(d) - anchorDate) / (365.25 * 86400000);
+      var unc = uncertainty.base + uncertainty.perYear * yearsElapsed;
 
       var ptC = { date: d }, ptL = { date: d }, ptH = { date: d };
+
       labs.forEach(function(lab) {
-        var g = growth[lab] || { compute: 4.0, power: 2.0 };
-        var baseH = anchor[lab] || 0;
-        var baseP = anchor[lab + "_pw"] || 0;
+        var target = targets[lab] || { h: 0, p: 0 };
+        var startH = anchor[lab] || 0;
+        var startP = anchor[lab + "_pw"] || 0;
 
-        // Central projection: compound growth from today's observed capacity
-        var projH = Math.round(baseH * Math.pow(g.compute, elapsed));
-        var projP = Math.round(baseP * Math.pow(g.power, elapsed));
+        // If target is below current (shouldn't happen), hold flat
+        var endH = Math.max(target.h, startH);
+        var endP = Math.max(target.p, startP);
 
-        // Uncertainty widens over time
-        var unc = uncertainty.base + uncertainty.perYear * elapsed;
-        var uncLow = 1 - unc;
-        var uncHigh = 1 + unc;
+        // Interpolate along ease-out curve
+        var projH = Math.round(startH + (endH - startH) * t);
+        var projP = Math.round(startP + (endP - startP) * t);
 
         ptC[lab] = projH;
         ptC[lab + "_pw"] = projP;
-        ptL[lab] = Math.round(projH * uncLow);
-        ptL[lab + "_pw"] = Math.round(projP * uncLow);
-        ptH[lab] = Math.round(projH * uncHigh);
-        ptH[lab + "_pw"] = Math.round(projP * uncHigh);
+        ptL[lab] = Math.round(projH * (1 - unc));
+        ptL[lab + "_pw"] = Math.round(projP * (1 - unc));
+        ptH[lab] = Math.round(projH * (1 + unc));
+        ptH[lab + "_pw"] = Math.round(projP * (1 + unc));
       });
 
       // Totals
@@ -1620,7 +1665,7 @@ var Store = (function() {
     if (!computed.proj2029) {
       var base = activeSeries();
       computed.proj2029 = Data.buildProjections2029(
-        base, CFG.labs, CFG.projGrowth, CFG.projEnd, CFG.projUncertainty
+        base, CFG.labs, CFG.proj2029Targets, CFG.projEnd, CFG.projUncertainty
       );
     }
     return computed.proj2029;
@@ -3388,19 +3433,21 @@ var UI = (function() {
     }).join("") +
     '<div style="margin-top:6px;font-size:10px;color:rgba(255,170,0,.6);font-family:var(--m)">TOTAL: ' + Data.formatH100(end.tH) + ' H100e · ' + Data.formatPower(end.tP) + '</div>';
 
-    // Render growth assumptions
+    // Render growth assumptions (now shows targets, not compound rates)
     document.getElementById("projAssumptions").innerHTML = CFG.labs.map(function(c) {
-      var g = CFG.projGrowth[c];
-      if (!g) return "";
+      var t = CFG.proj2029Targets[c];
+      if (!t) return "";
+      var nowH = now[c] || 0;
+      var growthX = nowH > 0 ? (t.h / nowH).toFixed(1) : "—";
       return '<div style="flex:1;min-width:120px;padding:6px 10px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px">' +
         '<div style="font-size:10px;font-weight:600;color:' + CFG.colors[c] + ';margin-bottom:3px">' + c + '</div>' +
-        '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Compute: <strong>' + g.compute + '×</strong>/yr</div>' +
-        '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Power: <strong>' + g.power + '×</strong>/yr</div>' +
-        '<div style="font-size:9px;color:var(--t3);margin-top:2px">' + g.note + '</div></div>';
+        '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Target: <strong>' + Data.formatH100(t.h) + '</strong> H100e</div>' +
+        '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Power: <strong>' + Data.formatPower(t.p) + '</strong></div>' +
+        '<div style="font-size:10px;font-family:var(--m);color:var(--t3)">Growth: ~' + growthX + '×</div>' +
+        '<div style="font-size:9px;color:var(--t3);margin-top:2px">' + t.basis + '</div></div>';
     }).join("");
 
     // Update key finding — renderProjPanel is the authoritative owner of kf when projMode is "2029"
-    // (renderStats skips kf writes in 2029 mode so this won't be overwritten)
     var kf = document.getElementById("kfRace");
     if (kf && projRows.length > 0) {
       var projLeader = projRows[0].c;
@@ -3408,11 +3455,11 @@ var UI = (function() {
       var unit = isPower ? "MW" : "H100e";
       var nowTotal = isPower ? now.tP : now.tH;
       var projTotal = isPower ? end.tP : end.tH;
-      var totalGrowth = nowTotal > 0 ? Math.round(projTotal / nowTotal) : 0;
-      kf.innerHTML = '⚡ <strong style="color:rgba(255,170,0,.9)">2029 PROJECTION:</strong> ' +
+      var totalGrowth = nowTotal > 0 ? (projTotal / nowTotal).toFixed(1) : "—";
+      kf.innerHTML = '⚡ <strong style="color:rgba(255,170,0,.9)">2029 PROJECTION (power-constrained):</strong> ' +
         '<strong style="color:' + CFG.colors[projLeader] + '">' + projLeader + '</strong> is projected to lead by Jan 2029 with <strong>' + Data.formatH100(projMax) + ' ' + unit + '</strong>. ' +
-        'Total industry compute grows <strong>~' + totalGrowth + '×</strong> from today\'s ' + Data.formatH100(nowTotal) + ' to ' + Data.formatH100(projTotal) + '. ' +
-        '<span style="color:var(--t3)">Growth rates vary: xAI (5×/yr, most aggressive) vs Gemini (4×/yr, efficiency-led). Uncertainty widens ±25-40% by 2029.</span>';
+        'Total industry compute grows <strong>~' + totalGrowth + '×</strong> from ' + Data.formatH100(nowTotal) + ' to ' + Data.formatH100(projTotal) + '. ' +
+        '<span style="color:var(--t3)">Targets derived from Epoch satellite ramps (Layer 1) + sourced cloud-lease fleet growth (Layer 2). No speculative facilities. Power is the binding constraint. ±20% uncertainty.</span>';
     }
   }
 
@@ -3712,7 +3759,7 @@ var Export = (function() {
       projection: state.projMode,
       metric: state.metric,
       labs: CFG.labs,
-      growthAssumptions: state.projMode === "2029" ? CFG.projGrowth : null,
+      growthAssumptions: state.projMode === "2029" ? CFG.proj2029Targets : null,
       timeSeries: series,
       projectionBands: proj ? { low: proj.low, high: proj.high } : null
     }, "ai-arms-race-timeseries-" + CFG.today + ".json");
