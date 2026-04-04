@@ -335,6 +335,11 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5">Projections use per-lab compound growth rates derived from announced capex, facility pipelines, and chip roadmaps. Uncertainty bands widen ±15% base + 10%/year. Power growth lags compute due to chip efficiency improvements (~30% per generation). <strong style="color:rgba(255,170,0,.7)">These are extrapolations, not forecasts.</strong></div>
 </div>
 </div>
+<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+<button class="P" onclick="Export.exportRaceCSV()">📊 EXPORT CSV</button>
+<button class="P" onclick="Export.exportRaceJSON()">📋 EXPORT JSON</button>
+<button class="P" onclick="UI.exportRaceChartPNG()">📸 CHART PNG</button>
+</div>
 <div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · 2029 Projection = per-lab compound growth extrapolation (compute 4-5×/yr, power ~2×/yr) with ±15%+10%/yr uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
@@ -361,6 +366,9 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="T" id="tFc"><button class="on" onclick="App.setStatus('ALL')">ALL</button><button onclick="App.setStatus('OP')">LIVE</button><button onclick="App.setStatus('BLD')">BUILDING</button><button onclick="App.setStatus('PLN')">PLANNED</button></div>
 </div>
 <div class="dt-wrap"><table class="dt-tbl"><thead id="dtHead"></thead><tbody id="dtBody"></tbody></table></div>
+<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+<button class="P" onclick="Export.exportIntelCSV()">📊 EXPORT INTEL CSV</button>
+</div>
 <div class="fn" style="margin-top:8px">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (H100e, power, cost, timelines) · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a> · Satellite preview: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI World Imagery</a> · Confidence scores derived from construction phase, power ramp, and observation count · ±6mo/±1.4×</div>
 </section>
 <div class="drawer-overlay" id="drOverlay" onclick="App.closeDrawer()"></div>
@@ -393,6 +401,11 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="fn" style="margin-top:8px">DATA: <a href="https://metr.org/time-horizons/" target="_blank">METR Time Horizons TH1.1</a> (updated Mar 3, 2026) · Raw data: <a href="https://metr.org/assets/benchmark_results_1_1.yaml" target="_blank">benchmark_results_1_1.yaml</a> · Analysis: <a href="https://github.com/METR/eval-analysis-public" target="_blank">GitHub</a> · Tasks drawn from <a href="https://metr.org/blog/2024-11-22-evaluating-r-d-capabilities-of-llms/" target="_blank">RE-Bench</a>, <a href="https://arxiv.org/html/2503.17354v1" target="_blank">HCAST</a>, and SWAA · Paper: <a href="https://arxiv.org/abs/2503.14499" target="_blank">arXiv:2503.14499</a> · Doubling time ~4 months · Linear scale (hours)</div>
 </div>
 
+<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+<button class="P" onclick="Export.exportModelsCSV()">📊 BENCHMARKS CSV</button>
+<button class="P" onclick="UI.exportScatterPNG()">📸 SCATTER PNG</button>
+<button class="P" onclick="UI.exportMetrPNG()">📸 METR PNG</button>
+</div>
 <div class="fn" style="margin-top:8px">DATA: <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank">Artificial Analysis v4.0</a> (Intelligence Index, speed, pricing) · <a href="https://gpqa-diamond.github.io" target="_blank">GPQA Diamond</a> · <a href="https://www.swebench.com" target="_blank">SWE-bench Verified</a> (Princeton NLP) · <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a> (ARC Prize Foundation) · <a href="https://artofproblemsolving.com/wiki/index.php/AIME" target="_blank">AIME 2025</a> (AMC/MAA) · <a href="https://mmmu-benchmark.github.io" target="_blank">MMMU-Pro</a> · <a href="https://last-exam.ai" target="_blank">HLE</a> (CAIS) · <a href="https://osworld.github.io" target="_blank">OSWorld</a> · <a href="https://openai.com/index/browsecomp" target="_blank">BrowseComp</a> · Scores are a snapshot — update per new model release</div>
 </section>
 <div style="padding:16px 28px 40px"><div class="fn">AI Arms Race · Data: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live fetch + cached fallback) · Satellite: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI</a> · ±6mo/±1.4× · Benchmarks: <a href="https://artificialanalysis.ai" target="_blank">Artificial Analysis</a>, <a href="https://www.swebench.com" target="_blank">SWE-bench</a>, <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a>, <a href="https://last-exam.ai" target="_blank">HLE</a>, <a href="https://osworld.github.io" target="_blank">OSWorld</a> + provider system cards (snapshot — update per release)</div></div>
@@ -401,6 +414,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Compute vs Performance scatter</strong> — New Chart.js scatter plot in MODELS section: H100e (X) vs AA Intelligence Index (Y), bubble-sized by power (GW), colored by lab. OLS trend line with R². Toggle between Observed (Apr 2026) and Projected (Jan 2029). Dynamic key finding with efficiency ranking. Tooltip shows model name, benchmark wins, capability/GW.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>URL hash state for deep linking</strong> — All view state (metric, scope, allocation, projections, scatter view, lab filter) serialized to URL hash. Share exact views via URLs like <span style="font-family:var(--m)">#models?scope=fleet&proj=2029</span>. Browser back/forward supported. 📋 SHARE VIEW button copies current URL to clipboard.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Growth Velocity view</strong> — New ABSOLUTE/VELOCITY toggle on the Race chart. Velocity mode computes trailing 12-month annualized growth rates per lab, showing ×/year instead of absolute H100e/MW. Reference lines at 1× (no growth) and 4×/yr. Dynamic key finding shows fastest-growing lab. Solves the chart compression problem when 2029 projections are active. URL hash support: <span style="font-family:var(--m)">velocity=velocity</span>.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Data Export</strong> — Export buttons on Race (CSV/JSON/PNG), Intel (CSV), and Models (Benchmarks CSV, Scatter PNG, METR PNG) sections. CSV includes all synthetic cloud-lease adjustments and current view state. JSON exports include projection bands and growth assumptions. Chart PNGs via Chart.js toBase64Image(). Export module: <span style="font-family:var(--m)">Export.exportRaceCSV()</span> etc.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>P2 improvements</strong> — Who's Winning mini scope toggle (SAT-VERIFIED ↔ +CLOUD-LEASE). Enhanced data banner with CSV version hash + fetch timestamp. 2029 projections in leaderboard rows (⚡ per-lab growth ×). Analyst cross-checks (SemiAnalysis + Artificial Analysis H100e). Interactive model selection with head-to-head wins, derived metrics, and column highlighting.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>2029 Projections engine</strong> — New "2029 PROJECTION ⚡" toggle on the Race chart. Per-lab compound growth extrapolation (4-5× compute/yr, ~2× power/yr) with widening uncertainty bands. Side-by-side Apr 2026 vs Jan 2029 comparison panel with growth assumptions per lab. Dynamic key finding updates with projected leader and total industry growth multiplier.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
@@ -3520,7 +3534,144 @@ var UI = (function() {
     clearModelSelection: clearModelSelection,
     tableSortCol: function() { return tableSortCol; },
     tableSortDir: function() { return tableSortDir; },
-    setTableSort: function(col, dir) { tableSortCol = col; tableSortDir = dir; }
+    setTableSort: function(col, dir) { tableSortCol = col; tableSortDir = dir; },
+    exportRaceChartPNG: function() { Export.downloadChartPNG(chartInstance, "ai-arms-race-chart-" + CFG.today + ".png"); },
+    exportScatterPNG: function() { Export.downloadChartPNG(scatterChartInstance, "ai-arms-race-scatter-" + CFG.today + ".png"); },
+    exportMetrPNG: function() { Export.downloadChartPNG(metrChartInstance, "ai-arms-race-metr-" + CFG.today + ".png"); }
+  };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// 4b. EXPORT — download helpers for CSV, JSON, and chart PNG
+// ═══════════════════════════════════════════════════════════════
+var Export = (function() {
+
+  function triggerDownload(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename; a.style.display = "none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  function toCSV(rows, columns) {
+    if (!rows.length) return "";
+    var cols = columns || Object.keys(rows[0]);
+    var lines = [cols.join(",")];
+    rows.forEach(function(r) {
+      lines.push(cols.map(function(c) {
+        var v = r[c];
+        if (v === null || v === undefined) return "";
+        if (typeof v === "string" && (v.indexOf(",") >= 0 || v.indexOf('"') >= 0)) return '"' + v.replace(/"/g, '""') + '"';
+        return v;
+      }).join(","));
+    });
+    return lines.join("\n");
+  }
+
+  function downloadCSV(rows, filename, columns) {
+    var csv = toCSV(rows, columns);
+    triggerDownload(new Blob([csv], { type: "text/csv" }), filename);
+  }
+
+  function downloadJSON(data, filename) {
+    var json = JSON.stringify(data, null, 2);
+    triggerDownload(new Blob([json], { type: "application/json" }), filename);
+  }
+
+  function downloadChartPNG(chartInstance, filename) {
+    if (!chartInstance) return;
+    var url = chartInstance.toBase64Image("image/png", 1);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename; a.style.display = "none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { document.body.removeChild(a); }, 100);
+  }
+
+  // ── Section-specific export builders ──
+
+  function exportRaceCSV() {
+    var state = Store.get();
+    var series = state.projMode === "2029" ? Store.activeSeriesWithProj() : Store.activeSeries();
+    var rows = series.map(function(pt) {
+      var row = { date: pt.date };
+      CFG.labs.forEach(function(lab) {
+        row[lab + "_H100e"] = pt[lab] || 0;
+        row[lab + "_MW"] = pt[lab + "_pw"] || 0;
+      });
+      row.total_H100e = pt.tH || 0;
+      row.total_MW = pt.tP || 0;
+      row.scope = state.scope;
+      row.allocation = state.allocView;
+      return row;
+    });
+    var cols = ["date"].concat(
+      CFG.labs.reduce(function(a, l) { return a.concat([l + "_H100e", l + "_MW"]); }, []),
+      ["total_H100e", "total_MW", "scope", "allocation"]
+    );
+    downloadCSV(rows, "ai-arms-race-timeseries-" + CFG.today + ".csv", cols);
+  }
+
+  function exportRaceJSON() {
+    var state = Store.get();
+    var series = state.projMode === "2029" ? Store.activeSeriesWithProj() : Store.activeSeries();
+    var proj = state.projMode === "2029" ? Store.activeProj() : null;
+    downloadJSON({
+      exported: new Date().toISOString(),
+      scope: state.scope,
+      allocation: state.allocView,
+      projection: state.projMode,
+      metric: state.metric,
+      labs: CFG.labs,
+      growthAssumptions: state.projMode === "2029" ? CFG.projGrowth : null,
+      timeSeries: series,
+      projectionBands: proj ? { low: proj.low, high: proj.high } : null
+    }, "ai-arms-race-timeseries-" + CFG.today + ".json");
+  }
+
+  function exportIntelCSV() {
+    var data = Store.getData();
+    var rows = data.dataCenters.filter(function(dc) { return dc.co !== "Other"; }).map(function(dc) {
+      var tl = data.timeline.filter(function(t) { return t.dc === dc.handle; });
+      var cf = Data.scoreConfidence(dc, tl, CFG.today, CFG.colors);
+      return {
+        facility: dc.title,
+        handle: dc.handle,
+        lab: dc.co,
+        confidence_pct: cf.score,
+        status: cf.label,
+        current_H100e: dc.h,
+        current_MW: dc.pw,
+        cost_USD_B: dc.cs,
+        phase: cf.phaseLabel
+      };
+    });
+    downloadCSV(rows, "ai-arms-race-intel-" + CFG.today + ".csv");
+  }
+
+  function exportModelsCSV() {
+    var benchKeys = Object.keys(CFG.benchmarks);
+    var rows = CFG.models.map(function(m) {
+      var row = { model: m.name, lab: m.lab, released: m.released };
+      benchKeys.forEach(function(bk) { row[bk] = m[bk] !== null && m[bk] !== undefined ? m[bk] : ""; });
+      row.speed_tps = m.speed || "";
+      row.cost_in = m.costIn || "";
+      row.cost_out = m.costOut || "";
+      row.context_K = m.context || "";
+      return row;
+    });
+    downloadCSV(rows, "ai-arms-race-models-" + CFG.today + ".csv");
+  }
+
+  return {
+    downloadCSV: downloadCSV,
+    downloadJSON: downloadJSON,
+    downloadChartPNG: downloadChartPNG,
+    exportRaceCSV: exportRaceCSV,
+    exportRaceJSON: exportRaceJSON,
+    exportIntelCSV: exportIntelCSV,
+    exportModelsCSV: exportModelsCSV
   };
 })();
 
