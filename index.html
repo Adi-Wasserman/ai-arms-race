@@ -80,6 +80,17 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 .kf{margin:0 0 18px;padding:12px 16px;border-left:3px solid rgba(255,255,255,.15);background:rgba(255,255,255,.02);border-radius:0 8px 8px 0;font-size:13px;line-height:1.55;color:rgba(255,255,255,.65);letter-spacing:.2px}
 .kf strong{color:rgba(255,255,255,.9);font-weight:600}
 .stale-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.8px;font-family:var(--m);border:1px solid}
+#dataBanner{display:flex;align-items:center;justify-content:space-between;padding:6px 28px;background:rgba(0,255,135,.04);border-bottom:1px solid rgba(0,255,135,.1);font-size:11px;color:var(--t2);margin-top:48px;flex-wrap:wrap;gap:6px}
+#dataBanner .db-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#dataBanner .db-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+#dataBanner .db-refresh{padding:3px 10px;font-size:10px;letter-spacing:.8px;font-weight:600;border:1px solid rgba(0,255,135,.2);border-radius:4px;background:rgba(0,255,135,.06);color:rgba(0,255,135,.8);cursor:pointer;font-family:var(--m)}
+#dataBanner .db-refresh:hover{background:rgba(0,255,135,.12);color:#00ff87}
+.cl-section{padding:20px 28px 40px;border-top:1px solid var(--bd)}
+.cl-section h3{font-size:12px;letter-spacing:2px;color:var(--t3);font-weight:700;margin-bottom:12px}
+.cl-entry{padding:6px 0;font-size:11px;color:var(--t2);line-height:1.5;border-bottom:1px solid rgba(255,255,255,.03)}
+.cl-entry .cl-date{font-family:var(--m);color:var(--t3);font-size:10px;margin-right:8px}
+.cl-entry strong{color:rgba(255,255,255,.8)}
+.lb-disclaimer{font-size:9px;color:rgba(255,170,0,.6);letter-spacing:.3px;padding:6px 0 0;line-height:1.4;border-top:1px solid var(--bd);margin-top:6px}
 .meth{margin:0 0 14px;padding:10px 14px;background:rgba(255,170,0,.04);border:1px solid rgba(255,170,0,.12);border-radius:8px;font-size:11px;line-height:1.6;color:rgba(255,255,255,.55);display:none}
 .meth.show{display:block}
 .meth strong{color:rgba(255,255,255,.8)}
@@ -142,6 +153,9 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 
 /* ─── Mobile: Tablet ─────────────────────────────────────── */
 @media(max-width:768px){
+  /* Data banner */
+  #dataBanner{padding:6px 16px;font-size:10px}
+
   /* Nav: scrollable, tighter */
   nav{padding:0 16px;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
   nav a{white-space:nowrap;font-size:10px;padding:12px 0}
@@ -191,6 +205,9 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 
 /* ─── Mobile: Phone ──────────────────────────────────────── */
 @media(max-width:480px){
+  #dataBanner{padding:5px 12px;font-size:9px}
+  #dataBanner .db-refresh{font-size:9px;padding:2px 8px}
+
   nav{padding:0 12px;gap:12px;height:44px}
   nav a{font-size:9px;letter-spacing:1px}
   .nb{font-size:11px}
@@ -235,8 +252,17 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 </head>
 <body>
 <nav><span class="nb">AI ARMS RACE</span><a href="#race" class="on">THE RACE</a><a href="#geomap">GEO MAP</a><a href="#sites">INTEL</a><a href="#models">MODELS</a></nav>
+<div id="dataBanner">
+<div class="db-left">
+<span class="db-dot" id="dbDot" style="background:#ffaa00"></span>
+<span id="dbStatus">Loading Epoch data…</span>
+<span style="color:var(--t4)">·</span>
+<span id="dbMeta" style="font-family:var(--m);font-size:10px;color:var(--t3)">Cloud-lease adj: Mar 2026 snapshot</span>
+</div>
+<button class="db-refresh" onclick="App.refresh()">↻ REFRESH DATA</button>
+</div>
 
-<section class="S" id="race">
+<section class="S" id="race" style="padding-top:28px">
 <span class="st">THE AI ARMS RACE</span>
 <span class="ss">WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT ERA (2023–)</span>
 <div class="kf" id="kfRace">Five labs are racing to build the largest AI data centers in history. The lead has changed hands multiple times since 2023 — and the gap between first and second place is narrowing. This chart tracks <strong>satellite-verified compute capacity</strong> across every major facility.</div>
@@ -325,6 +351,15 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="fn" style="margin-top:8px">DATA: <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank">Artificial Analysis v4.0</a> (Intelligence Index, speed, pricing) · <a href="https://gpqa-diamond.github.io" target="_blank">GPQA Diamond</a> · <a href="https://www.swebench.com" target="_blank">SWE-bench Verified</a> (Princeton NLP) · <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a> (ARC Prize Foundation) · <a href="https://artofproblemsolving.com/wiki/index.php/AIME" target="_blank">AIME 2025</a> (AMC/MAA) · <a href="https://mmmu-benchmark.github.io" target="_blank">MMMU-Pro</a> · <a href="https://last-exam.ai" target="_blank">HLE</a> (CAIS) · <a href="https://osworld.github.io" target="_blank">OSWorld</a> · <a href="https://openai.com/index/browsecomp" target="_blank">BrowseComp</a> · Scores are a snapshot — update per new model release</div>
 </section>
 <div style="padding:16px 28px 40px"><div class="fn">AI Arms Race · Data: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live fetch + cached fallback) · Satellite: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI</a> · ±6mo/±1.4× · Benchmarks: <a href="https://artificialanalysis.ai" target="_blank">Artificial Analysis</a>, <a href="https://www.swebench.com" target="_blank">SWE-bench</a>, <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a>, <a href="https://last-exam.ai" target="_blank">HLE</a>, <a href="https://osworld.github.io" target="_blank">OSWorld</a> + provider system cards (snapshot — update per release)</div></div>
+<div class="cl-section">
+<h3>CHANGELOG</h3>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Data freshness banner</strong> — Live status bar with ↻ Refresh button. Shows Epoch CSV load time, facility count, and timeline events. Leaderboard disclaimers when cloud-lease view active.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Methodology transparency</strong> — Expandable panel explaining satellite tracking bias, H100e conversion ratios, and allocation tier assumptions. Epoch confidence tags (CONFIDENT/LIKELY/SPECULATIVE) surfaced in Intel table.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Vercel proxy</strong> — Deployed server-side proxy for full ● LIVE mode (bypasses Cloudflare JS challenge). Both CSVs now load in ~0.2s via ai-arms-race.vercel.app.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Narrative layer</strong> — Key finding callouts on every section. Dynamic Race callout updates with live leader, gap %, and lead change count. Staleness badges on Models and METR sections.</div>
+<div class="cl-entry"><span class="cl-date">2026-03-15</span> <strong>Initial release</strong> — 5-section dashboard: Race chart, Geo Map, Intel table, Models/Benchmarks, METR Time Horizons. Epoch AI live CSV + cached fallback. Single-file HTML, GitHub Pages.</div>
+</div>
 <div id="tt"></div>
 
 <script>
@@ -1509,7 +1544,8 @@ var UI = (function() {
     }).join("") +
     '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;font-size:10px;font-weight:600">' +
       '<span style="color:var(--t3)">TOTAL</span>' +
-      '<span style="font-family:var(--m);color:var(--t2)">' + Data.formatH100(totalH) + ' · ' + Data.formatPower(totalP) + '</span></div>';
+      '<span style="font-family:var(--m);color:var(--t2)">' + Data.formatH100(totalH) + ' · ' + Data.formatPower(totalP) + '</span></div>' +
+    (state.scope === "fleet" ? '<div class="lb-disclaimer">⚠ Includes cloud-lease estimates for Anthropic (AWS + GCP + Azure) and Gemini (TPU fleet). <a href="#" onclick="var m=document.getElementById(\'methPanel\');m.classList.add(\'show\');m.scrollIntoView({behavior:\'smooth\'});return false" style="color:rgba(255,170,0,.8)">See methodology</a></div>' : '');
   }
 
   // ─── Chart tooltip ──────────────────────────────────────────
@@ -2726,6 +2762,12 @@ var App = (function() {
       console.log("[Epoch] ✅ " + mode + " data loaded in " + elapsed + "s — " + liveDCs.length + " DCs, " + liveEntries.length + " entries" + (hasLiveDCs ? "" : " (timelines only, DC metadata from cache)"));
       document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:' + color + ';font-size:10px;margin-left:4px"> ● ' + mode + '</span>';
 
+      // Update data banner
+      var dbDot = document.getElementById("dbDot");
+      var dbStatus = document.getElementById("dbStatus");
+      if (dbDot) dbDot.style.background = color;
+      if (dbStatus) dbStatus.innerHTML = '<strong style="color:#00ff87">● ' + mode + '</strong> — Epoch CSV pulled ' + CFG.today + ' · ' + liveDCs.length + ' facilities · ' + liveEntries.length + ' timeline events · loaded in ' + elapsed + 's';
+
       // Re-init map with updated data
       UI.initMap(Store.get(), Store.getData());
       document.getElementById("prev").innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px"><div style="font-size:28px;opacity:.15">🛰️</div><div style="font-size:11px;color:var(--t3);letter-spacing:1px">HOVER OR CLICK A SITE</div></div>';
@@ -2734,6 +2776,10 @@ var App = (function() {
       var elapsed = ((Date.now() - fetchStart) / 1000).toFixed(1);
       console.warn("[Epoch] ❌ Fetch failed after " + elapsed + "s: " + (err && err.message || err) + " — using cached data");
       document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:#ffaa00;font-size:10px;margin-left:4px"> ● CACHED</span>';
+      var dbDot = document.getElementById("dbDot");
+      var dbStatus = document.getElementById("dbStatus");
+      if (dbDot) dbDot.style.background = "#ffaa00";
+      if (dbStatus) dbStatus.innerHTML = '<strong style="color:#ffaa00">● CACHED</strong> — Live fetch failed, using built-in snapshot data';
     });
   }
 
@@ -2750,7 +2796,51 @@ var App = (function() {
     openDrawer: openDrawer,
     closeDrawer: closeDrawer,
     tableSort: tableSort,
-    toggleCard: toggleCard
+    toggleCard: toggleCard,
+    refresh: function() {
+      var btn = document.querySelector('.db-refresh');
+      if (btn) { btn.textContent = '↻ REFRESHING…'; btn.disabled = true; }
+      var dbStatus = document.getElementById("dbStatus");
+      if (dbStatus) dbStatus.innerHTML = 'Re-fetching Epoch data…';
+      // Re-run the entire fetch + parse + store cycle
+      var fetchStart = Date.now();
+      Data.fetchEpoch().then(function(raw) {
+        var parsed = Data.parseEpochData(raw.dcRows, raw.tlRows);
+        var elapsed = ((Date.now() - fetchStart) / 1000).toFixed(1);
+        var hasLiveDCs = parsed.dataCenters.length > 0;
+        var hasLiveEntries = parsed.entries.length > 0;
+        if (!hasLiveEntries) { if (dbStatus) dbStatus.innerHTML = '<strong style="color:#ffaa00">● No new data</strong> — Epoch CSV unchanged'; return; }
+        var liveEntries = parsed.entries;
+        var liveLabMap = hasLiveDCs ? parsed.labMap : {};
+        if (!hasLiveDCs) {
+          liveEntries.forEach(function(e) { if (e.dc && !liveLabMap[e.dc]) liveLabMap[e.dc] = Data.classifyByHandle(e.dc); });
+        }
+        liveLabMap.EGC = "Gemini"; liveLabMap.EAI = "Anthropic";
+        liveLabMap["EAI-AWS"] = "Anthropic"; liveLabMap["EAI-GCP"] = "Anthropic"; liveLabMap["EAI-AZR"] = "Anthropic";
+        var fallbackData = Data.buildFallbackData(CFG.rawTimeline, CFG.labMap);
+        var liveDCs = hasLiveDCs ? parsed.dataCenters : fallbackData.dataCenters;
+        var fleetEntries = Data.parseRawRows(CFG.fleetEstimates);
+        Store.setData({
+          labMap: liveLabMap, dataCenters: liveDCs, timeline: parsed.timeline.length > 0 ? parsed.timeline : fallbackData.timeline,
+          seriesEpoch: Data.buildTimeSeries(liveEntries, liveLabMap, CFG.labs),
+          seriesFull: Data.buildTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs),
+          seriesEpochLow: Data.buildAllocatedTimeSeries(liveEntries, liveLabMap, CFG.labs, CFG.allocations, "low"),
+          seriesEpochHigh: Data.buildAllocatedTimeSeries(liveEntries, liveLabMap, CFG.labs, CFG.allocations, "high"),
+          seriesFullLow: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs, CFG.allocations, "low"),
+          seriesFullHigh: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs, CFG.allocations, "high")
+        });
+        UI.initMap(Store.get(), Store.getData());
+        var mode = hasLiveDCs ? "LIVE" : "LIVE*";
+        document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:#00ff87;font-size:10px;margin-left:4px"> ● ' + mode + '</span>';
+        if (dbStatus) dbStatus.innerHTML = '<strong style="color:#00ff87">● REFRESHED</strong> — Epoch CSV pulled ' + CFG.today + ' · ' + liveDCs.length + ' facilities · loaded in ' + elapsed + 's';
+        document.getElementById("dbDot").style.background = "#00ff87";
+      }).catch(function(err) {
+        if (dbStatus) dbStatus.innerHTML = '<strong style="color:#ff4444">● REFRESH FAILED</strong> — ' + (err.message || err);
+        document.getElementById("dbDot").style.background = "#ff4444";
+      }).finally(function() {
+        if (btn) { btn.textContent = '↻ REFRESH DATA'; btn.disabled = false; }
+      });
+    }
   };
 })();
 
