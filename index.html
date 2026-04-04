@@ -304,6 +304,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="flex:1;min-width:0;position:relative;height:55vh;min-height:340px"><canvas id="ch"></canvas></div>
 <div style="width:260px;flex-shrink:0;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;padding:14px;max-height:55vh;overflow-y:auto">
 <div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:600">WHO'S WINNING</div>
+<div id="lbScope" style="margin:6px 0 4px"><div class="T" id="tSl" style="display:inline-flex"><button class="on" onclick="App.setScope('tracked')" style="font-size:8px;padding:3px 7px;letter-spacing:.5px">SAT-VERIFIED</button><button onclick="App.setScope('fleet')" style="font-size:8px;padding:3px 7px;letter-spacing:.5px">+ CLOUD-LEASE</button></div></div>
 <div id="lbd" style="font-size:11px;font-family:var(--m);color:var(--t2);margin:4px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--bd)"></div>
 <div id="lbr"></div>
 </div>
@@ -816,7 +817,17 @@ var CFG = Object.freeze({
   // Projection range: quarterly from latest data to Jan 2029
   projEnd: "2029-01-01",
   // Uncertainty band: ±factor around central projection (widens over time)
-  projUncertainty: { base: 0.15, perYear: 0.10 }
+  projUncertainty: { base: 0.15, perYear: 0.10 },
+
+  // Analyst cross-check estimates (H100e, as of Q1 2026)
+  // These provide independent validation against Epoch satellite data
+  analystEstimates: {
+    OpenAI:    { semi: 1800000, aa: 1700000, note: "Stargate + Azure (SemiAnalysis Q1 '26, AA Q1 '26)" },
+    Gemini:    { semi: 2100000, aa: null,     note: "Incl. TPUv5+ fleet est. (SemiAnalysis Q1 '26)" },
+    Meta:      { semi: 900000,  aa: 850000,   note: "Owned infra only (SemiAnalysis Q1 '26, AA Q1 '26)" },
+    xAI:       { semi: 600000,  aa: null,     note: "Colossus 1+2 (SemiAnalysis Q1 '26)" },
+    Anthropic: { semi: 1500000, aa: 1400000,  note: "3-cloud est. (SemiAnalysis Q1 '26, AA Q1 '26)" }
+  }
 });
 
 
@@ -1680,10 +1691,18 @@ var UI = (function() {
     }
     if (!pt) return;
 
+    // Get 2029 endpoint for projection annotations
+    var proj2029Pt = null;
+    if (is2029 && !dateSnap) {
+      var proj = Store.activeProj();
+      if (proj.central.length) proj2029Pt = proj.central[proj.central.length - 1];
+    }
+
     var isPast = !dateSnap || dateSnap <= CFG.today;
     document.getElementById("lbd").innerHTML =
       '<span style="color:' + (isPast ? "#00ff87" : "var(--t4)") + '">●</span> ' +
-      moment(dateSnap || CFG.today).format("MMM YYYY") + (isPast ? "" : " (proj)");
+      moment(dateSnap || CFG.today).format("MMM YYYY") + (isPast ? "" : " (proj)") +
+      (is2029 && !dateSnap ? ' <span style="font-size:9px;color:rgba(255,170,0,.6)">→ 2029</span>' : '');
 
     var rows = CFG.labs.map(function(c) {
       return { c: c, h: pt[c] || 0, p: pt[c + "_pw"] || 0 };
@@ -1705,17 +1724,44 @@ var UI = (function() {
       var rc = rank === 1 ? "rgba(255,215,0,.15)" : rank === 2 ? "rgba(192,192,192,.1)" : rank === 3 ? "rgba(205,127,50,.1)" : "rgba(255,255,255,.04)";
       var tc = rank === 1 ? "#ffd700" : rank === 2 ? "#c0c0c0" : rank === 3 ? "#cd7f32" : "var(--t3)";
       var barW = Math.round((state.metric === "power" ? r.p : r.h) / maxVal * 100);
+
+      // 2029 projection annotation
+      var projLine = "";
+      if (proj2029Pt) {
+        var pH = proj2029Pt[r.c] || 0;
+        var pP = proj2029Pt[r.c + "_pw"] || 0;
+        var nowVal = state.metric === "power" ? r.p : r.h;
+        var projVal = state.metric === "power" ? pP : pH;
+        var growth = nowVal > 0 ? Math.round(projVal / nowVal) : 0;
+        projLine = '<div style="font-size:8px;font-family:var(--m);color:rgba(255,170,0,.6);margin-top:2px">⚡ 2029: <b style="color:rgba(255,170,0,.8)">' + Data.formatH100(pH) + '</b> · ' + Data.formatPower(pP) + ' · <b>' + growth + '×</b></div>';
+      }
+
+      // Analyst cross-check
+      var analystLine = "";
+      var ae = CFG.analystEstimates[r.c];
+      if (ae && state.metric !== "power") {
+        var parts = [];
+        if (ae.semi) parts.push("SA: " + Data.formatH100(ae.semi));
+        if (ae.aa) parts.push("AA: " + Data.formatH100(ae.aa));
+        if (parts.length) {
+          analystLine = '<div style="font-size:8px;font-family:var(--m);color:rgba(255,255,255,.25);margin-top:1px" title="' + (ae.note || '') + '">⊕ ' + parts.join(" · ") + '</div>';
+        }
+      }
+
       return '<div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)">' +
         '<div style="width:20px;height:20px;border-radius:50%;background:' + rc + ';color:' + tc + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--m)">' + rank + '</div>' +
         '<div style="flex:1;min-width:0">' +
           '<div style="font-size:11px;font-weight:600;color:' + CFG.colors[r.c] + '">' + r.c + '</div>' +
           '<div style="font-size:9px;font-family:var(--m);color:var(--t2);margin-top:1px"><b style="color:#fff">' + Data.formatH100(r.h) + '</b> · <b style="color:#fff">' + Data.formatPower(r.p) + '</b></div>' +
+          projLine +
+          analystLine +
           '<div style="height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;width:' + barW + '%;background:' + CFG.colors[r.c] + ';border-radius:2px;transition:width .25s"></div></div>' +
         '</div></div>';
     }).join("") +
     '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;font-size:10px;font-weight:600">' +
       '<span style="color:var(--t3)">TOTAL</span>' +
       '<span style="font-family:var(--m);color:var(--t2)">' + Data.formatH100(totalH) + ' · ' + Data.formatPower(totalP) + '</span></div>' +
+    (proj2029Pt ? '<div style="margin-top:4px;display:flex;justify-content:space-between;font-size:9px;font-family:var(--m);color:rgba(255,170,0,.5)"><span>⚡ 2029 TOTAL</span><span>' + Data.formatH100(proj2029Pt.tH) + ' · ' + Data.formatPower(proj2029Pt.tP) + '</span></div>' : '') +
     (state.scope === "fleet" ? '<div class="lb-disclaimer">⚠ Includes cloud-lease estimates for Anthropic (AWS + GCP + Azure) and Gemini (TPU fleet). <a href="#" onclick="var m=document.getElementById(\'methPanel\');m.classList.add(\'show\');m.scrollIntoView({behavior:\'smooth\'});return false" style="color:rgba(255,170,0,.8)">See methodology</a></div>' : '');
   }
 
@@ -2392,6 +2438,21 @@ var UI = (function() {
   // MODELS SECTION — single unified benchmark table
   // ═══════════════════════════════════════════════════════════════
 
+  // ─── Interactive model comparison ────────────────────────────
+  var selectedModels = [];  // indices into CFG.models
+
+  function toggleModelSelection(idx) {
+    var pos = selectedModels.indexOf(idx);
+    if (pos >= 0) { selectedModels.splice(pos, 1); }
+    else if (selectedModels.length < 3) { selectedModels.push(idx); }
+    renderModels();
+  }
+
+  function clearModelSelection() {
+    selectedModels = [];
+    renderModels();
+  }
+
   function renderModels() {
     var el = document.getElementById("modelSection");
     if (!el) return;
@@ -2400,31 +2461,112 @@ var UI = (function() {
     var domains = CFG.domains;
     var bMeta = CFG.benchmarks;
 
-    // Helper: rank scores, return cell HTML
-    function scoreCell(value, allValues, lab) {
+    // ── Model selection chips ──
+    var html = '<div style="margin-bottom:14px">';
+    html += '<div style="font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:600;margin-bottom:8px">SELECT 2-3 MODELS FOR HEAD-TO-HEAD COMPARISON</div>';
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">';
+    models.forEach(function(m, idx) {
+      var c = CFG.colors[m.lab] || "#555";
+      var sel = selectedModels.indexOf(idx) >= 0;
+      html += '<button onclick="UI.toggleModelSelection(' + idx + ')" style="padding:6px 14px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:all .15s;' +
+        (sel ? 'background:' + c + '22;border:1.5px solid ' + c + ';color:' + c
+              : 'background:transparent;border:1.5px solid var(--bd);color:var(--t3)') + '">' + m.name + '</button>';
+    });
+    if (selectedModels.length > 0) {
+      html += '<button onclick="UI.clearModelSelection()" style="padding:4px 10px;font-size:9px;border:1px solid var(--bd);border-radius:4px;background:transparent;color:var(--t3);cursor:pointer;font-family:inherit">✕ CLEAR</button>';
+    }
+    html += '</div></div>';
+
+    // ── Head-to-head comparison panel ──
+    if (selectedModels.length >= 2) {
+      var selModels = selectedModels.map(function(i) { return models[i]; });
+
+      html += '<div style="margin-bottom:18px;padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.02)">';
+      html += '<div style="font-size:10px;letter-spacing:2px;color:var(--t3);font-weight:700;margin-bottom:12px">HEAD-TO-HEAD COMPARISON</div>';
+
+      // Win count summary
+      var winCount = {};
+      selModels.forEach(function(m) { winCount[m.name] = 0; });
+      var benchKeys = [];
+      domains.forEach(function(d) { d.benchmarks.forEach(function(bk) { benchKeys.push(bk); }); });
+      benchKeys.forEach(function(bk) {
+        var best = null, bestVal = -1;
+        selModels.forEach(function(m) {
+          if (m[bk] !== null && m[bk] !== undefined && m[bk] > bestVal) { bestVal = m[bk]; best = m.name; }
+        });
+        if (best) winCount[best]++;
+      });
+
+      html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">';
+      selModels.forEach(function(m) {
+        var c = CFG.colors[m.lab] || "#555";
+        var wins = winCount[m.name] || 0;
+        html += '<div style="flex:1;min-width:140px;padding:10px;border-radius:8px;background:' + c + '10;border:1px solid ' + c + '33;text-align:center">';
+        html += '<div style="font-size:13px;font-weight:700;color:' + c + '">' + m.name + '</div>';
+        html += '<div style="font-size:28px;font-weight:800;font-family:var(--m);color:#fff;margin:4px 0">' + wins + '</div>';
+        html += '<div style="font-size:9px;letter-spacing:1px;color:var(--t3)">BENCHMARK WINS</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+
+      // Derived efficiency metrics
+      html += '<div style="font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:600;margin:12px 0 8px">DERIVED METRICS</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
+
+      // Get current compute data for each lab
+      var series = Store.activeSeries();
+      var past = series.filter(function(x) { return x.date <= CFG.today; });
+      var current = past.length ? past[past.length - 1] : null;
+
+      selModels.forEach(function(m) {
+        var c = CFG.colors[m.lab] || "#555";
+        var labH = current ? (current[m.lab] || 0) : 0;
+        var labP = current ? (current[m.lab + "_pw"] || 0) : 0;
+        var aaIdx = m.aaIndex || 0;
+        var capPerMW = labP > 0 && aaIdx > 0 ? (aaIdx / labP * 1000).toFixed(1) : "—";
+        var capPerH100K = labH > 0 && aaIdx > 0 ? (aaIdx / (labH / 100000)).toFixed(1) : "—";
+
+        html += '<div style="padding:10px;border-radius:6px;border:1px solid var(--bd);background:rgba(255,255,255,.015)">';
+        html += '<div style="font-size:11px;font-weight:600;color:' + c + ';margin-bottom:6px">' + m.name + '</div>';
+        html += '<div style="font-size:10px;color:var(--t2);line-height:1.8;font-family:var(--m)">';
+        html += 'AA Index / GW: <b style="color:#fff">' + capPerMW + '</b><br>';
+        html += 'AA Index / 100K H100e: <b style="color:#fff">' + capPerH100K + '</b><br>';
+        html += 'Speed: <b style="color:#fff">' + (m.speed || "—") + '</b> t/s<br>';
+        html += 'Cost: <b style="color:#fff">$' + (m.costIn || "—") + '</b>/M in';
+        html += '</div></div>';
+      });
+      html += '</div></div>';
+    }
+
+    // Snapshot date
+    html += '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">All scores from independent evaluations or provider system cards · <span style="color:var(--t3)">Snapshot Mar 2026</span></div>';
+
+    // Helper: rank scores, return cell HTML (with optional highlight for selected models)
+    function scoreCell(value, allValues, lab, modelIdx) {
       var c = CFG.colors[lab] || "#fff";
-      if (value === null || value === undefined) return '<td class="mc"><span class="wm-cell na"><span class="wm-score" style="color:var(--t4)">—</span></span></td>';
+      var isSel = selectedModels.indexOf(modelIdx) >= 0;
+      var dimmed = selectedModels.length >= 2 && !isSel;
+      var hlStyle = dimmed ? "opacity:.35;" : isSel ? "background:rgba(255,255,255,.03);" : "";
+      if (value === null || value === undefined) return '<td class="mc" style="' + hlStyle + '"><span class="wm-cell na"><span class="wm-score" style="color:var(--t4)">—</span></span></td>';
       var valid = allValues.filter(function(v) { return v !== null && v !== undefined; });
       var sorted = valid.slice().sort(function(a, b) { return b - a; });
       var rank = sorted.indexOf(value) + 1;
       if (rank === 0) rank = 1;
       var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
       var badge = rank === 1 ? "1ST" : rank === 2 ? "2ND" : rank === 3 ? "3RD" : "#" + rank;
-      return '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + value + '</span><span class="wm-rank">' + badge + '</span></span></td>';
+      return '<td class="mc" style="' + hlStyle + '"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + value + '</span><span class="wm-rank">' + badge + '</span></span></td>';
     }
-
-    var html = '';
-
-    // Snapshot date
-    html += '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">All scores from independent evaluations or provider system cards · <span style="color:var(--t3)">Snapshot Mar 2026</span></div>';
 
     // Table start
     html += '<div class="wm"><table><thead><tr>';
     html += '<th style="text-align:left;min-width:220px">BENCHMARK</th>';
     html += '<th style="text-align:left;min-width:150px">SOURCE</th>';
-    models.forEach(function(m) {
+    models.forEach(function(m, mi) {
       var c = CFG.colors[m.lab] || "#555";
-      html += '<th><div style="color:' + c + ';font-size:12px;font-weight:700">' + m.name + '</div><div style="color:var(--t3);font-size:10px;font-weight:400;margin-top:2px">' + m.lab + '</div></th>';
+      var isSel = selectedModels.indexOf(mi) >= 0;
+      var dimmed = selectedModels.length >= 2 && !isSel;
+      var hlStyle = dimmed ? "opacity:.35;" : isSel ? "background:rgba(255,255,255,.04);" : "";
+      html += '<th style="' + hlStyle + '"><div style="color:' + c + ';font-size:12px;font-weight:700">' + m.name + '</div><div style="color:var(--t3);font-size:10px;font-weight:400;margin-top:2px">' + m.lab + '</div></th>';
     });
     html += '</tr></thead><tbody>';
 
@@ -2434,8 +2576,8 @@ var UI = (function() {
     html += '<td style="padding:16px"><div style="font-size:15px;font-weight:700;color:#fff">⭐ AA Intelligence Index</div>';
     html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">Composite of 10 evaluations across agents, coding, scientific reasoning, and general knowledge</div></td>';
     html += '<td style="vertical-align:top;padding-top:16px"><div style="font-size:12px;color:var(--t2);font-weight:600">Artificial Analysis</div><div style="font-size:11px;color:var(--t3)">Independent · v4.0</div></td>';
-    models.forEach(function(m) {
-      html += scoreCell(m.aaIndex, aaScores, m.lab);
+    models.forEach(function(m, mi) {
+      html += scoreCell(m.aaIndex, aaScores, m.lab, mi);
     });
     html += '</tr>';
 
@@ -2459,8 +2601,8 @@ var UI = (function() {
         var sourceParts = (meta.source || '').split('·');
         if (sourceParts.length > 1) html += '<div style="font-size:11px;color:var(--t3);margin-top:1px">' + sourceParts.slice(1).join('·').trim() + '</div>';
         html += '</td>';
-        models.forEach(function(m) {
-          html += scoreCell(m[bk], allScores, m.lab);
+        models.forEach(function(m, mi) {
+          html += scoreCell(m[bk], allScores, m.lab, mi);
         });
         html += '</tr>';
       });
@@ -2476,9 +2618,12 @@ var UI = (function() {
     html += '<td style="padding:14px 14px 14px 24px"><div style="font-size:14px;font-weight:600;color:#fff">Output Speed</div>';
     html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">Tokens per second via provider API</div></td>';
     html += '<td style="vertical-align:top;padding-top:14px"><div style="font-size:12px;color:var(--t2);font-weight:600">Artificial Analysis</div><div style="font-size:11px;color:var(--t3)">72hr rolling avg</div></td>';
-    models.forEach(function(m) {
+    models.forEach(function(m, mi) {
+      var isSel = selectedModels.indexOf(mi) >= 0;
+      var dimmed = selectedModels.length >= 2 && !isSel;
+      var hlStyle = dimmed ? "opacity:.35;" : isSel ? "background:rgba(255,255,255,.03);" : "";
       if (m.speed === null) {
-        html += '<td class="mc"><span class="wm-cell na"><span class="wm-score" style="color:var(--t4)">—</span></span></td>';
+        html += '<td class="mc" style="' + hlStyle + '"><span class="wm-cell na"><span class="wm-score" style="color:var(--t4)">—</span></span></td>';
       } else {
         var valid = speedScores.filter(function(v) { return v !== null; });
         var sorted = valid.slice().sort(function(a, b) { return b - a; });
@@ -2486,7 +2631,7 @@ var UI = (function() {
         var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
         var badge = rank === 1 ? "1ST" : rank === 2 ? "2ND" : rank === 3 ? "3RD" : "#" + rank;
         var c = CFG.colors[m.lab] || "#fff";
-        html += '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + m.speed + '</span><span class="wm-rank">' + badge + ' · t/s</span></span></td>';
+        html += '<td class="mc" style="' + hlStyle + '"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + m.speed + '</span><span class="wm-rank">' + badge + ' · t/s</span></span></td>';
       }
     });
     html += '</tr>';
@@ -2499,15 +2644,18 @@ var UI = (function() {
     var costScores = models.map(function(m) { return m.costIn; });
     var validCosts = costScores.filter(function(v) { return v !== null && v > 0; });
     var costSorted = validCosts.slice().sort(function(a, b) { return a - b; });
-    models.forEach(function(m) {
+    models.forEach(function(m, mi) {
       var c = CFG.colors[m.lab] || "#fff";
+      var isSel = selectedModels.indexOf(mi) >= 0;
+      var dimmed = selectedModels.length >= 2 && !isSel;
+      var hlStyle = dimmed ? "opacity:.35;" : isSel ? "background:rgba(255,255,255,.03);" : "";
       if (m.costIn === 0) {
-        html += '<td class="mc"><span class="wm-cell g"><span class="wm-score" style="color:#00ff87">Free</span><span class="wm-rank">Open</span></span></td>';
+        html += '<td class="mc" style="' + hlStyle + '"><span class="wm-cell g"><span class="wm-score" style="color:#00ff87">Free</span><span class="wm-rank">Open</span></span></td>';
       } else {
         var rank = costSorted.indexOf(m.costIn) + 1;
         var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
         var badge = rank === 1 ? "Cheapest" : rank === 2 ? "2nd" : rank === 3 ? "3rd" : "#" + rank;
-        html += '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">$' + m.costIn + '</span><span class="wm-rank">' + badge + '</span></span></td>';
+        html += '<td class="mc" style="' + hlStyle + '"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">$' + m.costIn + '</span><span class="wm-rank">' + badge + '</span></span></td>';
       }
     });
     html += '</tr>';
@@ -2518,14 +2666,17 @@ var UI = (function() {
     html += '<div style="font-size:12px;color:var(--t2);line-height:1.5;margin-top:4px">Maximum input tokens (K = thousands)</div></td>';
     html += '<td style="vertical-align:top;padding-top:14px"><div style="font-size:12px;color:var(--t2);font-weight:600">Provider docs</div><div style="font-size:11px;color:var(--t3)">Mar 2026</div></td>';
     var ctxScores = models.map(function(m) { return m.context; });
-    models.forEach(function(m) {
+    models.forEach(function(m, mi) {
       var c = CFG.colors[m.lab] || "#fff";
+      var isSel = selectedModels.indexOf(mi) >= 0;
+      var dimmed = selectedModels.length >= 2 && !isSel;
+      var hlStyle2 = dimmed ? "opacity:.35;" : isSel ? "background:rgba(255,255,255,.03);" : "";
       var valid = ctxScores.filter(function(v) { return v !== null; });
       var sorted = valid.slice().sort(function(a, b) { return b - a; });
       var rank = sorted.indexOf(m.context) + 1;
       var cls = rank === 1 ? "g" : rank === 2 ? "s" : rank === 3 ? "b" : "x";
       var badge = rank === 1 ? "Largest" : m.context + "K";
-      html += '<td class="mc"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + (m.context >= 1000 ? (m.context/1000) + 'M' : m.context + 'K') + '</span><span class="wm-rank">' + badge + '</span></span></td>';
+      html += '<td class="mc" style="' + hlStyle2 + '"><span class="wm-cell ' + cls + '"><span class="wm-score" style="color:' + c + '">' + (m.context >= 1000 ? (m.context/1000) + 'M' : m.context + 'K') + '</span><span class="wm-rank">' + badge + '</span></span></td>';
     });
     html += '</tr>';
 
@@ -2853,9 +3004,13 @@ var UI = (function() {
     document.querySelectorAll("#tM button").forEach(function(b, i) {
       b.className = (i === 0 && state.metric === "h100e") || (i === 1 && state.metric === "power") ? "on" : "";
     });
-    // Scope toggle
-    document.querySelectorAll("#tS button").forEach(function(b, i) {
-      b.className = (i === 0 && state.scope === "tracked") || (i === 1 && state.scope === "fleet") ? "on" : "";
+    // Scope toggle (main + leaderboard mini)
+    document.querySelectorAll("#tS button,#tSl button").forEach(function(b, i) {
+      var isMain = b.closest("#tS") !== null;
+      var idx = isMain ? i : i - document.querySelectorAll("#tS button").length;
+      // Each toggle group has 2 buttons: index 0=tracked, 1=fleet
+      var pos = Array.prototype.indexOf.call(b.parentNode.children, b);
+      b.className = (pos === 0 && state.scope === "tracked") || (pos === 1 && state.scope === "fleet") ? "on" : "";
     });
     // Allocation view toggle
     document.querySelectorAll("#tA button").forEach(function(b, i) {
@@ -2941,6 +3096,8 @@ var UI = (function() {
     renderModels: renderModels,
     renderMetr: renderMetr,
     renderProjPanel: renderProjPanel,
+    toggleModelSelection: toggleModelSelection,
+    clearModelSelection: clearModelSelection,
     tableSortCol: function() { return tableSortCol; },
     tableSortDir: function() { return tableSortDir; },
     setTableSort: function(col, dir) { tableSortCol = col; tableSortDir = dir; }
@@ -3111,14 +3268,18 @@ var App = (function() {
 
       var mode = hasLiveDCs ? "LIVE" : "LIVE*";
       var color = "#00ff87";
+      // CSV version: pseudo-hash from entry count + DC count + last date
+      var csvVersion = (liveDCs.length * 1000 + liveEntries.length).toString(16).toUpperCase().slice(0, 6);
+      var fetchTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       console.log("[Epoch] ✅ " + mode + " data loaded in " + elapsed + "s — " + liveDCs.length + " DCs, " + liveEntries.length + " entries" + (hasLiveDCs ? "" : " (timelines only, DC metadata from cache)"));
-      document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:' + color + ';font-size:10px;margin-left:4px"> ● ' + mode + '</span>';
+      document.getElementById("st5").innerHTML = '<span style="font-size:12px;font-weight:600">Epoch AI</span><span style="color:' + color + ';font-size:10px;margin-left:4px"> ● ' + mode + '</span>' +
+        '<div style="font-size:9px;color:var(--t3);margin-top:1px;font-family:var(--m)">' + fetchTime + ' · v' + csvVersion + '</div>';
 
       // Update data banner
       var dbDot = document.getElementById("dbDot");
       var dbStatus = document.getElementById("dbStatus");
       if (dbDot) dbDot.style.background = color;
-      if (dbStatus) dbStatus.innerHTML = '<strong style="color:#00ff87">● ' + mode + '</strong> — Epoch CSV pulled ' + CFG.today + ' · ' + liveDCs.length + ' facilities · ' + liveEntries.length + ' timeline events · loaded in ' + elapsed + 's';
+      if (dbStatus) dbStatus.innerHTML = '<strong style="color:#00ff87">● ' + mode + '</strong> — Epoch CSV pulled ' + CFG.today + ' at ' + fetchTime + ' · ' + liveDCs.length + ' facilities · ' + liveEntries.length + ' timeline events · loaded in ' + elapsed + 's · <span style="font-family:var(--m);color:var(--t3)">v' + csvVersion + '</span>';
 
       // Re-init map with updated data
       UI.initMap(Store.get(), Store.getData());
@@ -3184,8 +3345,11 @@ var App = (function() {
         });
         UI.initMap(Store.get(), Store.getData());
         var mode = hasLiveDCs ? "LIVE" : "LIVE*";
-        document.getElementById("st5").innerHTML = 'Epoch AI<span style="color:#00ff87;font-size:10px;margin-left:4px"> ● ' + mode + '</span>';
-        if (dbStatus) dbStatus.innerHTML = '<strong style="color:#00ff87">● REFRESHED</strong> — Epoch CSV pulled ' + CFG.today + ' · ' + liveDCs.length + ' facilities · loaded in ' + elapsed + 's';
+        var csvVersion = (liveDCs.length * 1000 + liveEntries.length).toString(16).toUpperCase().slice(0, 6);
+        var fetchTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        document.getElementById("st5").innerHTML = '<span style="font-size:12px;font-weight:600">Epoch AI</span><span style="color:#00ff87;font-size:10px;margin-left:4px"> ● ' + mode + '</span>' +
+          '<div style="font-size:9px;color:var(--t3);margin-top:1px;font-family:var(--m)">' + fetchTime + ' · v' + csvVersion + '</div>';
+        if (dbStatus) dbStatus.innerHTML = '<strong style="color:#00ff87">● REFRESHED</strong> — Epoch CSV pulled ' + CFG.today + ' at ' + fetchTime + ' · ' + liveDCs.length + ' facilities · loaded in ' + elapsed + 's · <span style="font-family:var(--m);color:var(--t3)">v' + csvVersion + '</span>';
         document.getElementById("dbDot").style.background = "#00ff87";
       }).catch(function(err) {
         if (dbStatus) dbStatus.innerHTML = '<strong style="color:#ff4444">● REFRESH FAILED</strong> — ' + (err.message || err);
