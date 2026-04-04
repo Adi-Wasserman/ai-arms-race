@@ -45,6 +45,8 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 .fn a:hover{color:#fff}
 .P{padding:3px 10px;font-size:10px;letter-spacing:1px;border:1px solid var(--bd);border-radius:4px;background:transparent;color:var(--t3);cursor:pointer;font-family:inherit;font-weight:600}
 .P.on{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18)}
+.P.exp{color:rgba(0,255,135,.6);border-color:rgba(0,255,135,.15);font-size:9px;letter-spacing:.5px}
+.P.exp:hover{color:rgba(0,255,135,.9);border-color:rgba(0,255,135,.3);background:rgba(0,255,135,.06)}
 #tt{position:fixed;pointer-events:none;background:rgba(8,8,28,.95);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 16px;min-width:260px;backdrop-filter:blur(12px);z-index:2000;opacity:0;transition:opacity .12s;font-size:12px}
 #map{height:55vh;min-height:400px;border-radius:10px;border:1px solid var(--bd)}
 #mapPanel{height:55vh;min-height:400px}
@@ -293,6 +295,10 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div class="T" id="tV"><button class="on" onclick="App.setVelocity('absolute')">ABSOLUTE</button><button onclick="App.setVelocity('velocity')">GROWTH VELOCITY 📈</button></div>
 <div id="leg" style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto"></div>
 <button class="meth-toggle" onclick="var m=document.getElementById('methPanel');m.classList.toggle('show');this.textContent=m.classList.contains('show')?'▾ HIDE METHODOLOGY':'▸ METHODOLOGY'">▸ METHODOLOGY</button>
+<span style="flex:1"></span>
+<button class="P exp" onclick="Export.exportRaceCSV()">📊 CSV</button>
+<button class="P exp" onclick="Export.exportRaceJSON()">📋 JSON</button>
+<button class="P exp" onclick="UI.exportRaceChartPNG()">📸 PNG</button>
 </div>
 <div id="methPanel" class="meth">
 <strong>WHY THIS DATA IS HARD</strong> — Satellite tracking inherently undercounts labs that distribute compute across existing cloud infrastructure. xAI Colossus, Meta Prometheus, and OpenAI Stargate are giant, visible campuses — easy to photograph and measure. But Anthropic runs a <em>three-cloud strategy</em> across AWS, Google Cloud, and Azure, and Google's Gemini TPU fleet is spread across dozens of existing data centers. From orbit, these look like regular cloud DCs. Epoch can only track facilities with visible new AI-specific construction, which means their dataset structurally favors concentrated builders and undercounts distributed ones. <strong>Anthropic is the most severely undercounted</strong> — Epoch's satellite data captures roughly one-third or less of Anthropic's actual compute footprint.<br><br>
@@ -335,11 +341,6 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5">Projections use per-lab compound growth rates derived from announced capex, facility pipelines, and chip roadmaps. Uncertainty bands widen ±15% base + 10%/year. Power growth lags compute due to chip efficiency improvements (~30% per generation). <strong style="color:rgba(255,170,0,.7)">These are extrapolations, not forecasts.</strong></div>
 </div>
 </div>
-<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
-<button class="P" onclick="Export.exportRaceCSV()">📊 EXPORT CSV</button>
-<button class="P" onclick="Export.exportRaceJSON()">📋 EXPORT JSON</button>
-<button class="P" onclick="UI.exportRaceChartPNG()">📸 CHART PNG</button>
-</div>
 <div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · 2029 Projection = per-lab compound growth extrapolation (compute 4-5×/yr, power ~2×/yr) with ±15%+10%/yr uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
@@ -364,11 +365,10 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="R" id="lf"></div>
 <div class="R">
 <div class="T" id="tFc"><button class="on" onclick="App.setStatus('ALL')">ALL</button><button onclick="App.setStatus('OP')">LIVE</button><button onclick="App.setStatus('BLD')">BUILDING</button><button onclick="App.setStatus('PLN')">PLANNED</button></div>
+<span style="flex:1"></span>
+<button class="P exp" onclick="Export.exportIntelCSV()">📊 EXPORT CSV</button>
 </div>
 <div class="dt-wrap"><table class="dt-tbl"><thead id="dtHead"></thead><tbody id="dtBody"></tbody></table></div>
-<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-<button class="P" onclick="Export.exportIntelCSV()">📊 EXPORT INTEL CSV</button>
-</div>
 <div class="fn" style="margin-top:8px">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (H100e, power, cost, timelines) · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a> · Satellite preview: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI World Imagery</a> · Confidence scores derived from construction phase, power ramp, and observation count · ±6mo/±1.4×</div>
 </section>
 <div class="drawer-overlay" id="drOverlay" onclick="App.closeDrawer()"></div>
@@ -385,6 +385,10 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="kf" id="kfScatter">The relationship between raw compute and model intelligence is <strong>not linear</strong>. Some labs extract far more capability per GPU than others — algorithmic efficiency, training data quality, and architecture choices matter as much as raw hardware.</div>
 <div class="R" style="margin-bottom:8px">
 <div class="T" id="tSc"><button class="on" onclick="App.setScatterView('observed')">OBSERVED · APR 2026</button><button onclick="App.setScatterView('projected')">PROJECTED · JAN 2029</button></div>
+<span style="flex:1"></span>
+<button class="P exp" onclick="Export.exportModelsCSV()">📊 BENCHMARKS</button>
+<button class="P exp" onclick="UI.exportScatterPNG()">📸 SCATTER</button>
+<button class="P exp" onclick="UI.exportMetrPNG()">📸 METR</button>
 </div>
 <div id="scatterWrap" style="position:relative;height:48vh;min-height:360px"><canvas id="scatterChart"></canvas></div>
 <div class="fn" style="margin-top:8px">X-axis: total H100-equivalent compute per lab (Epoch AI + cloud-lease adj.) · Y-axis: AA Intelligence Index v4.0 (composite of 10 evals) · Bubble size: power footprint (GW) · Trend line: OLS linear regression · Labs with no AA Index score (Meta, xAI) plotted at estimated positions based on analyst consensus. <strong>Correlation ≠ causation</strong> — algorithmic efficiency, data quality, and architecture drive outcomes as much as compute.</div>
@@ -401,11 +405,6 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="fn" style="margin-top:8px">DATA: <a href="https://metr.org/time-horizons/" target="_blank">METR Time Horizons TH1.1</a> (updated Mar 3, 2026) · Raw data: <a href="https://metr.org/assets/benchmark_results_1_1.yaml" target="_blank">benchmark_results_1_1.yaml</a> · Analysis: <a href="https://github.com/METR/eval-analysis-public" target="_blank">GitHub</a> · Tasks drawn from <a href="https://metr.org/blog/2024-11-22-evaluating-r-d-capabilities-of-llms/" target="_blank">RE-Bench</a>, <a href="https://arxiv.org/html/2503.17354v1" target="_blank">HCAST</a>, and SWAA · Paper: <a href="https://arxiv.org/abs/2503.14499" target="_blank">arXiv:2503.14499</a> · Doubling time ~4 months · Linear scale (hours)</div>
 </div>
 
-<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-<button class="P" onclick="Export.exportModelsCSV()">📊 BENCHMARKS CSV</button>
-<button class="P" onclick="UI.exportScatterPNG()">📸 SCATTER PNG</button>
-<button class="P" onclick="UI.exportMetrPNG()">📸 METR PNG</button>
-</div>
 <div class="fn" style="margin-top:8px">DATA: <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank">Artificial Analysis v4.0</a> (Intelligence Index, speed, pricing) · <a href="https://gpqa-diamond.github.io" target="_blank">GPQA Diamond</a> · <a href="https://www.swebench.com" target="_blank">SWE-bench Verified</a> (Princeton NLP) · <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a> (ARC Prize Foundation) · <a href="https://artofproblemsolving.com/wiki/index.php/AIME" target="_blank">AIME 2025</a> (AMC/MAA) · <a href="https://mmmu-benchmark.github.io" target="_blank">MMMU-Pro</a> · <a href="https://last-exam.ai" target="_blank">HLE</a> (CAIS) · <a href="https://osworld.github.io" target="_blank">OSWorld</a> · <a href="https://openai.com/index/browsecomp" target="_blank">BrowseComp</a> · Scores are a snapshot — update per new model release</div>
 </section>
 <div style="padding:16px 28px 40px"><div class="fn">AI Arms Race · Data: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live fetch + cached fallback) · Satellite: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI</a> · ±6mo/±1.4× · Benchmarks: <a href="https://artificialanalysis.ai" target="_blank">Artificial Analysis</a>, <a href="https://www.swebench.com" target="_blank">SWE-bench</a>, <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a>, <a href="https://last-exam.ai" target="_blank">HLE</a>, <a href="https://osworld.github.io" target="_blank">OSWorld</a> + provider system cards (snapshot — update per release)</div></div>
