@@ -3534,9 +3534,20 @@ var UI = (function() {
     tableSortCol: function() { return tableSortCol; },
     tableSortDir: function() { return tableSortDir; },
     setTableSort: function(col, dir) { tableSortCol = col; tableSortDir = dir; },
-    exportRaceChartPNG: function() { Export.downloadChartPNG(chartInstance, "ai-arms-race-chart-" + CFG.today + ".png"); },
-    exportScatterPNG: function() { Export.downloadChartPNG(scatterChartInstance, "ai-arms-race-scatter-" + CFG.today + ".png"); },
-    exportMetrPNG: function() { Export.downloadChartPNG(metrChartInstance, "ai-arms-race-metr-" + CFG.today + ".png"); }
+    exportRaceChartPNG: function() {
+      var s = Store.get();
+      var title = "AI ARMS RACE — " + (s.velocityMode === "velocity" ? "GROWTH VELOCITY" : (s.metric === "power" ? "POWER (MW)" : "COMPUTE (H100e)"));
+      if (s.scope === "fleet") title += " + CLOUD-LEASE";
+      if (s.projMode === "2029") title += " · 2029 PROJECTION";
+      Export.downloadChartPNG(chartInstance, "ai-arms-race-chart-" + CFG.today + ".png", title);
+    },
+    exportScatterPNG: function() {
+      var title = "COMPUTE vs PERFORMANCE — H100e vs AA Intelligence Index" + (Store.get().scatterView === "projected" ? " · 2029 PROJECTED" : " · APR 2026");
+      Export.downloadChartPNG(scatterChartInstance, "ai-arms-race-scatter-" + CFG.today + ".png", title);
+    },
+    exportMetrPNG: function() {
+      Export.downloadChartPNG(metrChartInstance, "ai-arms-race-metr-" + CFG.today + ".png", "METR TIME HORIZONS — AI Task Completion (50% Reliability)");
+    }
   };
 })();
 
@@ -3579,12 +3590,71 @@ var Export = (function() {
     triggerDownload(new Blob([json], { type: "application/json" }), filename);
   }
 
-  function downloadChartPNG(chartInstance, filename) {
+  function downloadChartPNG(chartInstance, filename, title) {
     if (!chartInstance) return;
-    var url = chartInstance.toBase64Image("image/png", 1);
+
+    // Get the chart canvas image at 2x resolution
+    var srcCanvas = chartInstance.canvas;
+    var w = srcCanvas.width;
+    var h = srcCanvas.height;
+
+    // Build legend info from datasets
+    var legendItems = [];
+    chartInstance.data.datasets.forEach(function(ds) {
+      if (!ds.label || ds.label.indexOf("high") >= 0 || ds.label.indexOf("proj-") >= 0 || ds.label.indexOf("Trend") >= 0) return;
+      var color = ds.borderColor;
+      if (Array.isArray(color)) color = color[0];
+      if (color && color !== "transparent") legendItems.push({ label: ds.label, color: color });
+    });
+
+    // Create composite canvas with title + legend + chart
+    var headerH = 60 + (legendItems.length > 0 ? 28 : 0);
+    var comp = document.createElement("canvas");
+    comp.width = w;
+    comp.height = h + headerH;
+    var ctx = comp.getContext("2d");
+
+    // Dark background
+    ctx.fillStyle = "#080820";
+    ctx.fillRect(0, 0, comp.width, comp.height);
+
+    // Title
+    var titleText = title || filename.replace(/-/g, " ").replace(".png", "").toUpperCase();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold " + Math.round(w * 0.016) + "px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(titleText, 20, 32);
+
+    // Subtitle with date
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.font = Math.round(w * 0.01) + "px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("AI Arms Race · " + CFG.today + " · adi-wasserman.github.io/ai-arms-race", 20, 50);
+
+    // Legend
+    if (legendItems.length > 0) {
+      var lx = 20;
+      var ly = 68;
+      legendItems.forEach(function(item) {
+        ctx.fillStyle = item.color;
+        ctx.beginPath();
+        ctx.arc(lx + 5, ly + 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.font = Math.round(w * 0.01) + "px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText(item.label, lx + 14, ly + 9);
+        lx += ctx.measureText(item.label).width + 30;
+      });
+    }
+
+    // Draw the chart
+    ctx.drawImage(srcCanvas, 0, headerH, w, h);
+
+    // Trigger download
     var a = document.createElement("a");
-    a.href = url; a.download = filename; a.style.display = "none";
-    document.body.appendChild(a); a.click();
+    a.href = comp.toDataURL("image/png", 1);
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
     setTimeout(function() { document.body.removeChild(a); }, 100);
   }
 
