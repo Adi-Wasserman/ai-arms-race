@@ -250,18 +250,23 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div class="R">
 <div class="T" id="tM"><button class="on" onclick="App.setMetric('h100e')">H100e</button><button onclick="App.setMetric('power')">POWER</button></div>
 <div class="sep"></div>
-<div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">SATELLITE-VERIFIED</button><button onclick="App.setScope('fleet')">+ FLEET EST. ⚠</button></div>
+<div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">SATELLITE-VERIFIED</button><button onclick="App.setScope('fleet')">+ CLOUD-LEASE ADJ. ⚠</button></div>
 <div class="sep"></div>
 <div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">TOTAL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED ⚠</button></div>
 <div id="leg" style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto"></div>
 <button class="meth-toggle" onclick="var m=document.getElementById('methPanel');m.classList.toggle('show');this.textContent=m.classList.contains('show')?'▾ HIDE METHODOLOGY':'▸ METHODOLOGY'">▸ METHODOLOGY</button>
 </div>
 <div id="methPanel" class="meth">
-<strong>WHY THIS DATA IS HARD</strong> — Satellite tracking inherently undercounts labs that distribute compute across existing cloud infrastructure, while accurately counting labs that build concentrated, purpose-built campuses. xAI Colossus, Meta Prometheus, and OpenAI Stargate are giant visible sites — easy to photograph, measure cooling towers, and estimate power. But Google's Gemini TPU fleet (v4-v7) is spread across dozens of existing Google Cloud data centers worldwide, and Anthropic trains on distributed AWS Trainium capacity across AWS regions. From orbit, these look like regular cloud DCs. Epoch can only track facilities with visible new AI-specific construction, which means their dataset structurally favors concentrated builders and undercounts distributed ones.<br><br>
-<strong>SATELLITE-VERIFIED</strong> — What Epoch AI can directly observe: ~15% of estimated global frontier compute across ~26 facilities. Every data point has a dated satellite observation, construction permit, or public disclosure behind it. This is the most reliable view, but it is <em>incomplete by design</em> — it shows only what's visible from space.<br><br>
-<strong>+ FLEET EST. ⚠</strong> — Our attempt to correct the satellite gap. Adds two synthetic entries: <em>EGC</em> (Estimated Gemini Compute) for Google's distributed TPU fleet, and <em>EAI</em> (Estimated Anthropic Infrastructure) for Anthropic's distributed AWS Trainium capacity. These are <em>not from Epoch</em> — they are educated estimates based on public capacity announcements, cloud region data, and chip order disclosures. No satellite verification exists. Without these, the chart overstates OpenAI and Meta's relative position by omitting the large but invisible distributed fleets. With them, the chart may overstate Gemini and Anthropic if our estimates are too high. The truth is somewhere in between.<br><br>
-<strong>TOTAL CAPACITY</strong> — Full compute at each facility as estimated by Epoch. For cloud provider DCs (Azure, AWS, Google Cloud), this includes <em>all</em> capacity at the facility — not just what's used for frontier AI training. A Microsoft Azure DC might be 40% OpenAI training and 60% Azure cloud customers, but this view shows 100%. Epoch flags their confidence in each facility's attribution: <span class="conf-tag ct-c">CONFIDENT</span> means verified via permits/announcements. <span class="conf-tag ct-l">LIKELY</span> means strong circumstantial evidence. <span class="conf-tag ct-s">SPECULATIVE</span> means inferred from patterns, not confirmed.<br><br>
-<strong>EST. DEDICATED ⚠</strong> — Our allocation model attempts to estimate what fraction of each facility is actually dedicated to frontier AI training for the attributed lab. Three tiers: <em>Tier 1</em> (85-100%) for purpose-built single-tenant sites like xAI Colossus, Meta facilities, Stargate, and Rainier. <em>Tier 2</em> (25-40%) for cloud partnerships where the lab is a priority customer — Azure→OpenAI, AWS→Anthropic. <em>Tier 3</em> (20-35%) for general hyperscaler DCs where the lab is one of many tenants — Google Cloud→Gemini. <em>These percentages are assumptions, not observed data.</em> Nobody outside these companies knows the real split, and it changes constantly as workloads shift. The shaded band on the chart shows the low-high range of our estimates.
+<strong>WHY THIS DATA IS HARD</strong> — Satellite tracking inherently undercounts labs that distribute compute across existing cloud infrastructure. xAI Colossus, Meta Prometheus, and OpenAI Stargate are giant, visible campuses — easy to photograph and measure. But Anthropic runs a <em>three-cloud strategy</em> across AWS, Google Cloud, and Azure, and Google's Gemini TPU fleet is spread across dozens of existing data centers. From orbit, these look like regular cloud DCs. Epoch can only track facilities with visible new AI-specific construction, which means their dataset structurally favors concentrated builders and undercounts distributed ones. <strong>Anthropic is the most severely undercounted</strong> — Epoch's satellite data captures roughly one-third or less of Anthropic's actual compute footprint.<br><br>
+<strong>SATELLITE-VERIFIED</strong> — What Epoch AI can directly observe: ~26 facilities with dated satellite observations, construction permits, and public disclosures. This is the most reliable view, but it is <em>incomplete by design</em> — it only shows what's visible from space.<br><br>
+<strong>+ CLOUD-LEASE ADJ. ⚠</strong> — Adds sourced cloud-lease capacity that satellites cannot see. Three Anthropic legs plus Google's internal TPU fleet:<br>
+&nbsp;&nbsp;• <strong>EAI-AWS</strong> — Project Rainier: ~500K Trainium2 chips live, scaling to &gt;1M (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">Source: Amazon, Oct 2025</a>). H100e conversion: Trn2 ≈ 0.93×H100.<br>
+&nbsp;&nbsp;• <strong>EAI-GCP</strong> — Up to 1M TPUs, "well over a gigawatt" in 2026 (<a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">Source: Anthropic, Oct 2025</a>). H100e conversion: blended ~1.4× (v6e + Ironwood mix).<br>
+&nbsp;&nbsp;• <strong>EAI-AZR</strong> — $30B Azure commitment, up to 1GW with NVIDIA Grace Blackwell + Vera Rubin (<a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Source: NVIDIA, Nov 2025</a>). H100e conversion: GB200 ≈ 2.5×H100.<br>
+&nbsp;&nbsp;• <strong>EGC</strong> — Google's internal TPU fleet for Gemini, not visible in Epoch's new-construction filter. Based on SemiAnalysis reporting ("millions of liquid-cooled TPUs, &gt;1GW") and Fubon supply-chain analysis (~3.1M TPU production in 2026). Only the estimated Gemini-dedicated fraction is included.<br>
+All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed capacity may lag announcements by 6-12 months.<br><br>
+<strong>TOTAL CAPACITY</strong> — Full compute at each facility as estimated by Epoch. For cloud provider DCs (Azure, AWS, Google Cloud), this includes <em>all</em> capacity — not just what's used for frontier AI training. Epoch flags confidence: <span class="conf-tag ct-c">CONFIDENT</span> <span class="conf-tag ct-l">LIKELY</span> <span class="conf-tag ct-s">SPECULATIVE</span><br><br>
+<strong>EST. DEDICATED ⚠</strong> — Allocation bands estimating what fraction is dedicated to frontier AI. Tier 1 (85-100%): purpose-built sites. Tier 2 (25-40%): cloud partnerships. Tier 3 (20-35%): general hyperscaler DCs. <em>These are assumptions, not observed data.</em> The shaded band shows the low-high range.
 </div>
 <div id="chartRow" style="display:flex;gap:16px;margin-bottom:12px">
 <div style="flex:1;min-width:0;position:relative;height:55vh;min-height:340px"><canvas id="ch"></canvas></div>
@@ -271,7 +276,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div id="lbr"></div>
 </div>
 </div>
-<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~15% of global compute) · + Fleet Est. = adds Gemini TPU + Anthropic AWS fleet estimates (not from Epoch) · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
+<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
 <section class="S" id="geomap">
@@ -373,7 +378,10 @@ var CFG = Object.freeze({
     "Coreweave Helios Afton Texas": "Other",
     "QTS Cedar Rapids Iowa": "Other",
     EGC: "Gemini",
-    EAI: "Anthropic"
+    EAI: "Anthropic",
+    "EAI-AWS": "Anthropic",
+    "EAI-GCP": "Anthropic",
+    "EAI-AZR": "Anthropic"
   },
 
   // Satellite coordinates [lat, lon]
@@ -472,15 +480,67 @@ var CFG = Object.freeze({
   ],
 
   // Fleet estimates: [date, handle, h100e, powerMW]
+  // These are cloud-lease adjustments that sit ON TOP of Epoch satellite data.
+  // They correct for the structural undercount of distributed/multi-cloud strategies.
+  //
+  // ── ANTHROPIC CLOUD-LEASE LEGS ──────────────────────────────────
+  //
+  // EAI-AWS: Project Rainier / AWS Trainium2
+  //   Source: https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster
+  //   ~500K Trn2 chips live (Oct 2025), scaling to >1M by end 2025.
+  //   H100e conversion: Trn2 ≈ 0.93 H100e (918 vs 989 BF16 TFLOPS). Conservative.
+  //   Power: ~300W/chip estimated from AWS disclosures.
+  //   NOTE: Epoch tracks New Carlisle + Canton + Ridgeland via satellite.
+  //   These entries add ONLY the distributed AWS capacity NOT in those tracked sites.
+  //
+  // EAI-GCP: Anthropic's Google Cloud TPU allocation
+  //   Source: https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services
+  //   Up to 1M TPUs, "well over a gigawatt" coming online in 2026.
+  //   H100e conversion: blended ~1.4 H100e/chip (mix of v6e at ~0.93x and Ironwood at ~2.3x).
+  //   Power: >1GW stated directly by Anthropic/Google.
+  //   NOTE: Entirely invisible to Epoch satellite tracking.
+  //
+  // EAI-AZR: Anthropic's Microsoft Azure / NVIDIA allocation
+  //   Source: https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/
+  //   $30B Azure commitment, up to 1GW with Grace Blackwell + Vera Rubin.
+  //   H100e conversion: GB200 ≈ 2.5 H100e, ~1.2KW/system. Conservative ramp assumed.
+  //   NOTE: Entirely invisible to Epoch satellite tracking.
+  //
+  // ── GOOGLE DEEPMIND / GEMINI TPU FLEET ──────────────────────────
+  //
+  // EGC: Estimated Gemini Compute (Google's internal TPU fleet)
+  //   Sources: SemiAnalysis "Multi-Datacenter Training" (Sep 2024) — "millions of liquid
+  //     cooled TPUs accounting for more than 1GW"; Fubon (Jan 2026) — 3.1-3.2M TPU
+  //     production in 2026; Google Cloud Ironwood blog (Nov 2025).
+  //   These estimate the fraction of Google's internal TPU fleet dedicated to Gemini
+  //   training/inference that is NOT visible in Epoch's tracked new-construction sites.
+  //   H100e conversion: blended ~1.2 H100e/chip (older v4/v5 fleet average).
+  //
   fleetEstimates: [
+    // ── EAI-AWS: Anthropic on AWS Trainium2 (distributed, not in Epoch tracked sites) ──
+    ["2025-10-01","EAI-AWS",465000,140],    // ~500K Trn2 × 0.93 H100e, minus Epoch-tracked sites
+    ["2026-01-01","EAI-AWS",700000,210],     // >1M chips announced scaling, partial ramp
+    ["2026-06-01","EAI-AWS",840000,252],     // continued ramp
+    ["2027-01-01","EAI-AWS",930000,279],     // near full 1M+ chip deployment
+
+    // ── EAI-GCP: Anthropic on Google Cloud TPUs (entirely invisible to Epoch) ──
+    ["2026-03-01","EAI-GCP",280000,200],     // early ramp, partial 1M TPU allocation
+    ["2026-06-01","EAI-GCP",560000,400],     // mid ramp, blended v6e + Ironwood
+    ["2026-09-01","EAI-GCP",840000,600],     // approaching full >1GW
+    ["2026-12-01","EAI-GCP",1120000,800],    // near full 1M TPUs × ~1.4 H100e/chip avg
+    ["2027-06-01","EAI-GCP",1400000,1000],   // full >1GW allocation
+
+    // ── EAI-AZR: Anthropic on Microsoft Azure / NVIDIA (entirely invisible to Epoch) ──
+    ["2026-06-01","EAI-AZR",200000,120],     // early GB200 ramp on Azure
+    ["2026-12-01","EAI-AZR",500000,300],     // scaling toward 1GW commitment
+    ["2027-06-01","EAI-AZR",1000000,600],    // approaching 1GW with GB200 + Vera Rubin
+    ["2027-12-01","EAI-AZR",1650000,1000],   // full ~1GW NVIDIA commitment
+
+    // ── EGC: Estimated Gemini Compute (Google's internal TPU fleet not in Epoch) ──
     ["2026-06-01","EGC",600000,265],
     ["2026-09-01","EGC",1500000,653],
     ["2026-12-01","EGC",2500000,1080],
-    ["2027-06-01","EGC",3070000,1330],
-    ["2026-07-01","EAI",466000,204],
-    ["2026-10-01","EAI",1165000,510],
-    ["2027-01-01","EAI",1864000,816],
-    ["2027-06-01","EAI",2330000,1020]
+    ["2027-06-01","EGC",3070000,1330]
   ],
 
   // Allocation confidence bands: what % of each facility is dedicated to the attributed lab
@@ -644,7 +704,10 @@ var CFG = Object.freeze({
     "Crusoe Goodnight Texas":                    { low: 0.80, high: 0.95, tier: 1, basis: "Contracted for Gemini training" },
     // Fleet estimates — dedicated by definition
     "EGC":                                       { low: 0.80, high: 0.95, tier: 1, basis: "Google/Gemini TPU fleet estimate" },
-    "EAI":                                       { low: 0.85, high: 0.95, tier: 1, basis: "Anthropic fleet estimate" }
+    "EAI":                                       { low: 0.85, high: 0.95, tier: 1, basis: "Anthropic fleet estimate" },
+    "EAI-AWS":                                   { low: 0.85, high: 0.95, tier: 1, basis: "Anthropic/AWS Trainium2 (Project Rainier distributed)" },
+    "EAI-GCP":                                   { low: 0.80, high: 0.95, tier: 1, basis: "Anthropic/Google Cloud TPU allocation (Oct 2025 deal)" },
+    "EAI-AZR":                                   { low: 0.80, high: 0.90, tier: 1, basis: "Anthropic/Azure NVIDIA (Nov 2025 deal)" }
   },
 
   // METR Time Horizons — 50% task-completion time horizon (TH1.1, last updated Mar 3 2026)
@@ -1102,6 +1165,9 @@ var Data = (function() {
     });
     labMap.EGC = "Gemini";
     labMap.EAI = "Anthropic";
+    labMap["EAI-AWS"] = "Anthropic";
+    labMap["EAI-GCP"] = "Anthropic";
+    labMap["EAI-AZR"] = "Anthropic";
 
     var dataCenters = dcRows.filter(function(r) { return col(r, DC_HANDLE); }).map(function(r) {
       var handle = col(r, DC_HANDLE);
@@ -2626,6 +2692,9 @@ var App = (function() {
         });
         liveLabMap.EGC = "Gemini";
         liveLabMap.EAI = "Anthropic";
+        liveLabMap["EAI-AWS"] = "Anthropic";
+        liveLabMap["EAI-GCP"] = "Anthropic";
+        liveLabMap["EAI-AZR"] = "Anthropic";
         console.log("[Epoch] Built labMap from " + Object.keys(liveLabMap).length + " timeline handles:", JSON.stringify(liveLabMap));
       }
       var liveDCs = hasLiveDCs ? parsed.dataCenters : fallback.dataCenters;
