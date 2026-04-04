@@ -3593,60 +3593,79 @@ var Export = (function() {
   function downloadChartPNG(chartInstance, filename, title) {
     if (!chartInstance) return;
 
-    // Get the chart canvas image at 2x resolution
     var srcCanvas = chartInstance.canvas;
-    var w = srcCanvas.width;
-    var h = srcCanvas.height;
+    var dpr = window.devicePixelRatio || 1;
+    // Work in CSS-pixel space for consistent sizing, then scale up
+    var cssW = srcCanvas.width / dpr;
+    var cssH = srcCanvas.height / dpr;
 
-    // Build legend info from datasets
+    // Fixed export dimensions (1600×900-ish, plus header)
+    var exportW = 1600;
+    var scale = exportW / cssW;
+    var exportChartH = Math.round(cssH * scale);
+
+    // Header layout (in export pixels)
+    var pad = 24;
+    var titleSize = 28;
+    var subSize = 14;
+    var legendSize = 14;
+    var headerH = pad + titleSize + 8 + subSize + 16 + legendSize + 16 + 2; // title + sub + legend + divider
+
+    // Build legend from datasets
     var legendItems = [];
     chartInstance.data.datasets.forEach(function(ds) {
-      if (!ds.label || ds.label.indexOf("high") >= 0 || ds.label.indexOf("proj-") >= 0 || ds.label.indexOf("Trend") >= 0) return;
+      if (!ds.label || ds.label.indexOf("high") >= 0 || ds.label.indexOf("proj-") >= 0 || ds.label === "Trend" || ds.label.indexOf("Trend (") >= 0) return;
       var color = ds.borderColor;
       if (Array.isArray(color)) color = color[0];
-      if (color && color !== "transparent") legendItems.push({ label: ds.label, color: color });
+      if (color && color !== "transparent" && color.indexOf("rgba(255,255,255") < 0) legendItems.push({ label: ds.label, color: color });
     });
 
-    // Create composite canvas with title + legend + chart
-    var headerH = 60 + (legendItems.length > 0 ? 28 : 0);
     var comp = document.createElement("canvas");
-    comp.width = w;
-    comp.height = h + headerH;
+    comp.width = exportW;
+    comp.height = exportChartH + headerH;
     var ctx = comp.getContext("2d");
 
-    // Dark background
+    // Background
     ctx.fillStyle = "#080820";
     ctx.fillRect(0, 0, comp.width, comp.height);
 
     // Title
-    var titleText = title || filename.replace(/-/g, " ").replace(".png", "").toUpperCase();
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold " + Math.round(w * 0.016) + "px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(titleText, 20, 32);
+    ctx.font = "bold " + titleSize + "px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillText(title || "AI Arms Race", pad, pad + titleSize);
 
-    // Subtitle with date
+    // Subtitle
     ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = Math.round(w * 0.01) + "px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText("AI Arms Race · " + CFG.today + " · adi-wasserman.github.io/ai-arms-race", 20, 50);
+    ctx.font = subSize + "px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillText("AI Arms Race · " + CFG.today + " · adi-wasserman.github.io/ai-arms-race", pad, pad + titleSize + 8 + subSize);
 
     // Legend
+    var ly = pad + titleSize + 8 + subSize + 16 + legendSize;
     if (legendItems.length > 0) {
-      var lx = 20;
-      var ly = 68;
+      var lx = pad;
       legendItems.forEach(function(item) {
         ctx.fillStyle = item.color;
         ctx.beginPath();
-        ctx.arc(lx + 5, ly + 5, 5, 0, Math.PI * 2);
+        ctx.arc(lx + 6, ly - 4, 6, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.font = Math.round(w * 0.01) + "px -apple-system, BlinkMacSystemFont, sans-serif";
-        ctx.fillText(item.label, lx + 14, ly + 9);
-        lx += ctx.measureText(item.label).width + 30;
+        ctx.font = "600 " + legendSize + "px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        ctx.fillText(item.label, lx + 16, ly);
+        lx += ctx.measureText(item.label).width + 36;
       });
     }
 
-    // Draw the chart
-    ctx.drawImage(srcCanvas, 0, headerH, w, h);
+    // Divider line
+    var divY = headerH - 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad, divY);
+    ctx.lineTo(exportW - pad, divY);
+    ctx.stroke();
+
+    // Draw chart scaled to export width
+    ctx.drawImage(srcCanvas, 0, headerH, exportW, exportChartH);
 
     // Trigger download
     var a = document.createElement("a");
