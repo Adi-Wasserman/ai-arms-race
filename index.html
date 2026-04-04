@@ -267,6 +267,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <span id="dbMeta" style="font-family:var(--m);font-size:10px;color:var(--t3)">Cloud-lease adj: Mar 2026 snapshot</span>
 </div>
 <button class="db-refresh" onclick="App.refresh()">↻ REFRESH DATA</button>
+<button class="db-refresh" onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=event.target;b.textContent='✓ COPIED';setTimeout(function(){b.textContent='📋 SHARE VIEW'},1200)}).catch(function(){})" style="margin-left:4px">📋 SHARE VIEW</button>
 </div>
 
 <section class="S" id="race" style="padding-top:28px">
@@ -396,6 +397,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="cl-section">
 <h3>CHANGELOG</h3>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Compute vs Performance scatter</strong> — New Chart.js scatter plot in MODELS section: H100e (X) vs AA Intelligence Index (Y), bubble-sized by power (GW), colored by lab. OLS trend line with R². Toggle between Observed (Apr 2026) and Projected (Jan 2029). Dynamic key finding with efficiency ranking. Tooltip shows model name, benchmark wins, capability/GW.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>URL hash state for deep linking</strong> — All view state (metric, scope, allocation, projections, scatter view, lab filter) serialized to URL hash. Share exact views via URLs like <span style="font-family:var(--m)">#models?scope=fleet&proj=2029</span>. Browser back/forward supported. 📋 SHARE VIEW button copies current URL to clipboard.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>P2 improvements</strong> — Who's Winning mini scope toggle (SAT-VERIFIED ↔ +CLOUD-LEASE). Enhanced data banner with CSV version hash + fetch timestamp. 2029 projections in leaderboard rows (⚡ per-lab growth ×). Analyst cross-checks (SemiAnalysis + Artificial Analysis H100e). Interactive model selection with head-to-head wins, derived metrics, and column highlighting.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>2029 Projections engine</strong> — New "2029 PROJECTION ⚡" toggle on the Race chart. Per-lab compound growth extrapolation (4-5× compute/yr, ~2× power/yr) with widening uncertainty bands. Side-by-side Apr 2026 vs Jan 2029 comparison panel with growth assumptions per lab. Dynamic key finding updates with projected leader and total industry growth multiplier.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
@@ -3411,6 +3413,78 @@ var App = (function() {
     openDrawer(handle);
   }
 
+  // --- URL Hash State (deep linking) ---
+  // Format: #section?key=val&key=val
+  // Only non-default values are serialized to keep URLs clean.
+  var DEFAULTS = {
+    metric: "h100e", scope: "tracked", allocView: "full",
+    projMode: "current", scatterView: "observed", labFilter: "ALL"
+  };
+  var VALID_SECTIONS = ["race", "geomap", "sites", "models"];
+  var _suppressHashPush = false;  // prevent re-entrant updates
+
+  function parseHash() {
+    var hash = window.location.hash.replace(/^#/, "");
+    if (!hash) return { section: null, state: {} };
+    var parts = hash.split("?");
+    var section = parts[0] || null;
+    var params = {};
+    if (parts[1]) {
+      parts[1].split("&").forEach(function(kv) {
+        var pair = kv.split("=");
+        if (pair.length === 2) params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+      });
+    }
+    // Map URL params to Store state keys
+    var patch = {};
+    if (params.metric && (params.metric === "h100e" || params.metric === "power")) patch.metric = params.metric;
+    if (params.scope && (params.scope === "tracked" || params.scope === "fleet")) patch.scope = params.scope;
+    if (params.alloc && (params.alloc === "full" || params.alloc === "dedicated")) patch.allocView = params.alloc;
+    if (params.proj && (params.proj === "current" || params.proj === "2029")) patch.projMode = params.proj;
+    if (params.scatter && (params.scatter === "observed" || params.scatter === "projected")) patch.scatterView = params.scatter;
+    if (params.lab) patch.labFilter = params.lab;
+    return { section: VALID_SECTIONS.indexOf(section) >= 0 ? section : null, state: patch };
+  }
+
+  function pushHash(state) {
+    if (_suppressHashPush) return;
+    // Determine current visible section from scroll position
+    var section = "race";
+    VALID_SECTIONS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 150) section = id;
+    });
+
+    // Build query params (only non-defaults)
+    var params = [];
+    if (state.metric !== DEFAULTS.metric) params.push("metric=" + state.metric);
+    if (state.scope !== DEFAULTS.scope) params.push("scope=" + state.scope);
+    if (state.allocView !== DEFAULTS.allocView) params.push("alloc=" + state.allocView);
+    if (state.projMode !== DEFAULTS.projMode) params.push("proj=" + state.projMode);
+    if (state.scatterView !== DEFAULTS.scatterView) params.push("scatter=" + state.scatterView);
+    if (state.labFilter !== DEFAULTS.labFilter) params.push("lab=" + encodeURIComponent(state.labFilter));
+
+    var hash = "#" + section + (params.length ? "?" + params.join("&") : "");
+    if (window.location.hash !== hash) {
+      _suppressHashPush = true;
+      history.replaceState(null, "", hash);
+      _suppressHashPush = false;
+    }
+  }
+
+  function applyHash() {
+    var parsed = parseHash();
+    if (Object.keys(parsed.state).length > 0) {
+      _suppressHashPush = true;
+      Store.set(parsed.state);
+      _suppressHashPush = false;
+    }
+    if (parsed.section) {
+      var el = document.getElementById(parsed.section);
+      if (el) setTimeout(function() { el.scrollIntoView({ behavior: "smooth" }); }, 300);
+    }
+  }
+
   // --- Nav scroll spy ---
   function initNavSpy() {
     window.addEventListener("scroll", function() {
@@ -3427,6 +3501,10 @@ var App = (function() {
     window.addEventListener("keydown", function(e) {
       if (e.key === "Escape" && Store.get().expandedDC) closeDrawer();
     });
+    // hashchange for browser back/forward
+    window.addEventListener("hashchange", function() {
+      if (!_suppressHashPush) applyHash();
+    });
   }
 
   // --- Bootstrap ---
@@ -3435,6 +3513,9 @@ var App = (function() {
 
     // Subscribe UI.render to all state changes
     Store.subscribe(UI.render);
+
+    // Subscribe hash state push (update URL on every state change)
+    Store.subscribe(function(state) { pushHash(state); });
 
     // Build fallback data from config
     var fallback = Data.buildFallbackData(CFG.rawTimeline, CFG.labMap);
@@ -3457,6 +3538,9 @@ var App = (function() {
     // Init map + preview IMMEDIATELY with fallback data (don't wait for fetch)
     UI.initMap(Store.get(), Store.getData());
     document.getElementById("prev").innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px"><div style="font-size:28px;opacity:.15">🛰️</div><div style="font-size:11px;color:var(--t3);letter-spacing:1px">HOVER OR CLICK A SITE</div></div>';
+
+    // Apply URL hash state (if any) — overrides defaults with URL params
+    applyHash();
 
     // Try live Epoch fetch (with 12s timeout to avoid hanging on CORS proxies)
     var fetchStart = Date.now();
