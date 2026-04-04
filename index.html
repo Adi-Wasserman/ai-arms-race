@@ -9,7 +9,11 @@
 <meta property="og:description" content="Track the AI infrastructure race — compute buildout, power capacity, frontier model benchmarks, and METR time horizons across the top AI labs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://adi-wasserman.github.io/ai-arms-race/">
+<meta property="og:image" content="https://adi-wasserman.github.io/ai-arms-race/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://adi-wasserman.github.io/ai-arms-race/og-image.png">
 <meta name="twitter:title" content="AI Arms Race — Compute, Power & Benchmarks">
 <meta name="twitter:description" content="Who has the most compute and the best AI? Live dashboard tracking OpenAI, Google, Meta, xAI, and Anthropic.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
@@ -53,6 +57,8 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 .mp.bld{animation:pls 2s ease-in-out infinite}
 .mp .dt{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 @keyframes pls{0%,100%{box-shadow:0 0 6px rgba(var(--g),.2)}50%{box-shadow:0 0 16px rgba(var(--g),.5)}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.06) 50%,rgba(255,255,255,.03) 75%);background-size:400px 100%;animation:shimmer 1.8s infinite;border-radius:6px}
 /* ─── Data table ───────────────────────────────────────────── */
 .dt-wrap{border:1px solid var(--bd);border-radius:10px;overflow:hidden;overflow-x:auto;background:rgba(255,255,255,.015)}
 .dt-tbl{width:100%;border-collapse:collapse}
@@ -71,6 +77,9 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 .obs-badge.pos{color:rgba(0,255,135,.8);border-color:rgba(0,255,135,.2);background:rgba(0,255,135,.06)}
 .obs-badge.neg{color:rgba(255,68,68,.8);border-color:rgba(255,68,68,.2);background:rgba(255,68,68,.06)}
 .conf-bar{display:inline-block;height:4px;border-radius:2px;vertical-align:middle;margin-left:6px}
+.kf{margin:0 0 18px;padding:12px 16px;border-left:3px solid rgba(255,255,255,.15);background:rgba(255,255,255,.02);border-radius:0 8px 8px 0;font-size:13px;line-height:1.55;color:rgba(255,255,255,.65);letter-spacing:.2px}
+.kf strong{color:rgba(255,255,255,.9);font-weight:600}
+.stale-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.8px;font-family:var(--m);border:1px solid}
 
 /* ─── Slide-in drawer ──────────────────────────────────────── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -129,6 +138,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <section class="S" id="race">
 <span class="st">THE AI ARMS RACE</span>
 <span class="ss">WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT ERA (2023–)</span>
+<div class="kf" id="kfRace">Five labs are racing to build the largest AI data centers in history. The lead has changed hands multiple times since 2023 — and the gap between first and second place is narrowing. This chart tracks <strong>satellite-verified compute capacity</strong> across every major facility.</div>
 <div class="R" style="gap:24px;margin-bottom:16px">
 <div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">LEADER TODAY</div><div id="st1"></div></div>
 <div><div style="font-size:9px;color:var(--t3);letter-spacing:1.5px">TOTAL COMPUTE</div><div id="st2"></div></div>
@@ -157,6 +167,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 
 <section class="S" id="geomap">
 <span class="st">GEO MAP</span><span class="ss">WHERE AI INFRASTRUCTURE IS BEING BUILT · HOVER OR CLICK ANY PIN</span>
+<div class="kf">Nearly all frontier AI infrastructure is concentrated in the <strong>central and southern United States</strong> — driven by cheap land, available power, and tax incentives. Abu Dhabi is the only major international site, anchoring OpenAI's Stargate expansion.</div>
 <div class="R" style="justify-content:space-between">
 <div class="T" id="tFm"><button class="on" onclick="App.setStatus('ALL')">ALL</button><button onclick="App.setStatus('OP')">● LIVE</button><button onclick="App.setStatus('BLD')">◐ BUILDING</button><button onclick="App.setStatus('PLN')">○ PLANNED</button></div>
 <div style="display:flex;gap:8px"><button id="rUS" onclick="App.setRegion('us')" style="padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:1px;border:1px solid var(--bd);border-radius:6px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-family:inherit">🇺🇸 US · 25</button><span style="color:var(--t4);align-self:center">→</span><button id="rUE" onclick="App.setRegion('uae')" style="padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:1px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t3);cursor:pointer;font-family:inherit">🇦🇪 UAE · 1</button></div>
@@ -170,6 +181,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 
 <section class="S" id="sites">
 <span class="st">INTEL</span><span class="ss">SATELLITE-DERIVED CONSTRUCTION ANALYSIS · WHO'S BUILDING WHAT, AND HOW FAST</span>
+<div class="kf">Construction confidence is scored from <strong>satellite imagery, power ramp data, and observation count</strong>. Sites with visible cooling towers, completed roofs, and substation connections score highest. Timelines carry ±6 months of uncertainty; capacity estimates ±1.4×.</div>
 <div id="scnt" style="font-size:12px;color:var(--t2);margin-bottom:10px"></div>
 <div class="R" id="lf"></div>
 <div class="R">
@@ -183,11 +195,15 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 
 <section class="S" id="models">
 <span class="st">MODELS</span><span class="ss">FRONTIER MODEL BENCHMARKS · WHICH LAB IS PRODUCING THE BEST AI</span>
+<div class="kf">No single model dominates. <strong>GPT-5.4, Gemini 3.1 Pro, and Claude Opus 4.6</strong> trade the lead across different benchmark categories — reasoning, coding, science, and multimodal. The frontier is a three-way contest, not a one-horse race.</div>
+<span id="staleModels" class="stale-badge" style="margin-bottom:12px"></span>
 <div id="modelSection"></div>
 
 <div style="margin-top:40px">
 <div style="font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:4px">METR TIME HORIZONS</div>
-<div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:14px">HOW LONG A TASK (MEASURED BY HUMAN EXPERT TIME) CAN AN AI AGENT COMPLETE WITH 50% RELIABILITY?</div>
+<div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:6px">HOW LONG A TASK (MEASURED BY HUMAN EXPERT TIME) CAN AN AI AGENT COMPLETE WITH 50% RELIABILITY?</div>
+<div class="kf">AI task-completion ability is <strong>doubling roughly every 4 months</strong>. In early 2023, models could handle tasks taking a human ~1 minute. By early 2026, Claude Opus 4.6 reached <strong>14.5 hours</strong> — completing work that would take a human expert most of two business days.</div>
+<span id="staleMetr" class="stale-badge" style="margin-bottom:12px"></span>
 <div style="position:relative;height:55vh;min-height:400px"><canvas id="metrChart"></canvas></div>
 <div class="fn" style="margin-top:8px">DATA: <a href="https://metr.org/time-horizons/" target="_blank">METR Time Horizons TH1.1</a> (updated Mar 3, 2026) · Raw data: <a href="https://metr.org/assets/benchmark_results_1_1.yaml" target="_blank">benchmark_results_1_1.yaml</a> · Analysis: <a href="https://github.com/METR/eval-analysis-public" target="_blank">GitHub</a> · Tasks drawn from <a href="https://metr.org/blog/2024-11-22-evaluating-r-d-capabilities-of-llms/" target="_blank">RE-Bench</a>, <a href="https://arxiv.org/html/2503.17354v1" target="_blank">HCAST</a>, and SWAA · Paper: <a href="https://arxiv.org/abs/2503.14499" target="_blank">arXiv:2503.14499</a> · Doubling time ~4 months · Linear scale (hours)</div>
 </div>
@@ -845,11 +861,39 @@ var Data = (function() {
   // --- Epoch AI data fetch (with CORS proxy fallback) ---
   var EPOCH_DC_URL = "https://epoch.ai/data/data_centers/data_centers.csv";
   var EPOCH_TL_URL = "https://epoch.ai/data/data_centers/data_center_timelines.csv";
+
+  // ⚡ Your Vercel proxy — update this after `vercel --prod`
+  var PROXY_BASE = "https://ai-arms-race.vercel.app/api/epoch";
+
   var CORS_PROXIES = [
     "",  // Direct first
     "https://corsproxy.io/?",
     "https://api.allorigins.win/raw?url="
   ];
+
+  // Try the Vercel proxy first (server-side fetch bypasses Cloudflare),
+  // then fall through to direct + CORS proxies as before
+  function fetchWithProxy(epochUrl, proxyFile) {
+    var proxyUrl = PROXY_BASE + "?file=" + proxyFile;
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = setTimeout(function() { if (controller) controller.abort(); }, 4000);
+    var opts = { mode: "cors" };
+    if (controller) opts.signal = controller.signal;
+
+    return fetch(proxyUrl, opts).then(function(r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error("Proxy HTTP " + r.status);
+      return r.text();
+    }).then(function(text) {
+      if (text.length < 100 || (text.indexOf("Handle") < 0 && text.indexOf("Date") < 0)) throw new Error("Invalid CSV from proxy");
+      console.log("[Epoch] Fetched " + proxyFile + " via Vercel proxy (" + text.length + " bytes)");
+      return text;
+    }).catch(function(err) {
+      clearTimeout(timer);
+      console.warn("[Epoch] Vercel proxy failed for " + proxyFile + ": " + err.message + " — falling back to direct/CORS");
+      return fetchWithFallback(epochUrl);
+    });
+  }
 
   function fetchWithFallback(url) {
     var attempt = 0;
@@ -885,8 +929,8 @@ var Data = (function() {
   // Fetch both CSVs — gracefully handle partial success
   // If timelines loads but data_centers doesn't (Cloudflare), derive DCs from timeline + fallback metadata
   function fetchEpoch() {
-    var dcPromise = fetchWithFallback(EPOCH_DC_URL).catch(function() { return null; });
-    var tlPromise = fetchWithFallback(EPOCH_TL_URL);
+    var dcPromise = fetchWithProxy(EPOCH_DC_URL, "data_centers").catch(function() { return null; });
+    var tlPromise = fetchWithProxy(EPOCH_TL_URL, "timelines");
 
     return Promise.all([dcPromise, tlPromise]).then(function(res) {
       var dcText = res[0]; // may be null if Cloudflare blocked it
@@ -1176,6 +1220,21 @@ var UI = (function() {
     document.getElementById("st4").innerHTML =
       '<span style="font-size:18px;font-weight:700;font-family:var(--m)">' + pastChanges + '</span>' +
       '<span style="font-size:10px;color:var(--t3)"> obs +' + futureChanges + ' proj</span>';
+
+    // Update key finding with live data
+    var kf = document.getElementById("kfRace");
+    if (kf) {
+      var second = "", secondH = 0;
+      CFG.labs.forEach(function(lab) {
+        var v = Store.getValue(current, lab);
+        if (lab !== leader && v > secondH) { secondH = v; second = lab; }
+      });
+      var gap = maxVal > 0 && secondH > 0 ? Math.round((maxVal - secondH) / secondH * 100) : 0;
+      var unit = state.metric === "power" ? "MW" : "H100e";
+      kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
+        (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
+        '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
+    }
   }
 
   // ─── Legend ─────────────────────────────────────────────────
@@ -2508,6 +2567,28 @@ var App = (function() {
 // ─── Go ───────────────────────────────────────────────────────
 try { 
   App.init();
+
+  // ─── Staleness badges for snapshot data ────────────────────
+  (function() {
+    var SNAPSHOTS = [
+      { id: "staleModels", date: "2026-03-15", label: "BENCHMARKS" },
+      { id: "staleMetr",   date: "2026-03-03", label: "METR TH1.1" }
+    ];
+    var now = new Date();
+    SNAPSHOTS.forEach(function(s) {
+      var el = document.getElementById(s.id);
+      if (!el) return;
+      var age = Math.floor((now - new Date(s.date)) / 86400000);
+      var color, border;
+      if (age < 30)       { color = "rgba(0,255,135,.7)";  border = "rgba(0,255,135,.2)"; }
+      else if (age < 90)  { color = "rgba(255,170,0,.7)";  border = "rgba(255,170,0,.2)"; }
+      else                 { color = "rgba(255,68,68,.7)";  border = "rgba(255,68,68,.2)"; }
+      el.style.color = color;
+      el.style.borderColor = border;
+      el.innerHTML = s.label + " · DATA AS OF " + s.date.slice(0,7).replace("-"," ") + " · " + age + "d AGO";
+    });
+  })();
+
   // Compact health check (console only, no UI noise)
   setTimeout(function() {
     var d = Store.getData();
