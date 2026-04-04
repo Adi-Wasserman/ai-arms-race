@@ -193,6 +193,10 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
   /* Benchmark table: horizontal scroll */
   .wm{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
+  /* Projection panel: stack columns */
+  #projPanel > div:first-child{flex-direction:column}
+  #projPanel > div:first-child > div:nth-child(2){display:none}
+
   /* METR chart */
   #metrWrap{height:40vh!important;min-height:300px!important}
 
@@ -279,6 +283,8 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">SATELLITE-VERIFIED</button><button onclick="App.setScope('fleet')">+ CLOUD-LEASE ADJ. ⚠</button></div>
 <div class="sep"></div>
 <div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">TOTAL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED ⚠</button></div>
+<div class="sep"></div>
+<div class="T" id="tP"><button class="on" onclick="App.setProjection('current')">CURRENT</button><button onclick="App.setProjection('2029')">2029 PROJECTION ⚡</button></div>
 <div id="leg" style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto"></div>
 <button class="meth-toggle" onclick="var m=document.getElementById('methPanel');m.classList.toggle('show');this.textContent=m.classList.contains('show')?'▾ HIDE METHODOLOGY':'▸ METHODOLOGY'">▸ METHODOLOGY</button>
 </div>
@@ -302,7 +308,27 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div id="lbr"></div>
 </div>
 </div>
-<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
+<div id="projPanel" style="display:none;margin-bottom:14px">
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="flex:1;min-width:280px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;padding:16px">
+<div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:600;margin-bottom:10px">📊 APR 2026 — OBSERVED</div>
+<div id="projNow"></div>
+</div>
+<div style="flex:0 0 40px;display:flex;align-items:center;justify-content:center">
+<div style="font-size:24px;color:var(--t4)">→</div>
+</div>
+<div style="flex:1;min-width:280px;background:rgba(255,170,0,.03);border:1px solid rgba(255,170,0,.12);border-radius:10px;padding:16px">
+<div style="font-size:9px;letter-spacing:2px;color:rgba(255,170,0,.7);font-weight:600;margin-bottom:10px">⚡ JAN 2029 — PROJECTED</div>
+<div id="proj2029"></div>
+</div>
+</div>
+<div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:8px">
+<div style="font-size:9px;letter-spacing:2px;color:var(--t3);font-weight:600;margin-bottom:6px">GROWTH ASSUMPTIONS</div>
+<div id="projAssumptions" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+<div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5">Projections use per-lab compound growth rates derived from announced capex, facility pipelines, and chip roadmaps. Uncertainty bands widen ±15% base + 10%/year. Power growth lags compute due to chip efficiency improvements (~30% per generation). <strong style="color:rgba(255,170,0,.7)">These are extrapolations, not forecasts.</strong></div>
+</div>
+</div>
+<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · 2029 Projection = per-lab compound growth extrapolation (compute 4-5×/yr, power ~2×/yr) with ±15%+10%/yr uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
 <section class="S" id="geomap">
@@ -353,6 +379,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="padding:16px 28px 40px"><div class="fn">AI Arms Race · Data: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live fetch + cached fallback) · Satellite: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI</a> · ±6mo/±1.4× · Benchmarks: <a href="https://artificialanalysis.ai" target="_blank">Artificial Analysis</a>, <a href="https://www.swebench.com" target="_blank">SWE-bench</a>, <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a>, <a href="https://last-exam.ai" target="_blank">HLE</a>, <a href="https://osworld.github.io" target="_blank">OSWorld</a> + provider system cards (snapshot — update per release)</div></div>
 <div class="cl-section">
 <h3>CHANGELOG</h3>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>2029 Projections engine</strong> — New "2029 PROJECTION ⚡" toggle on the Race chart. Per-lab compound growth extrapolation (4-5× compute/yr, ~2× power/yr) with widening uncertainty bands. Side-by-side Apr 2026 vs Jan 2029 comparison panel with growth assumptions per lab. Dynamic key finding updates with projected leader and total industry growth multiplier.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Data freshness banner</strong> — Live status bar with ↻ Refresh button. Shows Epoch CSV load time, facility count, and timeline events. Leaderboard disclaimers when cloud-lease view active.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Methodology transparency</strong> — Expandable panel explaining satellite tracking bias, H100e conversion ratios, and allocation tier assumptions. Epoch confidence tags (CONFIDENT/LIKELY/SPECULATIVE) surfaced in Intel table.</div>
@@ -771,7 +798,25 @@ var CFG = Object.freeze({
     ["2026-02-03", "Gemini 3 Pro",      270,   0],
     ["2026-02-05", "Claude Opus 4.6",   870,   1],
     ["2026-02-20", "GPT-5.3 Codex",    540,   0]
-  ]
+  ],
+
+  // 2029 Projection assumptions
+  // Compute: 4-5× per year (varies by lab based on announced pipeline)
+  // Power: ~2× per year after efficiency offsets (chip efficiency improves ~30%/gen)
+  // Sources: SemiAnalysis, Epoch AI methodology, public capex announcements
+  projGrowth: {
+    // Per-lab annual multipliers: [computeMultiplier, powerMultiplier]
+    // These reflect announced buildout pace + known constraints
+    OpenAI:    { compute: 4.5, power: 2.0, note: "Stargate JV pipeline ($100B+), Azure priority" },
+    Gemini:    { compute: 4.0, power: 1.8, note: "TPU cadence + cloud DCs, efficiency gains from Ironwood" },
+    Meta:      { compute: 4.2, power: 2.0, note: "Hyperion + Prometheus expansion, owned infra" },
+    xAI:       { compute: 5.0, power: 2.2, note: "Colossus rapid buildout, most aggressive ramp" },
+    Anthropic: { compute: 4.8, power: 2.0, note: "Three-cloud strategy (AWS+GCP+Azure), Trainium3 gen" }
+  },
+  // Projection range: quarterly from latest data to Jan 2029
+  projEnd: "2029-01-01",
+  // Uncertainty band: ±factor around central projection (widens over time)
+  projUncertainty: { base: 0.15, perYear: 0.10 }
 });
 
 
@@ -1242,6 +1287,80 @@ var Data = (function() {
     return { labMap: labMap, dataCenters: dataCenters, timeline: timeline, entries: entries };
   }
 
+  // --- Build 2029 projections from existing series ---
+  // Takes any time series and extrapolates quarterly to CFG.projEnd.
+  // Returns { central: [...points], low: [...points], high: [...points] }
+  // where each point has the same shape as buildTimeSeries output.
+  function buildProjections2029(series, labs, growth, projEnd, uncertainty) {
+    if (!series || !series.length) return { central: [], low: [], high: [] };
+
+    // Find the last data point
+    var last = series[series.length - 1];
+    var lastDate = new Date(last.date + "T00:00:00");
+    var endDate = new Date(projEnd + "T00:00:00");
+
+    // Generate quarterly dates from last date to projEnd
+    var dates = [];
+    var cur = new Date(lastDate);
+    // Advance to next quarter boundary
+    cur.setMonth(cur.getMonth() + 3 - (cur.getMonth() % 3));
+    cur.setDate(1);
+    while (cur <= endDate) {
+      dates.push(cur.toISOString().slice(0, 10));
+      cur = new Date(cur);
+      cur.setMonth(cur.getMonth() + 3);
+    }
+    // Always include the end date
+    if (dates.length === 0 || dates[dates.length - 1] !== projEnd) {
+      dates.push(projEnd);
+    }
+
+    var central = [], low = [], high = [];
+
+    dates.forEach(function(d) {
+      // Years elapsed since last observed data point
+      var elapsed = (new Date(d) - lastDate) / (365.25 * 86400000);
+      if (elapsed <= 0) return;
+
+      var ptC = { date: d }, ptL = { date: d }, ptH = { date: d };
+      labs.forEach(function(lab) {
+        var g = growth[lab] || { compute: 4.0, power: 2.0 };
+        var baseH = last[lab] || 0;
+        var baseP = last[lab + "_pw"] || 0;
+
+        // Central projection: compound growth
+        var projH = Math.round(baseH * Math.pow(g.compute, elapsed));
+        var projP = Math.round(baseP * Math.pow(g.power, elapsed));
+
+        // Uncertainty widens over time
+        var unc = uncertainty.base + uncertainty.perYear * elapsed;
+        var uncLow = 1 - unc;
+        var uncHigh = 1 + unc;
+
+        ptC[lab] = projH;
+        ptC[lab + "_pw"] = projP;
+        ptL[lab] = Math.round(projH * uncLow);
+        ptL[lab + "_pw"] = Math.round(projP * uncLow);
+        ptH[lab] = Math.round(projH * uncHigh);
+        ptH[lab + "_pw"] = Math.round(projP * uncHigh);
+      });
+
+      // Totals
+      ptC.tH = labs.reduce(function(s, c) { return s + (ptC[c] || 0); }, 0);
+      ptC.tP = labs.reduce(function(s, c) { return s + (ptC[c + "_pw"] || 0); }, 0);
+      ptL.tH = labs.reduce(function(s, c) { return s + (ptL[c] || 0); }, 0);
+      ptL.tP = labs.reduce(function(s, c) { return s + (ptL[c + "_pw"] || 0); }, 0);
+      ptH.tH = labs.reduce(function(s, c) { return s + (ptH[c] || 0); }, 0);
+      ptH.tP = labs.reduce(function(s, c) { return s + (ptH[c + "_pw"] || 0); }, 0);
+
+      central.push(ptC);
+      low.push(ptL);
+      high.push(ptH);
+    });
+
+    return { central: central, low: low, high: high };
+  }
+
   // --- Build fallback data from hardcoded config ---
   function buildFallbackData(rawTimeline, defaultLabMap) {
     var handles = {};
@@ -1287,6 +1406,7 @@ var Data = (function() {
     fetchEpoch: fetchEpoch,
     parseEpochData: parseEpochData,
     buildFallbackData: buildFallbackData,
+    buildProjections2029: buildProjections2029,
     parseRawRows: parseRawRows
   };
 })();
@@ -1307,7 +1427,8 @@ var Store = (function() {
     labFilter:    "ALL",     // "ALL" | lab name
     statusFilter: "ALL",     // "ALL" | "OP" | "BLD" | "PLN"
     sortBy:       "conf",    // "conf" | "h100e" | "power"
-    expandedDC:   null       // handle string or null
+    expandedDC:   null,      // handle string or null
+    projMode:     "current"  // "current" | "2029"
   };
 
   // --- Computed data (derived from Epoch fetch or fallback) ---
@@ -1320,7 +1441,8 @@ var Store = (function() {
     seriesEpochLow:  [],     // time series (Epoch, low allocation estimate)
     seriesEpochHigh: [],     // time series (Epoch, high allocation estimate)
     seriesFullLow:   [],     // time series (Epoch + fleet, low allocation)
-    seriesFullHigh:  []      // time series (Epoch + fleet, high allocation)
+    seriesFullHigh:  [],     // time series (Epoch + fleet, high allocation)
+    proj2029:        null    // { central: [], low: [], high: [] } — 2029 projections
   };
 
   // --- Subscriber pattern ---
@@ -1335,12 +1457,17 @@ var Store = (function() {
   }
 
   function set(patch) {
+    // Invalidate projection cache if series inputs changed
+    if (patch.scope !== undefined || patch.allocView !== undefined || patch.metric !== undefined) {
+      computed.proj2029 = null;
+    }
     Object.assign(state, patch);
     notify();
   }
 
   function setData(data) {
     Object.assign(computed, data);
+    computed.proj2029 = null;  // Invalidate projections on new data
     state._dataVersion = (state._dataVersion || 0) + 1;
     notify();
   }
@@ -1382,6 +1509,36 @@ var Store = (function() {
     return state.metric === "power" ? (point[lab + "_pw"] || 0) : (point[lab] || 0);
   }
 
+  // --- Projection helpers ---
+  // Compute 2029 projections from the active series (lazy, cached in computed.proj2029)
+  function ensureProjections() {
+    if (!computed.proj2029) {
+      var base = activeSeries();
+      computed.proj2029 = Data.buildProjections2029(
+        base, CFG.labs, CFG.projGrowth, CFG.projEnd, CFG.projUncertainty
+      );
+    }
+    return computed.proj2029;
+  }
+
+  // Active series extended with 2029 projections (for chart rendering)
+  function activeSeriesWithProj() {
+    var base = activeSeries();
+    if (state.projMode !== "2029") return base;
+    var proj = ensureProjections();
+    return base.concat(proj.central);
+  }
+
+  // Get just the projection data
+  function activeProj() {
+    return ensureProjections();
+  }
+
+  // Invalidate cached projections when inputs change
+  function invalidateProj() {
+    computed.proj2029 = null;
+  }
+
   return {
     get: get, getData: getData,
     set: set, setData: setData,
@@ -1389,6 +1546,9 @@ var Store = (function() {
     activeSeries: activeSeries,
     activeSeriesLow: activeSeriesLow,
     activeSeriesHigh: activeSeriesHigh,
+    activeSeriesWithProj: activeSeriesWithProj,
+    activeProj: activeProj,
+    invalidateProj: invalidateProj,
     getValue: getValue
   };
 })();
@@ -1452,9 +1612,30 @@ var UI = (function() {
       });
       var gap = maxVal > 0 && secondH > 0 ? Math.round((maxVal - secondH) / secondH * 100) : 0;
       var unit = state.metric === "power" ? "MW" : "H100e";
-      kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
-        (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
-        '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
+
+      if (state.projMode === "2029") {
+        // 2029 projection key finding
+        var proj = Store.activeProj();
+        var projEnd = proj.central.length ? proj.central[proj.central.length - 1] : null;
+        if (projEnd) {
+          var projLeader = "", projMax = 0;
+          CFG.labs.forEach(function(lab) {
+            var v = Store.getValue(projEnd, lab);
+            if (v > projMax) { projMax = v; projLeader = lab; }
+          });
+          var nowTotal = current.tH;
+          var projTotal = projEnd.tH;
+          var totalGrowth = nowTotal > 0 ? Math.round(projTotal / nowTotal) : 0;
+          kf.innerHTML = '⚡ <strong style="color:rgba(255,170,0,.9)">2029 PROJECTION:</strong> ' +
+            '<strong style="color:' + CFG.colors[projLeader] + '">' + projLeader + '</strong> is projected to lead by Jan 2029 with <strong>' + Data.formatH100(projMax) + ' ' + unit + '</strong>. ' +
+            'Total industry compute grows <strong>~' + totalGrowth + '×</strong> from today\'s ' + Data.formatH100(nowTotal) + ' to ' + Data.formatH100(projTotal) + '. ' +
+            '<span style="color:var(--t3)">Growth rates vary: xAI (5×/yr, most aggressive) vs Gemini (4×/yr, efficiency-led). Uncertainty widens ±25-40% by 2029.</span>';
+        }
+      } else {
+        kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
+          (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
+          '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
+      }
     }
   }
 
@@ -1500,7 +1681,8 @@ var UI = (function() {
 
   // ─── Leaderboard ────────────────────────────────────────────
   function renderLeaderboard(state, data, dateSnap) {
-    var series = Store.activeSeries();
+    var is2029 = state.projMode === "2029";
+    var series = is2029 ? Store.activeSeriesWithProj() : Store.activeSeries();
     var pt;
     if (dateSnap) pt = series.find(function(x) { return x.date === dateSnap; });
     if (!pt) {
@@ -1562,12 +1744,21 @@ var UI = (function() {
     renderLeaderboard(Store.get(), Store.getData(), dateSnap);
 
     var isPast = dateSnap <= CFG.today;
-    var series = Store.activeSeries();
+    var is2029 = Store.get().projMode === "2029";
+    var series = is2029 ? Store.activeSeriesWithProj() : Store.activeSeries();
     var pt = series.find(function(x) { return x.date === dateSnap; }) || {};
 
-    var badge = isPast
-      ? '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(0,255,135,.15);color:#00ff87;font-weight:600">OBS</span>'
-      : '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.08);color:var(--t3);font-weight:600">PROJ</span>';
+    // Determine badge: OBS / PROJ / 2029
+    var baseSeries = Store.activeSeries();
+    var lastBaseDate = baseSeries.length ? baseSeries[baseSeries.length - 1].date : CFG.today;
+    var badge;
+    if (isPast) {
+      badge = '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(0,255,135,.15);color:#00ff87;font-weight:600">OBS</span>';
+    } else if (is2029 && dateSnap > lastBaseDate) {
+      badge = '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(255,170,0,.15);color:#ffaa00;font-weight:600">2029 PROJ</span>';
+    } else {
+      badge = '<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.08);color:var(--t3);font-weight:600">PROJ</span>';
+    }
 
     var items = CFG.labs.filter(function(c) {
       return (pt[c] || 0) > 0 || (pt[c + "_pw"] || 0) > 0;
@@ -1609,7 +1800,8 @@ var UI = (function() {
   function renderChart(state, data) {
     if (chartInstance) chartInstance.destroy();
 
-    var allSeries = Store.activeSeries();
+    var is2029 = state.projMode === "2029";
+    var allSeries = is2029 ? Store.activeSeriesWithProj() : Store.activeSeries();
     var d = allSeries.filter(function(x) { return x.date >= "2023-01-01"; });
     if (!d.length) return;
 
@@ -1617,6 +1809,11 @@ var UI = (function() {
     var isPower = state.metric === "power";
     var maxDate = d[d.length - 1].date;
     var todayMs = new Date(CFG.today + "T00:00:00").getTime();
+
+    // For 2029 mode, get the last date of the base series (before projections)
+    var baseSeries = Store.activeSeries();
+    var lastBaseDate = baseSeries.length ? baseSeries[baseSeries.length - 1].date : CFG.today;
+    var lastBaseMs = new Date(lastBaseDate + "T00:00:00").getTime();
 
     // Annotations: today line + projected zone + lead changes
     var annotations = {
@@ -1626,8 +1823,26 @@ var UI = (function() {
         label: { display: true, content: "TODAY", position: "start", color: "rgba(255,255,255,.6)",
                  font: { size: 10, weight: "bold" }, backgroundColor: "rgba(5,5,16,.85)", padding: 4, borderRadius: 4 }
       },
-      projZone: { type: "box", xMin: CFG.today, xMax: maxDate, backgroundColor: "rgba(255,255,255,.01)", borderWidth: 0 }
+      projZone: { type: "box", xMin: CFG.today, xMax: is2029 ? lastBaseDate : maxDate, backgroundColor: "rgba(255,255,255,.01)", borderWidth: 0 }
     };
+
+    // In 2029 mode, add a distinct projection zone + 2029 target line
+    if (is2029) {
+      annotations.projZone2029 = {
+        type: "box", xMin: lastBaseDate, xMax: CFG.projEnd,
+        backgroundColor: "rgba(255,170,0,.02)", borderWidth: 0
+      };
+      annotations.proj2029Line = {
+        type: "line", scaleID: "x", value: CFG.projEnd,
+        borderColor: "rgba(255,170,0,.35)", borderWidth: 1.5, borderDash: [3, 3],
+        label: { display: true, content: "JAN 2029", position: "start", color: "rgba(255,170,0,.7)",
+                 font: { size: 10, weight: "bold" }, backgroundColor: "rgba(5,5,16,.85)", padding: 4, borderRadius: 4 }
+      };
+      annotations.projStartLine = {
+        type: "line", scaleID: "x", value: lastBaseDate,
+        borderColor: "rgba(255,170,0,.2)", borderWidth: 1, borderDash: [2, 3]
+      };
+    }
 
     var activeLabs = CFG.labs.filter(function(c) {
       return d.some(function(x) { return (Store.getValue(x, c) || 0) > 0; });
@@ -1635,14 +1850,13 @@ var UI = (function() {
 
     var datasets = [];
 
-    if (state.allocView === "dedicated") {
-      // In dedicated mode: show bands (high fill → low) + low line per lab
+    if (state.allocView === "dedicated" && !is2029) {
+      // In dedicated mode (non-projection): show bands (high fill → low) + low line per lab
       var dLow = Store.activeSeriesLow().filter(function(x) { return x.date >= "2023-01-01"; });
       var dHigh = Store.activeSeriesHigh().filter(function(x) { return x.date >= "2023-01-01"; });
 
       activeLabs.forEach(function(c) {
         var color = CFG.colors[c] || "#555";
-        // High bound — thin solid line, fills down to low bound
         datasets.push({
           label: c + " high",
           data: dHigh.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
@@ -1651,7 +1865,6 @@ var UI = (function() {
           fill: "+1",
           backgroundColor: color + "18"
         });
-        // Low bound — solid for observed, dashed for projected (same as full capacity)
         datasets.push({
           label: c,
           data: dLow.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
@@ -1659,6 +1872,61 @@ var UI = (function() {
           borderWidth: 1.8, pointRadius: 0, pointHitRadius: 8,
           stepped: "after", fill: false,
           segment: { borderDash: function(ctx2) { return ctx2.p0.parsed.x >= todayMs ? [6, 4] : []; } }
+        });
+      });
+    } else if (is2029) {
+      // 2029 projection mode: base series + projection lines with uncertainty fan
+      var proj = Store.activeProj();
+
+      activeLabs.forEach(function(c) {
+        var color = CFG.colors[c] || "#555";
+
+        // Uncertainty band (high fill → low) — only for projection points
+        if (proj.high.length > 0) {
+          // Prepend the last base point so band connects smoothly
+          var lastBase = baseSeries[baseSeries.length - 1];
+          var bandStartH = lastBase ? { x: lastBase.date, y: Store.getValue(lastBase, c) } : null;
+          var bandStartL = bandStartH;
+
+          var highPts = proj.high.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; });
+          var lowPts = proj.low.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; });
+
+          if (bandStartH) { highPts.unshift(bandStartH); lowPts.unshift(bandStartL); }
+
+          datasets.push({
+            label: c + " proj-high",
+            data: highPts,
+            borderColor: "transparent", borderWidth: 0, pointRadius: 0, pointHitRadius: 0,
+            stepped: false,
+            fill: "+1",
+            backgroundColor: color + "12"
+          });
+          datasets.push({
+            label: c + " proj-low",
+            data: lowPts,
+            borderColor: "transparent", borderWidth: 0, pointRadius: 0, pointHitRadius: 0,
+            stepped: false,
+            fill: false
+          });
+        }
+
+        // Main line: solid for base, dashed for epoch projected, dotted for 2029 projected
+        datasets.push({
+          label: c,
+          data: d.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
+          borderColor: color, backgroundColor: "transparent",
+          borderWidth: 1.8, pointRadius: 0, pointHitRadius: 8, stepped: "after", fill: false,
+          segment: {
+            borderDash: function(ctx2) {
+              var xVal = ctx2.p0.parsed.x;
+              if (xVal >= lastBaseMs) return [3, 3];  // 2029 projection zone: tight dots
+              if (xVal >= todayMs) return [6, 4];       // existing projected: dashes
+              return [];                                 // observed: solid
+            },
+            borderWidth: function(ctx2) {
+              return ctx2.p0.parsed.x >= lastBaseMs ? 2.2 : 1.8;
+            }
+          }
         });
       });
     } else {
@@ -1683,7 +1951,7 @@ var UI = (function() {
         scales: {
           x: { type: "time", time: { unit: "quarter", displayFormats: { quarter: "MMM YY" } },
                grid: { color: "rgba(255,255,255,.04)" },
-               ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 }, maxTicksLimit: 12 } },
+               ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 }, maxTicksLimit: is2029 ? 16 : 12 } },
           y: { grid: { color: "rgba(255,255,255,.04)" },
                ticks: { color: "rgba(255,255,255,.3)", font: { size: 10 },
                          callback: function(v) { return isPower ? Data.formatAxis(v) : Data.formatH100(v); } },
@@ -2502,6 +2770,78 @@ var UI = (function() {
     });
   }
 
+  // ─── 2029 Projection comparison panel ──────────────────────
+  function renderProjPanel(state) {
+    var panel = document.getElementById("projPanel");
+    if (!panel) return;
+
+    if (state.projMode !== "2029") {
+      panel.style.display = "none";
+      return;
+    }
+    panel.style.display = "block";
+
+    var series = Store.activeSeries();
+    var past = series.filter(function(x) { return x.date <= CFG.today; });
+    var now = past.length ? past[past.length - 1] : null;
+    if (!now) return;
+
+    var proj = Store.activeProj();
+    var end = proj.central.length ? proj.central[proj.central.length - 1] : null;
+    var endLow = proj.low.length ? proj.low[proj.low.length - 1] : null;
+    var endHigh = proj.high.length ? proj.high[proj.high.length - 1] : null;
+    if (!end) return;
+
+    var isPower = state.metric === "power";
+
+    // Render "now" column
+    var nowRows = CFG.labs.map(function(c) {
+      return { c: c, val: Store.getValue(now, c), h: now[c] || 0, p: now[c + "_pw"] || 0 };
+    }).filter(function(r) { return r.val > 0; }).sort(function(a, b) { return (isPower ? b.p - a.p : b.h - a.h); });
+
+    document.getElementById("projNow").innerHTML = nowRows.map(function(r, i) {
+      var rank = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i + 1) + ".";
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.03)">' +
+        '<span style="font-size:12px;width:22px;text-align:center">' + rank + '</span>' +
+        '<span style="color:' + CFG.colors[r.c] + ';font-weight:600;font-size:12px;flex:1">' + r.c + '</span>' +
+        '<span style="font-family:var(--m);font-size:12px;font-weight:700">' + Data.formatH100(r.h) + '</span>' +
+        '<span style="font-family:var(--m);font-size:10px;color:var(--t3);width:55px;text-align:right">' + Data.formatPower(r.p) + '</span></div>';
+    }).join("") +
+    '<div style="margin-top:6px;font-size:10px;color:var(--t3);font-family:var(--m)">TOTAL: ' + Data.formatH100(now.tH) + ' H100e · ' + Data.formatPower(now.tP) + '</div>';
+
+    // Render "2029" column
+    var projRows = CFG.labs.map(function(c) {
+      var valC = Store.getValue(end, c);
+      var nowVal = Store.getValue(now, c);
+      var growth = nowVal > 0 ? (valC / nowVal) : 0;
+      var lowVal = endLow ? Store.getValue(endLow, c) : valC;
+      var highVal = endHigh ? Store.getValue(endHigh, c) : valC;
+      return { c: c, val: valC, h: end[c] || 0, p: end[c + "_pw"] || 0, growth: growth, lowVal: lowVal, highVal: highVal };
+    }).filter(function(r) { return r.val > 0; }).sort(function(a, b) { return (isPower ? b.p - a.p : b.h - a.h); });
+
+    document.getElementById("proj2029").innerHTML = projRows.map(function(r, i) {
+      var rank = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i + 1) + ".";
+      var growthStr = r.growth > 0 ? Math.round(r.growth) + "×" : "—";
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,170,0,.06)">' +
+        '<span style="font-size:12px;width:22px;text-align:center">' + rank + '</span>' +
+        '<span style="color:' + CFG.colors[r.c] + ';font-weight:600;font-size:12px;flex:1">' + r.c + '</span>' +
+        '<span style="font-family:var(--m);font-size:12px;font-weight:700">' + Data.formatH100(r.h) + '</span>' +
+        '<span style="font-family:var(--m);font-size:10px;color:rgba(255,170,0,.7);width:40px;text-align:right">' + growthStr + '</span></div>';
+    }).join("") +
+    '<div style="margin-top:6px;font-size:10px;color:rgba(255,170,0,.6);font-family:var(--m)">TOTAL: ' + Data.formatH100(end.tH) + ' H100e · ' + Data.formatPower(end.tP) + '</div>';
+
+    // Render growth assumptions
+    document.getElementById("projAssumptions").innerHTML = CFG.labs.map(function(c) {
+      var g = CFG.projGrowth[c];
+      if (!g) return "";
+      return '<div style="flex:1;min-width:120px;padding:6px 10px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px">' +
+        '<div style="font-size:10px;font-weight:600;color:' + CFG.colors[c] + ';margin-bottom:3px">' + c + '</div>' +
+        '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Compute: <strong>' + g.compute + '×</strong>/yr</div>' +
+        '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Power: <strong>' + g.power + '×</strong>/yr</div>' +
+        '<div style="font-size:9px;color:var(--t3);margin-top:2px">' + g.note + '</div></div>';
+    }).join("");
+  }
+
   // ─── Toggle button styling helpers ──────────────────────────
   function syncToggleButtons(state) {
     // Metric toggle
@@ -2515,6 +2855,10 @@ var UI = (function() {
     // Allocation view toggle
     document.querySelectorAll("#tA button").forEach(function(b, i) {
       b.className = (i === 0 && state.allocView === "full") || (i === 1 && state.allocView === "dedicated") ? "on" : "";
+    });
+    // Projection mode toggle
+    document.querySelectorAll("#tP button").forEach(function(b, i) {
+      b.className = (i === 0 && state.projMode === "current") || (i === 1 && state.projMode === "2029") ? "on" : "";
     });
     // Status filter (both map and card toggles)
     document.querySelectorAll("#tFm button,#tFc button").forEach(function(b) {
@@ -2543,9 +2887,10 @@ var UI = (function() {
 
     var dataChanged = state._dataVersion !== prevState._dataVersion;
 
-    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.allocView !== prevState.allocView || dataChanged)) {
+    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.allocView !== prevState.allocView || state.projMode !== prevState.projMode || dataChanged)) {
       renderLegend(state, data);
       renderChart(state, data);
+      renderProjPanel(state);
     }
 
     if (state.hoveredLab !== prevState.hoveredLab) {
@@ -2590,6 +2935,7 @@ var UI = (function() {
     renderDrawer: renderDrawer,
     renderModels: renderModels,
     renderMetr: renderMetr,
+    renderProjPanel: renderProjPanel,
     tableSortCol: function() { return tableSortCol; },
     tableSortDir: function() { return tableSortDir; },
     setTableSort: function(col, dir) { tableSortCol = col; tableSortDir = dir; }
@@ -2608,6 +2954,7 @@ var App = (function() {
   function setMetric(m)     { Store.set({ metric: m }); }
   function setScope(s)      { Store.set({ scope: s }); }
   function setAllocView(v)  { Store.set({ allocView: v }); }
+  function setProjection(p) { Store.set({ projMode: p }); }
   function setStatus(s)     { Store.set({ statusFilter: s }); }
   function setLabFilter(f)  { Store.set({ labFilter: f }); }
   function setSort(s)       { Store.set({ sortBy: s }); }
@@ -2789,6 +3136,7 @@ var App = (function() {
     setMetric: setMetric,
     setScope: setScope,
     setAllocView: setAllocView,
+    setProjection: setProjection,
     setStatus: setStatus,
     setLabFilter: setLabFilter,
     setSort: setSort,
