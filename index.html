@@ -1338,7 +1338,6 @@ var UI = (function() {
     var todayMs = new Date(CFG.today + "T00:00:00").getTime();
 
     // Annotations: today line + projected zone + lead changes
-    var leadChanges = Data.detectLeadChanges(allSeries, state.metric, CFG.labs);
     var annotations = {
       today: {
         type: "line", scaleID: "x", value: CFG.today,
@@ -1348,18 +1347,6 @@ var UI = (function() {
       },
       projZone: { type: "box", xMin: CFG.today, xMax: maxDate, backgroundColor: "rgba(255,255,255,.01)", borderWidth: 0 }
     };
-
-    leadChanges.forEach(function(change, i) {
-      if (!change.prev) return;
-      annotations["lc" + i] = {
-        type: "line", scaleID: "x", value: change.date,
-        borderColor: (CFG.colors[change.leader] || "#fff") + "88", borderWidth: 1.5,
-        borderDash: change.date <= CFG.today ? [] : [4, 3],
-        label: { display: true, content: change.leader + " leads", position: "start",
-                 color: CFG.colors[change.leader] || "#fff",
-                 font: { size: 9, weight: "600" }, backgroundColor: "rgba(5,5,16,.85)", padding: 4, borderRadius: 4 }
-      };
-    });
 
     var activeLabs = CFG.labs.filter(function(c) {
       return d.some(function(x) { return (Store.getValue(x, c) || 0) > 0; });
