@@ -288,8 +288,6 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div class="sep"></div>
 <div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">SATELLITE-VERIFIED</button><button onclick="App.setScope('fleet')">+ CLOUD-LEASE ADJ. ⚠</button></div>
 <div class="sep"></div>
-<div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">TOTAL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED ⚠</button></div>
-<div class="sep"></div>
 <div class="T" id="tP"><button class="on" onclick="App.setProjection('current')">CURRENT</button><button onclick="App.setProjection('2029')">2029 PROJECTION ⚡</button></div>
 <div class="sep"></div>
 <div class="T" id="tV"><button class="on" onclick="App.setVelocity('absolute')">ABSOLUTE</button><button onclick="App.setVelocity('velocity')">GROWTH VELOCITY 📈</button></div>
@@ -309,8 +307,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 &nbsp;&nbsp;• <strong>EAI-AZR</strong> — $30B Azure commitment, up to 1GW with NVIDIA Grace Blackwell + Vera Rubin (<a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Source: NVIDIA, Nov 2025</a>). H100e conversion: GB200 ≈ 2.5×H100.<br>
 &nbsp;&nbsp;• <strong>EGC</strong> — Google's internal TPU fleet for Gemini, not visible in Epoch's new-construction filter. Based on SemiAnalysis reporting ("millions of liquid-cooled TPUs, &gt;1GW") and Fubon supply-chain analysis (~3.1M TPU production in 2026). Only the estimated Gemini-dedicated fraction is included.<br>
 All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed capacity may lag announcements by 6-12 months.<br><br>
-<strong>TOTAL CAPACITY</strong> — Full compute at each facility as estimated by Epoch. For cloud provider DCs (Azure, AWS, Google Cloud), this includes <em>all</em> capacity — not just what's used for frontier AI training. Epoch flags confidence: <span class="conf-tag ct-c">CONFIDENT</span> <span class="conf-tag ct-l">LIKELY</span> <span class="conf-tag ct-s">SPECULATIVE</span><br><br>
-<strong>EST. DEDICATED ⚠</strong> — Allocation bands estimating what fraction is dedicated to frontier AI. Tier 1 (85-100%): purpose-built sites. Tier 2 (25-40%): cloud partnerships. Tier 3 (20-35%): general hyperscaler DCs. <em>These are assumptions, not observed data.</em> The shaded band shows the low-high range.
+<strong>TOTAL CAPACITY</strong> — Full compute at each facility as estimated by Epoch. For cloud provider DCs (Azure, AWS, Google Cloud), this includes <em>all</em> capacity — not just what's used for frontier AI training. Epoch flags confidence: <span class="conf-tag ct-c">CONFIDENT</span> <span class="conf-tag ct-l">LIKELY</span> <span class="conf-tag ct-s">SPECULATIVE</span>
 </div>
 <div id="chartRow" style="display:flex;gap:16px;margin-bottom:12px">
 <div style="flex:1;min-width:0;position:relative;height:55vh;min-height:340px"><canvas id="ch"></canvas></div>
@@ -341,7 +338,7 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5">Projections use explicit per-lab Jan 2029 targets derived from Epoch satellite facility ramps (Layer 1) + sourced cloud-lease fleet growth (Layer 2). <strong>No speculative new facilities.</strong> Power is the binding constraint — new grid capacity requires 2-5 year interconnection queues. Chip efficiency improvements (GB200, Trainium3, Ironwood) are factored into H100e-per-MW ratios. Uncertainty bands widen ±8% base + 6%/year. <strong style="color:rgba(255,170,0,.7)">These are target-based interpolations, not compound growth forecasts.</strong></div>
 </div>
 </div>
-<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · 2029 Projection = power-constrained targets from Epoch satellite ramps + sourced cloud-lease fleet, ±20% uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
+<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~26 facilities) · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity (<a href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster" target="_blank">AWS</a>, <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank">GCP</a>, <a href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/" target="_blank">Azure</a>) + Gemini TPU fleet est. · 2029 Projection = power-constrained targets from Epoch satellite ramps + sourced cloud-lease fleet, ±20% uncertainty bands · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
 <section class="S" id="geomap">
@@ -678,11 +675,6 @@ var CFG = Object.freeze({
     ["2027-06-01","EGC",3070000,1330]
   ],
 
-  // Allocation confidence bands: what % of each facility is dedicated to the attributed lab
-  // Tier 1: Purpose-built / single-tenant (90-100%)
-  // Tier 2: Cloud provider with strategic partnership (20-45%)
-  // Tier 3: General hyperscaler infrastructure (15-35%)
-
   // Frontier model benchmarks — snapshot March 2026
   // Sources: Artificial Analysis v4.0, LMSYS Arena, provider system cards, independent evals
   // Scores are % unless noted. null = not available / not reported
@@ -808,42 +800,6 @@ var CFG = Object.freeze({
     { key: "agents",     label: "AGENTS & TOOL USE",     benchmarks: ["osworld", "browsecomp", "gdpval"], icon: "🤖" },
     { key: "frontier",   label: "FRONTIER DIFFICULTY",   benchmarks: ["hle"],           icon: "🎯" }
   ],
-  allocations: {
-    // xAI — owned, single-tenant, 100% dedicated
-    "xAI Colossus 1 Memphis Tennessee":          { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, single-tenant" },
-    "xAI Colossus 2 Memphis Tennessee":          { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, single-tenant" },
-    // Meta — owned, no cloud business, 100% dedicated
-    "Meta Prometheus New Albany Ohio":            { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, no cloud business" },
-    "Meta Temple Texas":                         { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, no cloud business" },
-    "Meta Hyperion Holly Ridge Louisiana":       { low: 1.0,  high: 1.0,  tier: 1, basis: "Owned, no cloud business" },
-    // OpenAI/Oracle Stargate — purpose-built JV
-    "OpenAI-Oracle Stargate Abilene Texas":      { low: 0.90, high: 1.0,  tier: 1, basis: "Purpose-built JV for OpenAI" },
-    "OpenAI-Oracle Stargate Abu Dhabi":          { low: 0.85, high: 1.0,  tier: 1, basis: "Purpose-built JV for OpenAI" },
-    "OpenAI Stargate Shackelford":               { low: 0.90, high: 1.0,  tier: 1, basis: "Purpose-built JV for OpenAI" },
-    // Anthropic/Amazon Rainier — named partnership, Trainium-based
-    "Anthropic-Amazon Project Rainier New Carlisle Indiana": { low: 0.85, high: 0.95, tier: 1, basis: "Named partnership, Trainium" },
-    // Microsoft Azure — multi-tenant, OpenAI is priority customer
-    "Microsoft Fairwater Fayetteville Georgia":  { low: 0.25, high: 0.40, tier: 2, basis: "Azure multi-tenant, OpenAI priority" },
-    "Microsoft Fairwater Mount Pleasant Wisconsin": { low: 0.25, high: 0.40, tier: 2, basis: "Azure multi-tenant, OpenAI priority" },
-    "Microsoft Goodyear Arizona":                { low: 0.25, high: 0.40, tier: 2, basis: "Azure multi-tenant, OpenAI priority" },
-    // Amazon AWS — general regions, Anthropic is one of many customers
-    "Amazon Canton Mississippi":                 { low: 0.15, high: 0.25, tier: 2, basis: "AWS general region" },
-    "Amazon Ridgeland Mississippi":              { low: 0.15, high: 0.25, tier: 2, basis: "AWS general region" },
-    // Google — multi-purpose, partial TPU for Gemini
-    "Google New Albany Ohio":                     { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
-    "Google Omaha Nebraska":                     { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
-    "Google Pryor Oklahoma":                     { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
-    "Google Cedar Rapids Iowa":                  { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
-    "Google Council Bluffs Iowa":                { low: 0.20, high: 0.35, tier: 3, basis: "Multi-purpose, partial TPU" },
-    // Crusoe — contracted for Gemini training
-    "Crusoe Goodnight Texas":                    { low: 0.80, high: 0.95, tier: 1, basis: "Contracted for Gemini training" },
-    // Fleet estimates — dedicated by definition
-    "EGC":                                       { low: 0.80, high: 0.95, tier: 1, basis: "Google/Gemini TPU fleet estimate" },
-    "EAI":                                       { low: 0.85, high: 0.95, tier: 1, basis: "Anthropic fleet estimate" },
-    "EAI-AWS":                                   { low: 0.85, high: 0.95, tier: 1, basis: "Anthropic/AWS Trainium2 (Project Rainier distributed)" },
-    "EAI-GCP":                                   { low: 0.80, high: 0.95, tier: 1, basis: "Anthropic/Google Cloud TPU allocation (Oct 2025 deal)" },
-    "EAI-AZR":                                   { low: 0.80, high: 0.90, tier: 1, basis: "Anthropic/Azure NVIDIA (Nov 2025 deal)" }
-  },
 
   // METR Time Horizons — 50% task-completion time horizon (TH1.1, last updated Mar 3 2026)
   // Source: https://metr.org/time-horizons/ + benchmark_results_1_1.yaml
@@ -1024,36 +980,6 @@ var Data = (function() {
         if (pt[lab] !== undefined) {
           pt[lab] += snapH[dc] || 0;
           pt[lab + "_pw"] += snapP[dc] || 0;
-        }
-      });
-      pt.tH = labs.reduce(function(s, c) { return s + (pt[c] || 0); }, 0);
-      pt.tP = labs.reduce(function(s, c) { return s + (pt[c + "_pw"] || 0); }, 0);
-      return pt;
-    });
-  }
-
-  // --- Time series with allocation percentages ---
-  // Same as buildTimeSeries but multiplies each entry's values by the allocation pct.
-  // bound = "low" | "high"
-  function buildAllocatedTimeSeries(entries, labMap, labs, allocations, bound) {
-    var sorted = _.sortBy(entries, "date");
-    var snapH = {}, snapP = {};
-    var dates = _.uniq(_.map(sorted, "date")).sort();
-    var byDate = _.groupBy(sorted, "date");
-    return dates.map(function(d) {
-      (byDate[d] || []).forEach(function(e) {
-        snapH[e.dc] = e.h;
-        snapP[e.dc] = e.p;
-      });
-      var pt = { date: d };
-      labs.forEach(function(c) { pt[c] = 0; pt[c + "_pw"] = 0; });
-      Object.keys(snapH).forEach(function(dc) {
-        var lab = labMap[dc] || "Other";
-        if (pt[lab] !== undefined) {
-          var alloc = allocations[dc];
-          var pct = alloc ? (bound === "low" ? alloc.low : alloc.high) : 1.0;
-          pt[lab] += (snapH[dc] || 0) * pct;
-          pt[lab + "_pw"] += (snapP[dc] || 0) * pct;
         }
       });
       pt.tH = labs.reduce(function(s, c) { return s + (pt[c] || 0); }, 0);
@@ -1582,7 +1508,6 @@ var Data = (function() {
     col: col,
     dmsToDecimal: dmsToDecimal,
     buildTimeSeries: buildTimeSeries,
-    buildAllocatedTimeSeries: buildAllocatedTimeSeries,
     detectLeadChanges: detectLeadChanges,
     buildVelocitySeries: buildVelocitySeries,
     scoreConfidence: scoreConfidence,
@@ -1606,7 +1531,6 @@ var Store = (function() {
   var state = {
     metric:       "h100e",   // "h100e" | "power"
     scope:        "tracked", // "tracked" | "fleet"
-    allocView:    "full",    // "full" | "dedicated"
     hoveredLab:   null,      // lab name or null
     labFilter:    "ALL",     // "ALL" | lab name
     statusFilter: "ALL",     // "ALL" | "OP" | "BLD" | "PLN"
@@ -1624,10 +1548,6 @@ var Store = (function() {
     timeline:     [],         // [{date, dc, st, h, p, buildings}]
     seriesEpoch:  [],         // time series (Epoch only, 100% attribution)
     seriesFull:   [],         // time series (Epoch + fleet, 100% attribution)
-    seriesEpochLow:  [],     // time series (Epoch, low allocation estimate)
-    seriesEpochHigh: [],     // time series (Epoch, high allocation estimate)
-    seriesFullLow:   [],     // time series (Epoch + fleet, low allocation)
-    seriesFullHigh:  [],     // time series (Epoch + fleet, high allocation)
     proj2029:        null    // { central: [], low: [], high: [] } — 2029 projections
   };
 
@@ -1644,7 +1564,7 @@ var Store = (function() {
 
   function set(patch) {
     // Invalidate projection cache if series inputs changed
-    if (patch.scope !== undefined || patch.allocView !== undefined || patch.metric !== undefined) {
+    if (patch.scope !== undefined || patch.metric !== undefined) {
       computed.proj2029 = null;
     }
     Object.assign(state, patch);
@@ -1663,32 +1583,7 @@ var Store = (function() {
 
   // --- Derived accessors (convenience) ---
   function activeSeries() {
-    if (state.allocView === "dedicated") {
-      // Return midpoint of low/high allocation estimates
-      var low = state.scope === "fleet" ? computed.seriesFullLow : computed.seriesEpochLow;
-      var high = state.scope === "fleet" ? computed.seriesFullHigh : computed.seriesEpochHigh;
-      if (!low.length) return low;
-      return low.map(function(lPt, i) {
-        var hPt = high[i] || lPt;
-        var pt = { date: lPt.date };
-        CFG.labs.forEach(function(c) {
-          pt[c] = Math.round(((lPt[c] || 0) + (hPt[c] || 0)) / 2);
-          pt[c + "_pw"] = Math.round(((lPt[c + "_pw"] || 0) + (hPt[c + "_pw"] || 0)) / 2);
-        });
-        pt.tH = CFG.labs.reduce(function(s, c) { return s + (pt[c] || 0); }, 0);
-        pt.tP = CFG.labs.reduce(function(s, c) { return s + (pt[c + "_pw"] || 0); }, 0);
-        return pt;
-      });
-    }
     return state.scope === "fleet" ? computed.seriesFull : computed.seriesEpoch;
-  }
-
-  function activeSeriesLow() {
-    return state.scope === "fleet" ? computed.seriesFullLow : computed.seriesEpochLow;
-  }
-
-  function activeSeriesHigh() {
-    return state.scope === "fleet" ? computed.seriesFullHigh : computed.seriesEpochHigh;
   }
 
   function getValue(point, lab) {
@@ -1734,8 +1629,6 @@ var Store = (function() {
     set: set, setData: setData,
     subscribe: subscribe, notify: notify,
     activeSeries: activeSeries,
-    activeSeriesLow: activeSeriesLow,
-    activeSeriesHigh: activeSeriesHigh,
     activeSeriesWithProj: activeSeriesWithProj,
     activeProj: activeProj,
     invalidateProj: invalidateProj,
@@ -2151,31 +2044,7 @@ var UI = (function() {
     // ── ABSOLUTE MODE (default) ──────────────────────────────
     var datasets = [];
 
-    if (state.allocView === "dedicated" && !is2029) {
-      // In dedicated mode (non-projection): show bands (high fill → low) + low line per lab
-      var dLow = Store.activeSeriesLow().filter(function(x) { return x.date >= "2023-01-01"; });
-      var dHigh = Store.activeSeriesHigh().filter(function(x) { return x.date >= "2023-01-01"; });
-
-      activeLabs.forEach(function(c) {
-        var color = CFG.colors[c] || "#555";
-        datasets.push({
-          label: c + " high",
-          data: dHigh.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
-          borderColor: color + "55", borderWidth: 0.8, pointRadius: 0, pointHitRadius: 0,
-          stepped: "after",
-          fill: "+1",
-          backgroundColor: color + "18"
-        });
-        datasets.push({
-          label: c,
-          data: dLow.map(function(x) { return { x: x.date, y: Store.getValue(x, c) }; }),
-          borderColor: color, backgroundColor: "transparent",
-          borderWidth: 1.8, pointRadius: 0, pointHitRadius: 8,
-          stepped: "after", fill: false,
-          segment: { borderDash: function(ctx2) { return ctx2.p0.parsed.x >= todayMs ? [6, 4] : []; } }
-        });
-      });
-    } else if (is2029) {
+    if (is2029) {
       // 2029 projection mode: base series + projection lines with uncertainty fan
       var proj = Store.activeProj();
 
@@ -2231,7 +2100,7 @@ var UI = (function() {
         });
       });
     } else {
-      // Full capacity or conservative: single line per lab
+      // Standard view: single line per lab
       activeLabs.forEach(function(c) {
         datasets.push({
           label: c,
@@ -3513,10 +3382,6 @@ var UI = (function() {
       var pos = Array.prototype.indexOf.call(b.parentNode.children, b);
       b.className = (pos === 0 && state.scope === "tracked") || (pos === 1 && state.scope === "fleet") ? "on" : "";
     });
-    // Allocation view toggle
-    document.querySelectorAll("#tA button").forEach(function(b, i) {
-      b.className = (i === 0 && state.allocView === "full") || (i === 1 && state.allocView === "dedicated") ? "on" : "";
-    });
     // Projection mode toggle
     document.querySelectorAll("#tP button").forEach(function(b, i) {
       b.className = (i === 0 && state.projMode === "current") || (i === 1 && state.projMode === "2029") ? "on" : "";
@@ -3556,7 +3421,7 @@ var UI = (function() {
 
     var dataChanged = state._dataVersion !== prevState._dataVersion;
 
-    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.allocView !== prevState.allocView || state.projMode !== prevState.projMode || state.velocityMode !== prevState.velocityMode || dataChanged)) {
+    if (hasSeries && (state.metric !== prevState.metric || state.scope !== prevState.scope || state.projMode !== prevState.projMode || state.velocityMode !== prevState.velocityMode || dataChanged)) {
       renderLegend(state, data);
       renderChart(state, data);
       renderProjPanel(state);
@@ -3774,12 +3639,11 @@ var Export = (function() {
       row.total_H100e = pt.tH || 0;
       row.total_MW = pt.tP || 0;
       row.scope = state.scope;
-      row.allocation = state.allocView;
       return row;
     });
     var cols = ["date"].concat(
       CFG.labs.reduce(function(a, l) { return a.concat([l + "_H100e", l + "_MW"]); }, []),
-      ["total_H100e", "total_MW", "scope", "allocation"]
+      ["total_H100e", "total_MW", "scope"]
     );
     downloadCSV(rows, "ai-arms-race-timeseries-" + CFG.today + ".csv", cols);
   }
@@ -3791,7 +3655,6 @@ var Export = (function() {
     downloadJSON({
       exported: new Date().toISOString(),
       scope: state.scope,
-      allocation: state.allocView,
       projection: state.projMode,
       metric: state.metric,
       labs: CFG.labs,
@@ -3857,7 +3720,6 @@ var App = (function() {
   // --- Actions (called from onclick handlers) ---
   function setMetric(m)     { Store.set({ metric: m }); }
   function setScope(s)      { Store.set({ scope: s }); }
-  function setAllocView(v)  { Store.set({ allocView: v }); }
   function setProjection(p) { Store.set({ projMode: p }); }
   function setScatterView(v) { Store.set({ scatterView: v }); }
   function setVelocity(v)    { Store.set({ velocityMode: v }); }
@@ -3896,7 +3758,7 @@ var App = (function() {
   // Format: #section?key=val&key=val
   // Only non-default values are serialized to keep URLs clean.
   var DEFAULTS = {
-    metric: "h100e", scope: "tracked", allocView: "full",
+    metric: "h100e", scope: "tracked",
     projMode: "current", scatterView: "observed", labFilter: "ALL",
     velocityMode: "absolute"
   };
@@ -3919,7 +3781,6 @@ var App = (function() {
     var patch = {};
     if (params.metric && (params.metric === "h100e" || params.metric === "power")) patch.metric = params.metric;
     if (params.scope && (params.scope === "tracked" || params.scope === "fleet")) patch.scope = params.scope;
-    if (params.alloc && (params.alloc === "full" || params.alloc === "dedicated")) patch.allocView = params.alloc;
     if (params.proj && (params.proj === "current" || params.proj === "2029")) patch.projMode = params.proj;
     if (params.scatter && (params.scatter === "observed" || params.scatter === "projected")) patch.scatterView = params.scatter;
     if (params.velocity && (params.velocity === "absolute" || params.velocity === "velocity")) patch.velocityMode = params.velocity;
@@ -3940,7 +3801,6 @@ var App = (function() {
     var params = [];
     if (state.metric !== DEFAULTS.metric) params.push("metric=" + state.metric);
     if (state.scope !== DEFAULTS.scope) params.push("scope=" + state.scope);
-    if (state.allocView !== DEFAULTS.allocView) params.push("alloc=" + state.allocView);
     if (state.projMode !== DEFAULTS.projMode) params.push("proj=" + state.projMode);
     if (state.scatterView !== DEFAULTS.scatterView) params.push("scatter=" + state.scatterView);
     if (state.velocityMode !== DEFAULTS.velocityMode) params.push("velocity=" + state.velocityMode);
@@ -4010,11 +3870,7 @@ var App = (function() {
       dataCenters: fallback.dataCenters,
       timeline: fallback.timeline,
       seriesEpoch: Data.buildTimeSeries(epochEntries, fallback.labMap, CFG.labs),
-      seriesFull: Data.buildTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs),
-      seriesEpochLow: Data.buildAllocatedTimeSeries(epochEntries, fallback.labMap, CFG.labs, CFG.allocations, "low"),
-      seriesEpochHigh: Data.buildAllocatedTimeSeries(epochEntries, fallback.labMap, CFG.labs, CFG.allocations, "high"),
-      seriesFullLow: Data.buildAllocatedTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs, CFG.allocations, "low"),
-      seriesFullHigh: Data.buildAllocatedTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs, CFG.allocations, "high")
+      seriesFull: Data.buildTimeSeries(epochEntries.concat(fleetEntries), fallback.labMap, CFG.labs)
     });
 
     // Init map + preview IMMEDIATELY with fallback data (don't wait for fetch)
@@ -4088,11 +3944,7 @@ var App = (function() {
         dataCenters: liveDCs,
         timeline: liveTimeline,
         seriesEpoch: Data.buildTimeSeries(liveEntries, liveLabMap, CFG.labs),
-        seriesFull: Data.buildTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs),
-        seriesEpochLow: Data.buildAllocatedTimeSeries(liveEntries, liveLabMap, CFG.labs, CFG.allocations, "low"),
-        seriesEpochHigh: Data.buildAllocatedTimeSeries(liveEntries, liveLabMap, CFG.labs, CFG.allocations, "high"),
-        seriesFullLow: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs, CFG.allocations, "low"),
-        seriesFullHigh: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs, CFG.allocations, "high")
+        seriesFull: Data.buildTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs)
       });
 
       var mode = hasLiveDCs ? "LIVE" : "LIVE*";
@@ -4130,7 +3982,6 @@ var App = (function() {
     init: init,
     setMetric: setMetric,
     setScope: setScope,
-    setAllocView: setAllocView,
     setProjection: setProjection,
     setScatterView: setScatterView,
     setVelocity: setVelocity,
@@ -4168,11 +4019,7 @@ var App = (function() {
         Store.setData({
           labMap: liveLabMap, dataCenters: liveDCs, timeline: parsed.timeline.length > 0 ? parsed.timeline : fallbackData.timeline,
           seriesEpoch: Data.buildTimeSeries(liveEntries, liveLabMap, CFG.labs),
-          seriesFull: Data.buildTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs),
-          seriesEpochLow: Data.buildAllocatedTimeSeries(liveEntries, liveLabMap, CFG.labs, CFG.allocations, "low"),
-          seriesEpochHigh: Data.buildAllocatedTimeSeries(liveEntries, liveLabMap, CFG.labs, CFG.allocations, "high"),
-          seriesFullLow: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs, CFG.allocations, "low"),
-          seriesFullHigh: Data.buildAllocatedTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs, CFG.allocations, "high")
+          seriesFull: Data.buildTimeSeries(liveEntries.concat(fleetEntries), liveLabMap, CFG.labs)
         });
         UI.initMap(Store.get(), Store.getData());
         var mode = hasLiveDCs ? "LIVE" : "LIVE*";
