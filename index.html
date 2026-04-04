@@ -2445,6 +2445,7 @@ var App = (function() {
       }
 
       // Use live entries for time series, but choose labMap based on DC availability
+      var liveEntries = parsed.entries;
       var liveLabMap;
       if (hasLiveDCs) {
         liveLabMap = parsed.labMap;
@@ -2462,7 +2463,6 @@ var App = (function() {
       }
       var liveDCs = hasLiveDCs ? parsed.dataCenters : fallback.dataCenters;
       var liveTimeline = parsed.timeline.length > 0 ? parsed.timeline : fallback.timeline;
-      var liveEntries = parsed.entries;
 
       // Merge live coordinates if DC CSV was available
       if (hasLiveDCs) {
