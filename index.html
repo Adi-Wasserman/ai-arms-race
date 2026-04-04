@@ -1602,9 +1602,9 @@ var UI = (function() {
       '<span style="font-size:18px;font-weight:700;font-family:var(--m)">' + pastChanges + '</span>' +
       '<span style="font-size:10px;color:var(--t3)"> obs +' + futureChanges + ' proj</span>';
 
-    // Update key finding with live data
+    // Update key finding with live data (skip when in 2029 mode — renderProjPanel handles that)
     var kf = document.getElementById("kfRace");
-    if (kf) {
+    if (kf && state.projMode !== "2029") {
       var second = "", secondH = 0;
       CFG.labs.forEach(function(lab) {
         var v = Store.getValue(current, lab);
@@ -1612,30 +1612,9 @@ var UI = (function() {
       });
       var gap = maxVal > 0 && secondH > 0 ? Math.round((maxVal - secondH) / secondH * 100) : 0;
       var unit = state.metric === "power" ? "MW" : "H100e";
-
-      if (state.projMode === "2029") {
-        // 2029 projection key finding
-        var proj = Store.activeProj();
-        var projEnd = proj.central.length ? proj.central[proj.central.length - 1] : null;
-        if (projEnd) {
-          var projLeader = "", projMax = 0;
-          CFG.labs.forEach(function(lab) {
-            var v = Store.getValue(projEnd, lab);
-            if (v > projMax) { projMax = v; projLeader = lab; }
-          });
-          var nowTotal = current.tH;
-          var projTotal = projEnd.tH;
-          var totalGrowth = nowTotal > 0 ? Math.round(projTotal / nowTotal) : 0;
-          kf.innerHTML = '⚡ <strong style="color:rgba(255,170,0,.9)">2029 PROJECTION:</strong> ' +
-            '<strong style="color:' + CFG.colors[projLeader] + '">' + projLeader + '</strong> is projected to lead by Jan 2029 with <strong>' + Data.formatH100(projMax) + ' ' + unit + '</strong>. ' +
-            'Total industry compute grows <strong>~' + totalGrowth + '×</strong> from today\'s ' + Data.formatH100(nowTotal) + ' to ' + Data.formatH100(projTotal) + '. ' +
-            '<span style="color:var(--t3)">Growth rates vary: xAI (5×/yr, most aggressive) vs Gemini (4×/yr, efficiency-led). Uncertainty widens ±25-40% by 2029.</span>';
-        }
-      } else {
-        kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
-          (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
-          '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
-      }
+      kf.innerHTML = '<strong style="color:' + CFG.colors[leader] + '">' + leader + '</strong> leads with <strong>' + Data.formatH100(maxVal) + ' ' + unit + '</strong>' +
+        (second ? ', ' + gap + '% ahead of <strong style="color:' + CFG.colors[second] + '">' + second + '</strong>' : '') +
+        '. The lead has changed <strong>' + pastChanges + ' times</strong> since 2023 — and ' + futureChanges + ' more projected shifts are ahead.';
     }
   }
 
@@ -2840,6 +2819,22 @@ var UI = (function() {
         '<div style="font-size:10px;font-family:var(--m);color:var(--t2)">Power: <strong>' + g.power + '×</strong>/yr</div>' +
         '<div style="font-size:9px;color:var(--t3);margin-top:2px">' + g.note + '</div></div>';
     }).join("");
+
+    // Update key finding — renderProjPanel is the authoritative owner of kf when projMode is "2029"
+    // (renderStats skips kf writes in 2029 mode so this won't be overwritten)
+    var kf = document.getElementById("kfRace");
+    if (kf && projRows.length > 0) {
+      var projLeader = projRows[0].c;
+      var projMax = isPower ? projRows[0].p : projRows[0].h;
+      var unit = isPower ? "MW" : "H100e";
+      var nowTotal = isPower ? now.tP : now.tH;
+      var projTotal = isPower ? end.tP : end.tH;
+      var totalGrowth = nowTotal > 0 ? Math.round(projTotal / nowTotal) : 0;
+      kf.innerHTML = '⚡ <strong style="color:rgba(255,170,0,.9)">2029 PROJECTION:</strong> ' +
+        '<strong style="color:' + CFG.colors[projLeader] + '">' + projLeader + '</strong> is projected to lead by Jan 2029 with <strong>' + Data.formatH100(projMax) + ' ' + unit + '</strong>. ' +
+        'Total industry compute grows <strong>~' + totalGrowth + '×</strong> from today\'s ' + Data.formatH100(nowTotal) + ' to ' + Data.formatH100(projTotal) + '. ' +
+        '<span style="color:var(--t3)">Growth rates vary: xAI (5×/yr, most aggressive) vs Gemini (4×/yr, efficiency-led). Uncertainty widens ±25-40% by 2029.</span>';
+    }
   }
 
   // ─── Toggle button styling helpers ──────────────────────────
