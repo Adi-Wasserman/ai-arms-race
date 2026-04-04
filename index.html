@@ -244,6 +244,9 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
   /* METR chart: shorter */
   #metrWrap{height:35vh!important;min-height:260px!important}
 
+  /* Scatter chart: shorter on mobile */
+  #scatterWrap{height:35vh!important;min-height:260px!important}
+
   /* Tooltip: narrower */
   #tt{min-width:200px;padding:10px 12px;font-size:11px}
 
@@ -364,6 +367,18 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <span class="st">MODELS</span><span class="ss">FRONTIER MODEL BENCHMARKS · WHICH LAB IS PRODUCING THE BEST AI</span>
 <div class="kf">No single model dominates. <strong>GPT-5.4, Gemini 3.1 Pro, and Claude Opus 4.6</strong> trade the lead across different benchmark categories — reasoning, coding, science, and multimodal. The frontier is a three-way contest, not a one-horse race.</div>
 <span id="staleModels" class="stale-badge" style="margin-bottom:12px"></span>
+
+<div style="margin-bottom:32px">
+<div style="font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:4px">COMPUTE vs PERFORMANCE</div>
+<div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:6px">DOES MORE COMPUTE = BETTER AI? · H100e CAPACITY vs AA INTELLIGENCE INDEX</div>
+<div class="kf" id="kfScatter">The relationship between raw compute and model intelligence is <strong>not linear</strong>. Some labs extract far more capability per GPU than others — algorithmic efficiency, training data quality, and architecture choices matter as much as raw hardware.</div>
+<div class="R" style="margin-bottom:8px">
+<div class="T" id="tSc"><button class="on" onclick="App.setScatterView('observed')">OBSERVED · APR 2026</button><button onclick="App.setScatterView('projected')">PROJECTED · JAN 2029</button></div>
+</div>
+<div id="scatterWrap" style="position:relative;height:48vh;min-height:360px"><canvas id="scatterChart"></canvas></div>
+<div class="fn" style="margin-top:8px">X-axis: total H100-equivalent compute per lab (Epoch AI + cloud-lease adj.) · Y-axis: AA Intelligence Index v4.0 (composite of 10 evals) · Bubble size: power footprint (GW) · Trend line: OLS linear regression · Labs with no AA Index score (Meta, xAI) plotted at estimated positions based on analyst consensus. <strong>Correlation ≠ causation</strong> — algorithmic efficiency, data quality, and architecture drive outcomes as much as compute.</div>
+</div>
+
 <div id="modelSection"></div>
 
 <div style="margin-top:40px">
@@ -380,6 +395,8 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div style="padding:16px 28px 40px"><div class="fn">AI Arms Race · Data: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live fetch + cached fallback) · Satellite: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI</a> · ±6mo/±1.4× · Benchmarks: <a href="https://artificialanalysis.ai" target="_blank">Artificial Analysis</a>, <a href="https://www.swebench.com" target="_blank">SWE-bench</a>, <a href="https://arcprize.org" target="_blank">ARC-AGI-2</a>, <a href="https://last-exam.ai" target="_blank">HLE</a>, <a href="https://osworld.github.io" target="_blank">OSWorld</a> + provider system cards (snapshot — update per release)</div></div>
 <div class="cl-section">
 <h3>CHANGELOG</h3>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Compute vs Performance scatter</strong> — New Chart.js scatter plot in MODELS section: H100e (X) vs AA Intelligence Index (Y), bubble-sized by power (GW), colored by lab. OLS trend line with R². Toggle between Observed (Apr 2026) and Projected (Jan 2029). Dynamic key finding with efficiency ranking. Tooltip shows model name, benchmark wins, capability/GW.</div>
+<div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>P2 improvements</strong> — Who's Winning mini scope toggle (SAT-VERIFIED ↔ +CLOUD-LEASE). Enhanced data banner with CSV version hash + fetch timestamp. 2029 projections in leaderboard rows (⚡ per-lab growth ×). Analyst cross-checks (SemiAnalysis + Artificial Analysis H100e). Interactive model selection with head-to-head wins, derived metrics, and column highlighting.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>2029 Projections engine</strong> — New "2029 PROJECTION ⚡" toggle on the Race chart. Per-lab compound growth extrapolation (4-5× compute/yr, ~2× power/yr) with widening uncertainty bands. Side-by-side Apr 2026 vs Jan 2029 comparison panel with growth assumptions per lab. Dynamic key finding updates with projected leader and total industry growth multiplier.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Cloud-lease adjustments v2</strong> — Broke Anthropic fleet into 3 sourced legs: EAI-AWS (Project Rainier/Trainium2), EAI-GCP (1M TPU deal), EAI-AZR ($30B Azure/NVIDIA). Updated methodology with primary source links from Amazon, Anthropic, and NVIDIA.</div>
 <div class="cl-entry"><span class="cl-date">2026-04-04</span> <strong>Data freshness banner</strong> — Live status bar with ↻ Refresh button. Shows Epoch CSV load time, facility count, and timeline events. Leaderboard disclaimers when cloud-lease view active.</div>
@@ -1445,7 +1462,8 @@ var Store = (function() {
     statusFilter: "ALL",     // "ALL" | "OP" | "BLD" | "PLN"
     sortBy:       "conf",    // "conf" | "h100e" | "power"
     expandedDC:   null,      // handle string or null
-    projMode:     "current"  // "current" | "2029"
+    projMode:     "current",  // "current" | "2029"
+    scatterView:  "observed"  // "observed" | "projected"
   };
 
   // --- Computed data (derived from Epoch fetch or fallback) ---
@@ -2910,6 +2928,239 @@ var UI = (function() {
     });
   }
 
+  // ─── Compute vs Performance scatter plot ────────────────────
+  var scatterChartInstance = null;
+
+  function renderScatter(state) {
+    var canvas = document.getElementById("scatterChart");
+    if (!canvas) return;
+    if (scatterChartInstance) { scatterChartInstance.destroy(); scatterChartInstance = null; }
+
+    var isProjected = state.scatterView === "projected";
+
+    // Get compute data per lab
+    var series = Store.activeSeries();
+    var past = series.filter(function(x) { return x.date <= CFG.today; });
+    var current = past.length ? past[past.length - 1] : null;
+    if (!current) return;
+
+    var proj2029Pt = null;
+    if (isProjected) {
+      var proj = Store.activeProj();
+      if (proj.central.length) proj2029Pt = proj.central[proj.central.length - 1];
+    }
+
+    var dataPt = isProjected && proj2029Pt ? proj2029Pt : current;
+
+    // AA Index per lab (use actual or estimated for labs without scores)
+    var aaByLab = {};
+    var estByLab = {};
+    CFG.models.forEach(function(m) {
+      if (m.aaIndex !== null && m.aaIndex !== undefined) {
+        aaByLab[m.lab] = m.aaIndex;
+        estByLab[m.lab] = false;
+      }
+    });
+    // Estimates for labs without AA Index
+    if (!aaByLab["xAI"])  { aaByLab["xAI"] = 45;  estByLab["xAI"] = true; }
+    if (!aaByLab["Meta"]) { aaByLab["Meta"] = 30;  estByLab["Meta"] = true; }
+
+    // For projected view, apply modest AA improvement (~8%/yr for 2.75 years)
+    if (isProjected) {
+      var aaGrowth = Math.pow(1.08, 2.75);
+      CFG.labs.forEach(function(lab) {
+        if (aaByLab[lab]) aaByLab[lab] = Math.round(aaByLab[lab] * aaGrowth * 10) / 10;
+      });
+    }
+
+    // Build scatter data points
+    var points = [];
+    var trendX = [], trendY = [];
+    CFG.labs.forEach(function(lab) {
+      var h = dataPt[lab] || 0;
+      var p = dataPt[lab + "_pw"] || 0;
+      var aa = aaByLab[lab];
+      if (!h || !aa) return;
+
+      var hM = h / 1e6; // H100e in millions
+      var pGW = p / 1000; // Power in GW
+      var capPerMW = p > 0 ? (aa / p * 1000).toFixed(1) : "—";
+
+      // Find model for this lab
+      var model = CFG.models.find(function(m) { return m.lab === lab; });
+      var modelName = model ? model.name : lab;
+
+      // Count benchmark wins
+      var wins = 0;
+      CFG.domains.forEach(function(d) {
+        d.benchmarks.forEach(function(bk) {
+          var scores = CFG.models.map(function(m) { return m[bk]; }).filter(function(v) { return v != null; });
+          if (!scores.length) return;
+          var maxScore = Math.max.apply(null, scores);
+          if (model && model[bk] === maxScore) wins++;
+        });
+      });
+
+      points.push({
+        x: hM,
+        y: aa,
+        r: Math.max(8, Math.min(35, pGW * 18 + 6)),
+        lab: lab,
+        color: CFG.colors[lab],
+        modelName: modelName,
+        wins: wins,
+        capPerMW: capPerMW,
+        hRaw: h,
+        pRaw: p,
+        est: estByLab[lab] || false
+      });
+
+      trendX.push(hM);
+      trendY.push(aa);
+    });
+
+    if (!points.length) return;
+
+    // Linear regression for trend line
+    var n = trendX.length;
+    var sumX = trendX.reduce(function(a, b) { return a + b; }, 0);
+    var sumY = trendY.reduce(function(a, b) { return a + b; }, 0);
+    var sumXY = trendX.reduce(function(a, x, i) { return a + x * trendY[i]; }, 0);
+    var sumX2 = trendX.reduce(function(a, x) { return a + x * x; }, 0);
+    var slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    var intercept = (sumY - slope * sumX) / n;
+
+    var xMin = 0;
+    var xMax = Math.max.apply(null, trendX) * 1.15;
+    var trendLine = [
+      { x: xMin, y: intercept + slope * xMin },
+      { x: xMax, y: intercept + slope * xMax }
+    ];
+
+    // R² calculation
+    var meanY = sumY / n;
+    var ssTot = trendY.reduce(function(a, y) { return a + (y - meanY) * (y - meanY); }, 0);
+    var ssRes = trendX.reduce(function(a, x, i) { var pred = intercept + slope * x; return a + (trendY[i] - pred) * (trendY[i] - pred); }, 0);
+    var rSquared = ssTot > 0 ? (1 - ssRes / ssTot).toFixed(2) : "N/A";
+
+    // Datasets
+    var datasets = [
+      // Trend line
+      {
+        label: "Trend (R²=" + rSquared + ")",
+        type: "line",
+        data: trendLine,
+        borderColor: "rgba(255,255,255,.15)",
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        pointHitRadius: 0,
+        fill: false
+      },
+      // Lab bubbles
+      {
+        label: "Labs",
+        data: points,
+        backgroundColor: points.map(function(p) { return p.color + "55"; }),
+        borderColor: points.map(function(p) { return p.color; }),
+        borderWidth: 2,
+        pointRadius: points.map(function(p) { return p.r; }),
+        pointHoverRadius: points.map(function(p) { return p.r + 3; }),
+        pointStyle: "circle"
+      }
+    ];
+
+    scatterChartInstance = new Chart(canvas.getContext("2d"), {
+      type: "scatter",
+      data: { datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 30, right: 40, bottom: 10, left: 10 } },
+        scales: {
+          x: {
+            title: { display: true, text: "Compute Capacity (Millions H100e)", color: "rgba(255,255,255,.35)", font: { size: 11 } },
+            grid: { color: "rgba(255,255,255,.04)" },
+            ticks: { color: "rgba(255,255,255,.35)", font: { size: 10 }, callback: function(v) { return v + "M"; } },
+            min: 0
+          },
+          y: {
+            title: { display: true, text: "AA Intelligence Index", color: "rgba(255,255,255,.35)", font: { size: 11 } },
+            grid: { color: "rgba(255,255,255,.04)" },
+            ticks: { color: "rgba(255,255,255,.35)", font: { size: 10 } },
+            min: 20,
+            max: isProjected ? 90 : 70
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(8,8,28,.96)",
+            borderColor: "rgba(255,255,255,.12)",
+            borderWidth: 1,
+            titleColor: "#fff",
+            bodyColor: "rgba(255,255,255,.7)",
+            titleFont: { size: 13, weight: "700" },
+            bodyFont: { size: 11 },
+            padding: 12,
+            displayColors: false,
+            filter: function(item) { return item.datasetIndex === 1; },
+            callbacks: {
+              title: function(items) {
+                var pt = items[0].raw;
+                return pt.modelName + (pt.est ? " (est.)" : "");
+              },
+              label: function(ctx) {
+                var pt = ctx.raw;
+                return [
+                  "Lab: " + pt.lab,
+                  "Compute: " + Data.formatH100(pt.hRaw) + " H100e",
+                  "Power: " + Data.formatPower(pt.pRaw),
+                  "AA Index: " + pt.y + (pt.est ? " (estimated)" : ""),
+                  "Benchmark wins: " + pt.wins,
+                  "Capability/GW: " + pt.capPerMW
+                ];
+              }
+            }
+          },
+          annotation: {
+            annotations: points.reduce(function(acc, pt, i) {
+              acc["label" + i] = {
+                type: "label",
+                xValue: pt.x,
+                yValue: pt.y,
+                content: [pt.lab + (pt.est ? "*" : "")],
+                color: pt.color,
+                font: { size: 10, weight: "600" },
+                position: { x: "center", y: "end" },
+                yAdjust: -(pt.r + 6),
+                backgroundColor: "transparent"
+              };
+              return acc;
+            }, {})
+          }
+        }
+      }
+    });
+
+    // Update key finding
+    var kf = document.getElementById("kfScatter");
+    if (kf) {
+      // Find most efficient lab (highest AA / lowest compute)
+      var sorted = points.slice().sort(function(a, b) {
+        var effA = a.y / (a.x || 1);
+        var effB = b.y / (b.x || 1);
+        return effB - effA;
+      });
+      var mostEff = sorted[0];
+      var leastEff = sorted[sorted.length - 1];
+      var view = isProjected ? "By Jan 2029" : "Today";
+      kf.innerHTML = view + ', <strong style="color:' + mostEff.color + '">' + mostEff.lab + '</strong> extracts the most intelligence per H100e' +
+        (mostEff.est ? ' (est.)' : '') + ', while <strong style="color:' + leastEff.color + '">' + leastEff.lab + '</strong> has the most compute but lower efficiency. ' +
+        'R² = ' + rSquared + ' — compute explains some but not all of model quality. <span style="color:var(--t3)">Bubble size = power footprint (GW).</span>';
+    }
+  }
+
   // ─── 2029 Projection comparison panel ──────────────────────
   function renderProjPanel(state) {
     var panel = document.getElementById("projPanel");
@@ -3020,6 +3271,10 @@ var UI = (function() {
     document.querySelectorAll("#tP button").forEach(function(b, i) {
       b.className = (i === 0 && state.projMode === "current") || (i === 1 && state.projMode === "2029") ? "on" : "";
     });
+    // Scatter view toggle
+    document.querySelectorAll("#tSc button").forEach(function(b, i) {
+      b.className = (i === 0 && state.scatterView === "observed") || (i === 1 && state.scatterView === "projected") ? "on" : "";
+    });
     // Status filter (both map and card toggles)
     document.querySelectorAll("#tFm button,#tFc button").forEach(function(b) {
       var txt = b.textContent.trim();
@@ -3080,6 +3335,12 @@ var UI = (function() {
     if (dataChanged || !prevState._initialized) {
       renderModels();
       renderMetr();
+      renderScatter(state);
+    }
+
+    // Scatter chart re-renders on scatter view or scope change
+    if (state.scatterView !== prevState.scatterView || state.scope !== prevState.scope || dataChanged) {
+      renderScatter(state);
     }
 
     prevState = Object.assign({}, state, { _initialized: true });
@@ -3095,6 +3356,7 @@ var UI = (function() {
     renderDrawer: renderDrawer,
     renderModels: renderModels,
     renderMetr: renderMetr,
+    renderScatter: renderScatter,
     renderProjPanel: renderProjPanel,
     toggleModelSelection: toggleModelSelection,
     clearModelSelection: clearModelSelection,
@@ -3117,6 +3379,7 @@ var App = (function() {
   function setScope(s)      { Store.set({ scope: s }); }
   function setAllocView(v)  { Store.set({ allocView: v }); }
   function setProjection(p) { Store.set({ projMode: p }); }
+  function setScatterView(v) { Store.set({ scatterView: v }); }
   function setStatus(s)     { Store.set({ statusFilter: s }); }
   function setLabFilter(f)  { Store.set({ labFilter: f }); }
   function setSort(s)       { Store.set({ sortBy: s }); }
@@ -3303,6 +3566,7 @@ var App = (function() {
     setScope: setScope,
     setAllocView: setAllocView,
     setProjection: setProjection,
+    setScatterView: setScatterView,
     setStatus: setStatus,
     setLabFilter: setLabFilter,
     setSort: setSort,
