@@ -80,6 +80,15 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 .kf{margin:0 0 18px;padding:12px 16px;border-left:3px solid rgba(255,255,255,.15);background:rgba(255,255,255,.02);border-radius:0 8px 8px 0;font-size:13px;line-height:1.55;color:rgba(255,255,255,.65);letter-spacing:.2px}
 .kf strong{color:rgba(255,255,255,.9);font-weight:600}
 .stale-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.8px;font-family:var(--m);border:1px solid}
+.meth{margin:0 0 14px;padding:10px 14px;background:rgba(255,170,0,.04);border:1px solid rgba(255,170,0,.12);border-radius:8px;font-size:11px;line-height:1.6;color:rgba(255,255,255,.55);display:none}
+.meth.show{display:block}
+.meth strong{color:rgba(255,255,255,.8)}
+.meth-toggle{font-size:10px;color:rgba(255,170,0,.6);cursor:pointer;letter-spacing:.5px;font-weight:600;border:none;background:none;font-family:inherit;padding:2px 6px;margin-left:4px}
+.meth-toggle:hover{color:rgba(255,170,0,.9)}
+.conf-tag{font-size:8px;font-weight:700;letter-spacing:.5px;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle}
+.conf-tag.ct-c{color:rgba(0,255,135,.8);background:rgba(0,255,135,.1)}
+.conf-tag.ct-l{color:rgba(255,170,0,.8);background:rgba(255,170,0,.1)}
+.conf-tag.ct-s{color:rgba(255,100,100,.8);background:rgba(255,100,100,.1)}
 
 /* ─── Slide-in drawer ──────────────────────────────────────── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -241,10 +250,17 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div class="R">
 <div class="T" id="tM"><button class="on" onclick="App.setMetric('h100e')">H100e</button><button onclick="App.setMetric('power')">POWER</button></div>
 <div class="sep"></div>
-<div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">TRACKED FACILITIES</button><button onclick="App.setScope('fleet')">+ FLEET EST.</button></div>
+<div class="T" id="tS"><button class="on" onclick="App.setScope('tracked')">SATELLITE-VERIFIED</button><button onclick="App.setScope('fleet')">+ FLEET EST. ⚠</button></div>
 <div class="sep"></div>
-<div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">FULL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED</button></div>
+<div class="T" id="tA"><button class="on" onclick="App.setAllocView('full')">TOTAL CAPACITY</button><button onclick="App.setAllocView('dedicated')">EST. DEDICATED ⚠</button></div>
 <div id="leg" style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto"></div>
+<button class="meth-toggle" onclick="var m=document.getElementById('methPanel');m.classList.toggle('show');this.textContent=m.classList.contains('show')?'▾ HIDE METHODOLOGY':'▸ METHODOLOGY'">▸ METHODOLOGY</button>
+</div>
+<div id="methPanel" class="meth">
+<strong>SATELLITE-VERIFIED</strong> — Epoch AI tracks ~15% of global frontier compute via satellite imagery, construction permits, and public disclosures. Each facility has an observation timeline with dated evidence. This is the most reliable view.<br><br>
+<strong>+ FLEET EST. ⚠</strong> — Adds estimates for Gemini's distributed TPU fleet across Google DCs and Anthropic's distributed AWS fleet. These are <em>not</em> from Epoch — they are educated guesses based on public capacity announcements and cloud region data. No satellite verification exists for these.<br><br>
+<strong>TOTAL CAPACITY</strong> — Full compute at each facility as estimated by Epoch. For cloud provider DCs (Azure, AWS, Google Cloud), this includes <em>all</em> capacity — not just what's used for frontier AI training. Epoch's "Users" field carries confidence tags: <span class="conf-tag ct-c">CONFIDENT</span> <span class="conf-tag ct-l">LIKELY</span> <span class="conf-tag ct-s">SPECULATIVE</span><br><br>
+<strong>EST. DEDICATED ⚠</strong> — Applies allocation bands to estimate what fraction of each facility is dedicated to the attributed lab's frontier AI work. Purpose-built facilities (xAI Colossus, Meta, Stargate) get 85-100%. Cloud partnerships (Azure→OpenAI) get 25-40%. General hyperscaler DCs (Google) get 20-35%. <em>These percentages are assumptions, not observed data.</em> The shaded band on the chart shows the low-high range.
 </div>
 <div id="chartRow" style="display:flex;gap:16px;margin-bottom:12px">
 <div style="flex:1;min-width:0;position:relative;height:55vh;min-height:340px"><canvas id="ch"></canvas></div>
@@ -254,7 +270,7 @@ nav a:hover,nav a.on{color:#fff;border-color:rgba(255,255,255,.3)}
 <div id="lbr"></div>
 </div>
 </div>
-<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Tracked Facilities = satellite-verified sites (~15% of global compute) · + Fleet Est. = adds Gemini TPU + Anthropic AWS fleet estimates · Est. Dedicated = allocation bands by facility ownership tier · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
+<div class="fn">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (CC BY 4.0, live CSV) · Satellite-Verified = satellite-confirmed sites (~15% of global compute) · + Fleet Est. = adds Gemini TPU + Anthropic AWS fleet estimates (not from Epoch) · Est. Dedicated = allocation bands by facility ownership tier (see Methodology) · Solid=observed · Dashed=projected · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a></div>
 </section>
 
 <section class="S" id="geomap">
@@ -718,6 +734,16 @@ var Data = (function() {
          : "Other";
   }
 
+  // Extract Epoch confidence tag from Users/Owner fields
+  // Returns "confident", "likely", "speculative", or "unknown"
+  function extractConfidence(users, owner) {
+    var s = (users || "") + " " + (owner || "");
+    if (s.indexOf("#confident") >= 0) return "confident";
+    if (s.indexOf("#likely") >= 0) return "likely";
+    if (s.indexOf("#speculative") >= 0) return "speculative";
+    return "unknown";
+  }
+
   // --- Time series aggregation ---
   // Takes flat entry list [{date, dc, h, p}], labMap, and labs array.
   // Returns cumulative snapshots grouped by lab.
@@ -1083,6 +1109,7 @@ var Data = (function() {
         title: col(r, DC_TITLE) || handle,
         pj: col(r, DC_PROJECT, ""),
         co: labMap[handle] || "Other",
+        conf: extractConfidence(col(r, DC_USERS, ""), col(r, DC_OWNER, "")),
         h: Number(col(r, DC_H100E, 0)) || 0,
         pw: Number(col(r, DC_POWER, 0)) || 0,
         cs: Number(col(r, DC_COST, 0)) || 0,
@@ -1915,7 +1942,8 @@ var UI = (function() {
         '<td style="text-align:center">' + statusIcon + '</td>' +
         '<td class="nm"><div style="font-weight:600;font-size:12px">' + Data.shortName(dc.title) + '</div>' +
           '<div style="font-size:9px;color:var(--t3);margin-top:1px">' + dc.title.split(" ").slice(-2).join(", ") + '</div></td>' +
-        '<td><span style="color:' + c + ';font-weight:600;font-size:11px">' + dc.co + '</span></td>' +
+        '<td><span style="color:' + c + ';font-weight:600;font-size:11px">' + dc.co + '</span>' +
+          (dc.conf && dc.conf !== "unknown" ? '<span class="conf-tag ct-' + dc.conf[0] + '">' + dc.conf.toUpperCase() + '</span>' : '') + '</td>' +
         '<td>' + confBar + '</td>' +
         '<td class="mono">' + (cf.currentPower ? Data.formatPower(cf.currentPower) : '<span style="color:var(--t4)">—</span>') + '</td>' +
         '<td class="mono">' + (cf.maxPower ? Data.formatPower(cf.maxPower) : '<span style="color:var(--t4)">—</span>') + '</td>' +
