@@ -597,6 +597,19 @@ var Data = (function() {
          : "Other";
   }
 
+  // Classify lab from facility handle/name alone (used when DC CSV is unavailable)
+  function classifyByHandle(handle) {
+    var h = (handle || "").toLowerCase();
+    return h.indexOf("openai") >= 0 || h.indexOf("stargate") >= 0 ? "OpenAI"
+         : h.indexOf("microsoft") >= 0 || h.indexOf("fairwater") >= 0 ? "OpenAI"
+         : h.indexOf("meta ") >= 0 || h.indexOf("prometheus") >= 0 || h.indexOf("hyperion") >= 0 ? "Meta"
+         : h.indexOf("xai") >= 0 || h.indexOf("colossus") >= 0 ? "xAI"
+         : h.indexOf("anthropic") >= 0 || h.indexOf("rainier") >= 0 ? "Anthropic"
+         : h.indexOf("amazon") >= 0 ? "Anthropic"
+         : h.indexOf("google") >= 0 || h.indexOf("crusoe") >= 0 ? "Gemini"
+         : "Other";
+  }
+
   // --- Time series aggregation ---
   // Takes flat entry list [{date, dc, h, p}], labMap, and labs array.
   // Returns cumulative snapshots grouped by lab.
@@ -998,6 +1011,7 @@ var Data = (function() {
     formatAxis: formatAxis,
     shortName: shortName,
     classifyLab: classifyLab,
+    classifyByHandle: classifyByHandle,
     col: col,
     dmsToDecimal: dmsToDecimal,
     buildTimeSeries: buildTimeSeries,
@@ -2431,7 +2445,21 @@ var App = (function() {
       }
 
       // Use live entries for time series, but choose labMap based on DC availability
-      var liveLabMap = hasLiveDCs ? parsed.labMap : fallback.labMap;
+      var liveLabMap;
+      if (hasLiveDCs) {
+        liveLabMap = parsed.labMap;
+      } else {
+        // DC CSV unavailable — build labMap from timeline handles using name pattern matching
+        liveLabMap = {};
+        liveEntries.forEach(function(e) {
+          if (e.dc && !liveLabMap[e.dc]) {
+            liveLabMap[e.dc] = Data.classifyByHandle(e.dc);
+          }
+        });
+        liveLabMap.EGC = "Gemini";
+        liveLabMap.EAI = "Anthropic";
+        console.log("[Epoch] Built labMap from " + Object.keys(liveLabMap).length + " timeline handles:", JSON.stringify(liveLabMap));
+      }
       var liveDCs = hasLiveDCs ? parsed.dataCenters : fallback.dataCenters;
       var liveTimeline = parsed.timeline.length > 0 ? parsed.timeline : fallback.timeline;
       var liveEntries = parsed.entries;
