@@ -1294,14 +1294,20 @@ var Data = (function() {
   function buildProjections2029(series, labs, growth, projEnd, uncertainty) {
     if (!series || !series.length) return { central: [], low: [], high: [] };
 
-    // Find the last data point
-    var last = series[series.length - 1];
-    var lastDate = new Date(last.date + "T00:00:00");
+    // Use the last OBSERVED point (date <= today) as the projection baseline.
+    // This is critical because live Epoch data may project past projEnd (Jan 2029),
+    // which would make elapsed negative and produce empty arrays.
+    var today = CFG.today;
+    var observed = series.filter(function(x) { return x.date <= today; });
+    var anchor = observed.length ? observed[observed.length - 1] : series[series.length - 1];
+    var anchorDate = new Date(anchor.date + "T00:00:00");
     var endDate = new Date(projEnd + "T00:00:00");
 
-    // Generate quarterly dates from last date to projEnd
+    if (anchorDate >= endDate) return { central: [], low: [], high: [] };
+
+    // Generate quarterly dates from anchor to projEnd
     var dates = [];
-    var cur = new Date(lastDate);
+    var cur = new Date(anchorDate);
     // Advance to next quarter boundary
     cur.setMonth(cur.getMonth() + 3 - (cur.getMonth() % 3));
     cur.setDate(1);
@@ -1318,17 +1324,17 @@ var Data = (function() {
     var central = [], low = [], high = [];
 
     dates.forEach(function(d) {
-      // Years elapsed since last observed data point
-      var elapsed = (new Date(d) - lastDate) / (365.25 * 86400000);
+      // Years elapsed since the observed anchor point
+      var elapsed = (new Date(d) - anchorDate) / (365.25 * 86400000);
       if (elapsed <= 0) return;
 
       var ptC = { date: d }, ptL = { date: d }, ptH = { date: d };
       labs.forEach(function(lab) {
         var g = growth[lab] || { compute: 4.0, power: 2.0 };
-        var baseH = last[lab] || 0;
-        var baseP = last[lab + "_pw"] || 0;
+        var baseH = anchor[lab] || 0;
+        var baseP = anchor[lab + "_pw"] || 0;
 
-        // Central projection: compound growth
+        // Central projection: compound growth from today's observed capacity
         var projH = Math.round(baseH * Math.pow(g.compute, elapsed));
         var projP = Math.round(baseP * Math.pow(g.power, elapsed));
 
@@ -1526,7 +1532,11 @@ var Store = (function() {
     var base = activeSeries();
     if (state.projMode !== "2029") return base;
     var proj = ensureProjections();
-    return base.concat(proj.central);
+    // Only append projection points that extend beyond existing series
+    // (base series may already project to 2028+ via Epoch data)
+    var lastBaseDate = base.length ? base[base.length - 1].date : "";
+    var extra = proj.central.filter(function(p) { return p.date > lastBaseDate; });
+    return base.concat(extra);
   }
 
   // Get just the projection data
