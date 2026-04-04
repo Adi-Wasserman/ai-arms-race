@@ -363,12 +363,29 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 <div class="R">
 <div class="T" id="tFc"><button class="on" onclick="App.setStatus('ALL')">ALL</button><button onclick="App.setStatus('OP')">LIVE</button><button onclick="App.setStatus('BLD')">BUILDING</button><button onclick="App.setStatus('PLN')">PLANNED</button></div>
 <span style="flex:1"></span>
-<button class="meth-toggle" onclick="var p=document.getElementById('sigLegend');p.classList.toggle('show');this.textContent=p.classList.contains('show')?'▾ HIDE SIGNALS':'▸ SIGNAL LEGEND'" style="color:rgba(0,255,135,.6)">▸ SIGNAL LEGEND</button>
 <button class="P exp" onclick="Export.exportIntelCSV()">📊 EXPORT CSV</button>
 </div>
-<div id="sigLegend" class="meth" style="background:rgba(0,255,135,.02);border-color:rgba(0,255,135,.1)">
-<div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.7);margin-bottom:10px">SATELLITE OBSERVATION SIGNALS</div>
-<div style="font-size:11px;color:var(--t2);margin-bottom:8px">Each signal represents physical construction evidence extracted from Epoch AI's satellite imagery timeline. Together they tell the buildout progression story for each facility.</div>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.015)">
+<span style="font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:700;margin-right:4px">SIGNALS:</span>
+<span style="font-size:11px" title="Cooling towers (~30MW each)">🗼 Cooling</span>
+<span style="color:var(--t4)">·</span>
+<span style="font-size:11px" title="Air-cooled chillers">❄️ Chillers</span>
+<span style="color:var(--t4)">·</span>
+<span style="font-size:11px" title="Roof complete → ~5-7mo to live">🏗️ Roof</span>
+<span style="color:var(--t4)">·</span>
+<span style="font-size:11px" title="Backup generators installed">⚡ Generators</span>
+<span style="color:var(--t4)">·</span>
+<span style="font-size:11px" title="Grid substation connected — power flowing">🔌 Substation</span>
+<span style="color:var(--t4)">·</span>
+<span style="font-size:11px" title="On-site gas turbines">🔥 Turbines</span>
+<span style="color:var(--t4)">·</span>
+<span style="font-size:11px;color:rgba(255,100,100,.7)" title="Construction delay or pause">⚠️ Delay</span>
+<span style="flex:1"></span>
+<button class="meth-toggle" onclick="var p=document.getElementById('sigLegend');p.classList.toggle('show');this.textContent=p.classList.contains('show')?'▾ LESS':'▸ DETAILS'" style="color:rgba(0,255,135,.6);font-size:9px">▸ DETAILS</button>
+</div>
+<div id="sigLegend" class="meth" style="background:rgba(0,255,135,.02);border-color:rgba(0,255,135,.1);margin-top:0">
+<div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.7);margin-bottom:8px">CONSTRUCTION SIGNAL DETAILS</div>
+<div style="font-size:11px;color:var(--t2);margin-bottom:8px">Each signal represents physical construction evidence extracted from Epoch AI's satellite timeline. Together they tell the buildout progression story for each facility.</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">🗼</span>
@@ -376,30 +393,30 @@ All cloud-lease numbers are <em>"up to"</em> commitments — actual deployed cap
 </div>
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">❄️</span>
-<div><div style="font-size:11px;font-weight:600;color:#fff">CHILLERS</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Air-cooled chiller units spotted. Alternative to cooling towers — used in drier climates or liquid-cooling setups. Power estimated via cooling model.</div></div>
+<div><div style="font-size:11px;font-weight:600;color:#fff">CHILLERS</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Air-cooled chiller units. Alternative to cooling towers — used in drier climates or liquid-cooling setups. Power estimated via cooling model.</div></div>
 </div>
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">🏗️</span>
-<div><div style="font-size:11px;font-weight:600;color:#fff">ROOF COMPLETE</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Building roof finished and visible from satellite. Historically, sites go live <strong>~5-7 months after roof completion</strong>. Strong timeline indicator.</div></div>
+<div><div style="font-size:11px;font-weight:600;color:#fff">ROOF COMPLETE</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Building roof finished. Sites go live <strong>~5-7 months after roof</strong>. Strong timeline indicator.</div></div>
 </div>
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">⚡</span>
-<div><div style="font-size:11px;font-weight:600;color:#fff">GENERATORS INSTALLED</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Backup diesel/gas generators visible on site. Indicates the facility is nearing power-on readiness. Often seen 3-6 months before operational.</div></div>
+<div><div style="font-size:11px;font-weight:600;color:#fff">GENERATORS INSTALLED</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Backup generators on site. Nearing power-on readiness. Often seen 3-6 months before operational.</div></div>
 </div>
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">🔌</span>
-<div><div style="font-size:11px;font-weight:600;color:#fff">SUBSTATION CONNECTED</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Grid substation completed and connected to the facility. <strong>Power is flowing.</strong> This is the strongest signal that a site is operational or days from it.</div></div>
+<div><div style="font-size:11px;font-weight:600;color:#fff">SUBSTATION CONNECTED</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Grid substation complete and connected. <strong>Power is flowing.</strong> Strongest signal a site is near-operational.</div></div>
 </div>
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">🔥</span>
-<div><div style="font-size:11px;font-weight:600;color:#fff">ON-SITE TURBINES</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Natural gas turbines on site. Indicates dedicated on-site power generation — the facility isn't waiting for grid power. Common at remote or high-priority sites.</div></div>
+<div><div style="font-size:11px;font-weight:600;color:#fff">ON-SITE TURBINES</div><div style="font-size:10px;color:var(--t2);margin-top:2px">Natural gas turbines — dedicated on-site power. Facility isn't waiting for grid power. Common at high-priority sites.</div></div>
 </div>
 <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.015)">
 <span style="font-size:16px;flex-shrink:0">⚠️</span>
-<div><div style="font-size:11px;font-weight:600;color:#fff">DELAY / PAUSE</div><div style="font-size:10px;color:var(--t2);margin-top:2px;color:rgba(255,100,100,.7)">Construction pause or delay noted in timeline. Possible causes: permitting issues, power availability, supply chain, or strategic reprioritization. Reduces confidence score by 15 points.</div></div>
+<div><div style="font-size:11px;font-weight:600;color:#fff;color:rgba(255,100,100,.8)">DELAY / PAUSE</div><div style="font-size:10px;color:var(--t2);margin-top:2px;color:rgba(255,100,100,.6)">Construction pause or delay. Permitting, power, supply chain, or strategic reprioritization. Reduces confidence by 15 points.</div></div>
 </div>
 </div>
-<div style="margin-top:10px;font-size:10px;color:var(--t3);line-height:1.5"><strong>Reading the signals:</strong> A typical buildout progression is: land clearing → foundation → 🏗️ roof → ⚡ generators → 🗼 cooling towers → 🔌 substation → operational. Sites with more green signals and higher counts are further along. The absence of signals doesn't mean no progress — it means Epoch's satellite observations haven't captured specific milestones yet.</div>
+<div style="margin-top:10px;font-size:10px;color:var(--t3);line-height:1.5"><strong>Buildout progression:</strong> land clearing → foundation → 🏗️ roof → ⚡ generators → 🗼 cooling → 🔌 substation → operational. More green signals + higher counts = further along. Absence of signals = no satellite observation yet, not necessarily no progress.</div>
 </div>
 <div class="dt-wrap"><table class="dt-tbl"><thead id="dtHead"></thead><tbody id="dtBody"></tbody></table></div>
 <div class="fn" style="margin-top:8px">DATA: <a href="https://epoch.ai/data/data-centers" target="_blank">Epoch AI Frontier Data Centers</a> (H100e, power, cost, timelines) · <a href="https://epoch.ai/data/data-centers-documentation" target="_blank">Methodology</a> · Satellite preview: <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank">ESRI World Imagery</a> · Confidence scores derived from construction phase, power ramp, and observation count · ±6mo/±1.4×</div>
