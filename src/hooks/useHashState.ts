@@ -7,6 +7,7 @@ import type {
   LabFilter,
   MetricMode,
   ProjMode,
+  RaceMode,
   ScatterView,
   ScopeMode,
   VelocityMode,
@@ -37,6 +38,7 @@ const DEFAULTS = {
   scatterView: 'observed' as ScatterView,
   velocityMode: 'absolute' as VelocityMode,
   labFilter: 'ALL' as LabFilter,
+  raceMode: 'effective' as RaceMode,
 } as const;
 
 /** Partial patch of store fields this hook reads from / writes to the hash. */
@@ -47,6 +49,7 @@ interface HashPatch {
   scatterView?: ScatterView;
   velocityMode?: VelocityMode;
   labFilter?: LabFilter;
+  raceMode?: RaceMode;
 }
 
 interface ParsedHash {
@@ -105,6 +108,9 @@ export function parseHash(): ParsedHash {
   if (params.lab) {
     if (params.lab === 'ALL' || isLab(params.lab)) patch.labFilter = params.lab;
   }
+  if (params.mode === 'effective' || params.mode === 'ownership') {
+    patch.raceMode = params.mode;
+  }
 
   return {
     section: isValidSection(rawSection) ? rawSection : null,
@@ -134,6 +140,9 @@ export function buildHash(state: Required<HashPatch>): string {
   if (state.labFilter !== DEFAULTS.labFilter) {
     params.push(`lab=${encodeURIComponent(state.labFilter)}`);
   }
+  if (state.raceMode !== DEFAULTS.raceMode) {
+    params.push(`mode=${state.raceMode}`);
+  }
 
   return `#${section}${params.length > 0 ? `?${params.join('&')}` : ''}`;
 }
@@ -155,6 +164,7 @@ export function useHashState(): void {
   const setScatterView = useDashboard((s) => s.setScatterView);
   const setVelocityMode = useDashboard((s) => s.setVelocityMode);
   const setLabFilter = useDashboard((s) => s.setLabFilter);
+  const setRaceMode = useDashboard((s) => s.setRaceMode);
 
   const suppressRef = useRef(false);
 
@@ -166,6 +176,7 @@ export function useHashState(): void {
     if (patch.scatterView) setScatterView(patch.scatterView);
     if (patch.velocityMode) setVelocityMode(patch.velocityMode);
     if (patch.labFilter) setLabFilter(patch.labFilter);
+    if (patch.raceMode) setRaceMode(patch.raceMode);
   };
 
   // --- Mount: read hash → store, scroll to section. ---
@@ -212,7 +223,8 @@ export function useHashState(): void {
         state.projMode === prev.projMode &&
         state.scatterView === prev.scatterView &&
         state.velocityMode === prev.velocityMode &&
-        state.labFilter === prev.labFilter
+        state.labFilter === prev.labFilter &&
+        state.raceMode === prev.raceMode
       ) {
         return;
       }
@@ -225,6 +237,7 @@ export function useHashState(): void {
         scatterView: state.scatterView,
         velocityMode: state.velocityMode,
         labFilter: state.labFilter,
+        raceMode: state.raceMode,
       });
       if (window.location.hash !== next) {
         suppressRef.current = true;

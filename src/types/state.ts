@@ -9,6 +9,18 @@ export type ScopeMode = 'tracked' | 'fleet';
 export type ProjMode = 'current' | '2029';
 export type VelocityMode = 'absolute' | 'velocity';
 
+/**
+ * Race section view mode.
+ *
+ *   "effective"  → existing time-series chart + leaderboard sidebar.
+ *                  Shows compute that each lab has *access* to (their
+ *                  own facilities + their cloud-lease allocations).
+ *   "ownership"  → new table view sourced from Epoch's AI Chip Owners
+ *                  ZIP. Shows who *bought* the chips, regardless of
+ *                  who consumes them. Only meaningful when scope=fleet.
+ */
+export type RaceMode = 'effective' | 'ownership';
+
 /** "ALL" or a single lab name. */
 export type LabFilter = 'ALL' | Lab;
 

@@ -38,6 +38,30 @@
   margin-bottom: 12px;
 }
 
+/**
+ * Mode toggle row — only rendered when scope=fleet. Sits between the
+ * primary toggle row and the chart/ownership body.
+ */
+.modeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.modeInfo {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  cursor: help;
+  user-select: none;
+  line-height: 1;
+  padding: 2px;
+}
+
+.modeInfo:hover {
+  color: var(--color-text-primary);
+}
+
 .fn {
   font-size: var(--font-size-base);
   color: var(--color-text-tertiary);

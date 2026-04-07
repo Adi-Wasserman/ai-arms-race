@@ -1,0 +1,367 @@
+/* ─────────────────────────────────────────────────────────────
+   Ownership view — full-width table that replaces the chart row
+   when raceMode === 'ownership'. Sourced from the Epoch AI
+   Chip Owners ZIP via useEpochChipOwners.
+   ───────────────────────────────────────────────────────────── */
+
+.wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.015);
+  overflow-x: auto;
+}
+
+.metaBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(0, 255, 135, 0.025);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.metaBar.stale {
+  background: rgba(255, 170, 0, 0.04);
+}
+
+.metaBar.error {
+  background: rgba(255, 68, 68, 0.05);
+}
+
+.metaDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-lab-openai);
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(0, 255, 135, 0.5);
+}
+
+.metaDot.stale {
+  background: var(--color-lab-anthropic);
+  box-shadow: none;
+}
+
+.metaDot.error {
+  background: var(--color-lab-xai);
+  box-shadow: none;
+}
+
+.metaLabel {
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.3px;
+}
+
+.metaValue {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.metaLink {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.2);
+  text-underline-offset: 2px;
+  margin-left: auto;
+}
+
+.metaLink:hover {
+  color: var(--color-text-primary);
+}
+
+.refreshBtn {
+  padding: 3px 10px;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  border: 1px solid rgba(0, 255, 135, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 255, 135, 0.06);
+  color: rgba(0, 255, 135, 0.8);
+  cursor: pointer;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.refreshBtn:hover {
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--color-lab-openai);
+}
+
+.refreshBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ─── Table ──────────────────────────────────────── */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 880px;
+}
+
+.th {
+  position: sticky;
+  top: 0;
+  background: rgba(8, 8, 28, 0.95);
+  backdrop-filter: var(--blur-panel);
+  padding: 10px 12px;
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.th.right {
+  text-align: right;
+}
+
+.row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background var(--transition-fast);
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.td {
+  padding: 12px;
+  vertical-align: middle;
+  font-size: var(--font-size-md);
+}
+
+.td.right {
+  text-align: right;
+}
+
+/* Rank circle */
+.rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.rankGold {
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--color-medal-gold);
+}
+
+.rankSilver {
+  background: rgba(192, 192, 192, 0.1);
+  color: var(--color-medal-silver);
+}
+
+.rankBronze {
+  background: rgba(205, 127, 50, 0.1);
+  color: var(--color-medal-bronze);
+}
+
+.rankDefault {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-tertiary);
+}
+
+/* Owner column */
+.ownerName {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.ownerLab {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+.ownerSub {
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* H100e column */
+.h100eMain {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.h100eRange {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+/* Power column */
+.power {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+/* % global column */
+.pctGlobalCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 90px;
+}
+
+.pctGlobalValue {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.pctGlobalBarTrack {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pctGlobalBarFill {
+  height: 100%;
+  background: var(--color-text-secondary);
+  border-radius: 2px;
+}
+
+/* Chip mix column */
+.chipMix {
+  min-width: 220px;
+  max-width: 280px;
+}
+
+.chipMixBar {
+  display: flex;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+}
+
+.chipMixSegment {
+  height: 100%;
+  flex-shrink: 0;
+  cursor: help;
+}
+
+.chipMixLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 6px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+}
+
+.chipMixLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chipMixLegendDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 2029 projection column */
+.proj {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  color: rgba(255, 170, 0, 0.85);
+  font-weight: 600;
+}
+
+.projMuted {
+  color: var(--color-text-quaternary);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.projGrowth {
+  font-size: 9px;
+  color: rgba(255, 170, 0, 0.55);
+  margin-top: 2px;
+}
+
+/* Confidence badge */
+.confBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.confHigh {
+  color: rgba(0, 255, 135, 0.85);
+  background: rgba(0, 255, 135, 0.08);
+  border: 1px solid rgba(0, 255, 135, 0.18);
+}
+
+.confMed {
+  color: rgba(255, 170, 0, 0.85);
+  background: rgba(255, 170, 0, 0.06);
+  border: 1px solid rgba(255, 170, 0, 0.18);
+}
+
+.confLow {
+  color: rgba(255, 100, 100, 0.85);
+  background: rgba(255, 100, 100, 0.06);
+  border: 1px solid rgba(255, 100, 100, 0.18);
+}
+
+.confUnknown {
+  color: var(--color-text-quaternary);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+}
+
+/* Loading / error states */
+.skeleton {
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-md);
+  font-family: var(--font-mono);
+}
+
+.errorMsg {
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: rgba(255, 100, 100, 0.85);
+  font-size: var(--font-size-md);
+  font-family: var(--font-mono);
+}

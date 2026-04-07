@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 
+import {
+  createChipOwnersSlice,
+  type ChipOwnersSlice,
+} from './slices/chipOwnersSlice';
 import { createDataSlice, type DataSlice } from './slices/dataSlice';
 import { createIntelSlice, type IntelSlice } from './slices/intelSlice';
 import { createMapSlice, type MapSlice } from './slices/mapSlice';
@@ -12,7 +16,12 @@ import { createRaceSlice, type RaceSlice } from './slices/raceSlice';
  * fields, with one exception: `setScope` / `setMetric` / `setData` also
  * null out `proj2029` to invalidate the projection cache.
  */
-export type DashboardState = DataSlice & RaceSlice & IntelSlice & ModelsSlice & MapSlice;
+export type DashboardState = DataSlice &
+  RaceSlice &
+  IntelSlice &
+  ModelsSlice &
+  MapSlice &
+  ChipOwnersSlice;
 
 export const useDashboard = create<DashboardState>()((...args) => ({
   ...createDataSlice(...args),
@@ -20,10 +29,19 @@ export const useDashboard = create<DashboardState>()((...args) => ({
   ...createIntelSlice(...args),
   ...createModelsSlice(...args),
   ...createMapSlice(...args),
+  ...createChipOwnersSlice(...args),
 }));
 
 /** Non-reactive read (use inside event handlers, selectors, etc). */
 export const getDashboardState = (): DashboardState => useDashboard.getState();
 
-export type { DataSlice, RaceSlice, IntelSlice, ModelsSlice, MapSlice };
+export type {
+  ChipOwnersSlice,
+  DataSlice,
+  IntelSlice,
+  MapSlice,
+  ModelsSlice,
+  RaceSlice,
+};
 export type { DataPayload, DataSource } from './slices/dataSlice';
+export type { ChipOwnersSource } from './slices/chipOwnersSlice';

@@ -7,3 +7,4 @@ export * from './metr';
 export * from './signals';
 export * from './map';
 export * from './state';
+export * from './chipOwners';
