@@ -179,18 +179,18 @@ export function FrontierOutlookCard(): JSX.Element | null {
             </p>
           ) : (
             <p className={styles.lede}>
-              <strong>Access leaders</strong> (OpenAI, Anthropic) still
-              dominate frontier releases today. Labs with the highest{' '}
+              <strong>Access leaders</strong> (OpenAI, Anthropic) currently
+              dominate frontier model releases. Labs with the highest{' '}
               <strong>% hardware ownership</strong> (Gemini, Meta, xAI)
-              have the strongest moat for sustained scaling beyond 2027,
-              per Epoch AI data.
+              have the strongest strategic moat for sustained scaling
+              beyond 2027, per Epoch AI data.
             </p>
           )}
 
           {ranked == null ? (
             <div className={styles.skeleton}>Loading Epoch chip owners…</div>
           ) : (
-            <ol className={styles.list}>
+            <div className={styles.list} role="list">
               {ranked.map((r, i) => {
                 // OpenAI is the 0%-owned "last place" row. Its lab brand
                 // color (#10a37f) reads as green/positive — overriding it
@@ -202,8 +202,9 @@ export function FrontierOutlookCard(): JSX.Element | null {
                 const nameColor = isOpenAI ? '#9a9a9a' : labColor;
                 const star = !r.isDerivedFromEpoch ? '*' : '';
                 return (
-                  <li
+                  <div
                     key={r.lab}
+                    role="listitem"
                     className={styles.row}
                     style={{ '--row-color': rowColor } as CSSProperties}
                   >
@@ -228,10 +229,10 @@ export function FrontierOutlookCard(): JSX.Element | null {
                         </span>
                       )}
                     </span>
-                  </li>
+                  </div>
                 );
               })}
-            </ol>
+            </div>
           )}
 
           <p className={styles.footnote}>
