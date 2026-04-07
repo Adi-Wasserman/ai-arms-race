@@ -16,82 +16,88 @@ import styles from './OwnershipTable.module.css';
 /* ─────────────────────────────────────────────────────────────
    Chip-mix color palette.
 
-   Design rationale: assign maximally distinct colors to chip
-   types that ACTUALLY APPEAR TOGETHER in the same row. Earlier
-   tries grouped tonally by manufacturer (all Nvidia = greens),
-   which blended Microsoft / Meta / Amazon / Oracle into one
-   undifferentiated green block — those 4 owners all hold the
-   same 4 Nvidia chip types in the current snapshot.
+   Design rationale: bounded hue ranges per manufacturer family
+   so the family is visually obvious AT A GLANCE, but individual
+   chips within a family are still distinguishable because they
+   span ~80° of the family hue range (not just different shades
+   of one hue).
 
-   Strategy:
-   - The 4 high-frequency Nvidia chips that co-occur in every
-     hyperscaler row (A100, H100/H200, B200, B300) get the 4
-     most distinct hues from Tableau 10 (blue, green, orange,
-     purple).
-   - Google's 10-chip row consumes the rest of Tableau 10 plus
-     a few Tableau 20 entries for the TPU variants.
-   - China-only export variants (A800, H20, H800) and Amazon's
-     Trainium use the lighter Tableau 20 tints — they never
-     appear in rows that already have the 4 main Nvidia chips,
-     so reuse-by-similarity is fine.
-   - AMD Instinct + Huawei Ascend rarely appear in the snapshot;
-     they get the remaining Tableau 20 entries.
+   - Nvidia       → greens (hue 60°-180°, yellow-green → teal)
+   - Google TPU   → blues  (hue 200°-260°, cyan → indigo)
+   - AWS Trainium → ambers (hue 25°-45°)
+   - AMD          → reds   (hue 0°-15°)
+   - Huawei       → purples (hue 270°-290°)
 
-   Source: Tableau 10/20 categorical palette — these colors are
-   engineered to be perceptually distinguishable from each other.
+   Within Nvidia, the 4 high-frequency hyperscaler chips (A100,
+   H100/H200, B200, B300) are spaced ~35° apart so they're
+   visually distinct even though all clearly "green family":
+
+     A100        olive-green   ~70°
+     H100/H200   emerald       ~125°
+     B200        jade          ~160°
+     B300        teal-cyan     ~178°
+
+   Saturation 50-60% and lightness 45-55% — bright enough to pop
+   on the dashboard's dark navy background but not garish.
+   Tonally consistent with the existing lab/chart palette.
+
+   China-only Nvidia export variants (A800, H800, H20) take
+   in-between green hues — they only co-occur with A100 in
+   China's row, so they don't compete with the main 4.
    ───────────────────────────────────────────────────────────── */
 
 const CHIP_COLORS: Record<string, string> = {
-  // ── Top 4 Nvidia chips (always together in hyperscaler rows) ──
-  // Maximum contrast among themselves.
-  A100: '#4e79a7', // blue   — older generation
-  'H100/H200': '#59a14f', // green  — current Nvidia association
-  B200: '#f28e2c', // orange — newer
-  B300: '#af7aa1', // purple — newest
+  // ── Nvidia (greens, hue 60°-180°) ────────────────────────────
+  // 4 hyperscaler chips — spaced for max contrast within family
+  A100: '#a8b738', //   ~65°  olive-yellow
+  'H100/H200': '#3fa14d', // ~125° emerald (Nvidia-ish brand green)
+  B200: '#1fb586', //   ~160° jade
+  B300: '#13b3a6', //   ~177° teal-cyan
+  // China-only export variants (only co-occur with A100, fill gaps)
+  A800: '#c5c233', //   ~58°  yellow-olive
+  H800: '#6db347', //   ~102° medium leaf green
+  H20: '#2e9d76', //    ~162° forest green
 
-  // ── Google TPU family (only co-occurs with the 4 above in Google's row) ──
-  'TPU v4': '#76b7b2', // teal
-  'TPU v4i': '#9c755f', // brown
-  'TPU v5e': '#edc949', // yellow
-  'TPU v5p': '#ff9da7', // pink
-  'TPU v6e': '#e15759', // red
-  'TPU v7': '#bab0ab', // warm gray
+  // ── Google TPU (blues, hue 200°-260°) ────────────────────────
+  // 6 chips, all in Google's row, spaced across the blue range
+  'TPU v4': '#2c6ed1', //  ~214° royal blue
+  'TPU v4i': '#1d4dab', // ~218° dark navy
+  'TPU v5e': '#4d8eea', // ~214° medium sky
+  'TPU v5p': '#7badf0', // ~213° light sky
+  'TPU v6e': '#5b54d4', // ~243° indigo
+  'TPU v7': '#3eb6dd', //  ~195° cyan
 
-  // ── China-only Nvidia export variants (China row only) ──
-  A800: '#8ed3f4', // light blue
-  H800: '#ffc6cd', // light pink
-  H20: '#c8a482', // tan
+  // ── AWS Trainium (ambers, hue 25°-45°) ───────────────────────
+  Trainium1: '#d57e2a', // ~30° burnt orange
+  Trainium2: '#eba33f', // ~33° amber
 
-  // ── AWS Trainium (Amazon row only) ──
-  Trainium1: '#fcc658', // light yellow-orange
-  Trainium2: '#abd089', // light green
+  // ── AMD Instinct (reds, hue 0°-15°) ──────────────────────────
+  'Instinct MI250X': '#b8453a',
+  'Instinct MI300A': '#cc524a',
+  'Instinct MI300X': '#a83a32',
+  'Instinct MI308X': '#d96058',
+  'Instinct MI325X': '#933027',
+  'Instinct MI350X': '#bd433c',
+  'Instinct MI355X': '#e36e66',
 
-  // ── AMD Instinct (rare) ──
-  'Instinct MI250X': '#d4b9d2', // mauve
-  'Instinct MI300A': '#d3ccc8', // taupe
-  'Instinct MI300X': '#aaccc4', // light teal
-  'Instinct MI308X': '#fff89e', // cream
-  'Instinct MI325X': '#8ed3f4', // light blue (alt)
-  'Instinct MI350X': '#fcc658', // light yellow (alt)
-  'Instinct MI355X': '#ff9896', // salmon
-
-  // ── Huawei Ascend (rare) ──
-  'Ascend 910B': '#4e79a7', // blue (no co-occurrence with A100)
-  'Ascend 910C': '#af7aa1', // purple (no co-occurrence with B300)
+  // ── Huawei Ascend (purples, hue 270°-290°) ───────────────────
+  'Ascend 910B': '#8456b8',
+  'Ascend 910C': '#9d6cc9',
 };
 
 /**
  * Manufacturer color used as a fallback when a future Epoch release
- * adds an unknown chip type. Each manufacturer maps to its own
- * Tableau 10 hue so the fallback color stays distinguishable.
+ * adds an unknown chip type. Each is the central hue of its family,
+ * so an unknown Nvidia chip still renders as "some green" and stays
+ * grouped visually.
  */
 const MFR_COLORS: Record<ChipManufacturer | 'Unknown', string> = {
-  Nvidia: '#59a14f',
-  Google: '#76b7b2',
-  Amazon: '#fcc658',
-  AMD: '#d4b9d2',
-  Huawei: '#4e79a7',
-  Unknown: '#bab0ab',
+  Nvidia: '#3fa14d', // emerald (family center)
+  Google: '#2c6ed1', // royal blue (family center)
+  Amazon: '#d57e2a', // burnt orange (family center)
+  AMD: '#b8453a', // brick red (family center)
+  Huawei: '#8456b8', // medium purple (family center)
+  Unknown: '#7a7a7a',
 };
 
 /** Resolve a per-segment color, falling back through chip-type → manufacturer → unknown. */
