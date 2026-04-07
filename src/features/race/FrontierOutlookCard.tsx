@@ -36,7 +36,7 @@ const EPOCH_BLOG_URL =
  * in the adjacent column).
  */
 const PROOF_LINES: Readonly<Record<Lab, string>> = {
-  Gemini: 'largest self-operated TPU fleet (Google owns the silicon and the data centers)',
+  Gemini: 'largest self-operated TPU fleet (Google owns the silicon)',
   Meta: 'full control of Hyperion + Prometheus — own data centers, own Nvidia chips',
   xAI: 'most vertically integrated pure-play lab — built and operates Colossus 1+2',
   Anthropic: 'transition phase — Trainium2 in flight + first owned sites coming online',
@@ -143,6 +143,13 @@ export function FrontierOutlookCard(): JSX.Element | null {
           </h3>
         </button>
         <div className={styles.headerRight}>
+          <span
+            className={styles.dataBadge}
+            title="Live data from epoch.ai/data/ai_chip_owners.zip"
+          >
+            <span className={styles.dataBadgeDot} aria-hidden="true" />
+            Data: Epoch AI Chip Owners <em>(live)</em>
+          </span>
           <span className={styles.modeIndicator}>
             Currently viewing:{' '}
             <strong>
@@ -164,29 +171,44 @@ export function FrontierOutlookCard(): JSX.Element | null {
 
       {open && (
         <div id="frontier-outlook-body" className={styles.body}>
-          <p className={styles.lede}>
-            <strong>Access leaders</strong> (OpenAI, Anthropic) currently
-            dominate frontier model releases. Labs with the highest{' '}
-            <strong>% hardware ownership</strong> (Gemini, Meta, xAI) have
-            the strongest strategic moat for sustained scaling beyond 2027,
-            per Epoch AI's ownership data.
-          </p>
+          {raceMode === 'ownership' ? (
+            <p className={styles.lede}>
+              <strong>Ownership leaders</strong> (Gemini, Meta, xAI) now
+              have the clearest path to frontier model dominance beyond
+              2027.
+            </p>
+          ) : (
+            <p className={styles.lede}>
+              <strong>Access leaders</strong> (OpenAI, Anthropic) still
+              dominate frontier releases today. Labs with the highest{' '}
+              <strong>% hardware ownership</strong> (Gemini, Meta, xAI)
+              have the strongest moat for sustained scaling beyond 2027,
+              per Epoch AI data.
+            </p>
+          )}
 
           {ranked == null ? (
             <div className={styles.skeleton}>Loading Epoch chip owners…</div>
           ) : (
             <ol className={styles.list}>
               {ranked.map((r, i) => {
-                const color = LAB_COLORS[r.lab];
+                // OpenAI is the 0%-owned "last place" row. Its lab brand
+                // color (#10a37f) reads as green/positive — overriding it
+                // with a neutral gray makes the visual hierarchy match the
+                // ranking instead of inadvertently signaling "good".
+                const isOpenAI = r.lab === 'OpenAI';
+                const labColor = LAB_COLORS[r.lab];
+                const rowColor = isOpenAI ? '#7a7a7a' : labColor;
+                const nameColor = isOpenAI ? '#9a9a9a' : labColor;
                 const star = !r.isDerivedFromEpoch ? '*' : '';
                 return (
                   <li
                     key={r.lab}
                     className={styles.row}
-                    style={{ '--row-color': color } as CSSProperties}
+                    style={{ '--row-color': rowColor } as CSSProperties}
                   >
                     <span className={styles.rank}>{i + 1}</span>
-                    <span className={styles.labName} style={{ color }}>
+                    <span className={styles.labName} style={{ color: nameColor }}>
                       {r.lab}
                     </span>
                     <span className={styles.pct}>
@@ -196,7 +218,7 @@ export function FrontierOutlookCard(): JSX.Element | null {
                     <span className={styles.proof}>→ {r.proof}</span>
                     <span className={styles.sparkSlot}>
                       {r.sparkline ? (
-                        <Sparkline values={r.sparkline} color={color} />
+                        <Sparkline values={r.sparkline} color={labColor} />
                       ) : (
                         <span
                           className={styles.sparkNa}

@@ -75,6 +75,37 @@
   flex-shrink: 0;
 }
 
+.dataBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  padding: 3px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dataBadge em {
+  font-style: normal;
+  color: #00ff87;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.dataBadgeDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #00ff87;
+  box-shadow: 0 0 4px #00ff87;
+  flex-shrink: 0;
+}
+
 .modeIndicator {
   font-family: var(--font-mono);
   font-size: 9px;
@@ -284,6 +315,9 @@
     font-size: 13px;
   }
   .modeIndicator {
+    display: none;
+  }
+  .dataBadge {
     display: none;
   }
   .body {
