@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import { PCT_OWNED_FOOTNOTE } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
+import { formatH100 } from '@/services/format';
 import { computePctOwned, type PctOwnedResult } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
 import type { Lab } from '@/types';
@@ -58,13 +59,24 @@ const SPARKLINE_OWNER: Partial<Record<Lab, string>> = {
   xAI: 'xAI',
 };
 
+/**
+ * Sparkline payload — values + the start year and end value used to
+ * caption the chart so the floating line graph is no longer ambiguous.
+ * Caption renders as e.g. `'22 → 5.4M H100e` below the chart.
+ */
+interface SparklineData {
+  values: number[];
+  startYear: number;
+  endValue: number;
+}
+
 interface RankedLab {
   lab: Lab;
   pct: number;
   ownedH100e: number;
   isDerivedFromEpoch: boolean;
   proof: string;
-  sparkline: number[] | null;
+  sparkline: SparklineData | null;
 }
 
 export function FrontierOutlookCard(): JSX.Element | null {
@@ -114,18 +126,27 @@ export function FrontierOutlookCard(): JSX.Element | null {
      * 2.30M to 1.95M) ARE preserved — only undefined / missing rows
      * are forward-filled.
      */
-    const sparklineFor = (ownerName: string): number[] => {
+    const sparklineFor = (ownerName: string): SparklineData | null => {
       let lastKnown = 0;
-      const filled = since2022.map((p) => {
+      const filled: number[] = [];
+      for (const p of since2022) {
         const v = p.byOwner[ownerName];
-        if (v != null) {
-          lastKnown = v;
-          return v;
-        }
-        return lastKnown;
-      });
+        if (v != null) lastKnown = v;
+        filled.push(lastKnown);
+      }
       const firstNonZero = filled.findIndex((v) => v > 0);
-      return firstNonZero === -1 ? [] : filled.slice(firstNonZero);
+      if (firstNonZero === -1) return null;
+      const values = filled.slice(firstNonZero);
+      if (values.length < 2) return null;
+      const startYear = parseInt(
+        since2022[firstNonZero].endDate.slice(0, 4),
+        10,
+      );
+      return {
+        values,
+        startYear,
+        endValue: values[values.length - 1],
+      };
     };
 
     const rows: RankedLab[] = LAB_NAMES.map((lab): RankedLab => {
@@ -135,14 +156,13 @@ export function FrontierOutlookCard(): JSX.Element | null {
         chipOwners,
       );
       const sparkOwner = SPARKLINE_OWNER[lab];
-      const series = sparkOwner ? sparklineFor(sparkOwner) : null;
       return {
         lab,
         pct: result.pct,
         ownedH100e: result.ownedH100e,
         isDerivedFromEpoch: result.isDerivedFromEpoch,
         proof: PROOF_LINES[lab],
-        sparkline: series && series.length > 1 ? series : null,
+        sparkline: sparkOwner ? sparklineFor(sparkOwner) : null,
       };
     });
 
@@ -255,7 +275,17 @@ export function FrontierOutlookCard(): JSX.Element | null {
                     <span className={styles.proof}>→ {r.proof}</span>
                     <span className={styles.sparkSlot}>
                       {r.sparkline ? (
-                        <Sparkline values={r.sparkline} color={labColor} />
+                        <span className={styles.sparkContainer}>
+                          <Sparkline
+                            values={r.sparkline.values}
+                            color={labColor}
+                          />
+                          <span className={styles.sparkCaption}>
+                            &apos;
+                            {String(r.sparkline.startYear).slice(2)} →{' '}
+                            {formatH100(r.sparkline.endValue)} H100e
+                          </span>
+                        </span>
                       ) : (
                         <span
                           className={styles.sparkNa}

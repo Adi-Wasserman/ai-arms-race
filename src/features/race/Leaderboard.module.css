@@ -126,26 +126,65 @@
   transition: width 0.25s;
 }
 
-/* "Owned X% · [chip mix bar]" line under each row's metric bar. */
+/**
+ * Two stacked rows under each lab's metric bar:
+ *   OWNED [██████░░░░░] 25%   ← real progress bar (lab-colored, fill = pct)
+ *   CHIPS [████████████]      ← manufacturer mix bar (separate visual)
+ * The dedicated OWNED progress bar means the fill width literally
+ * equals the % owned — no more confusion with the chip-mix bar.
+ */
 .ownership {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 5px;
+}
+
+.ownedRow,
+.chipsRow {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 4px;
 }
 
-.ownedLabel {
-  font-size: 9px;
+.ownedRow {
+  cursor: help;
+}
+
+.ownershipLabel {
+  font-size: 8px;
   font-family: var(--font-mono);
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
+  color: var(--color-text-quaternary);
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  width: 32px;
   flex-shrink: 0;
 }
 
-.ownedLabel strong {
-  color: var(--color-text-primary);
+.ownedTrack {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+}
+
+.ownedFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.ownedPct {
+  font-size: 10px;
+  font-family: var(--font-mono);
   font-weight: 700;
+  color: var(--color-text-primary);
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .chipMixSlot {

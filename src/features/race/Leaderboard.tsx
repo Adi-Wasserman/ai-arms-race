@@ -173,24 +173,46 @@ export function Leaderboard(): JSX.Element | null {
                   />
                 </div>
 
-                {/* ─── % Owned + chip-mix bar ─── */}
+                {/* ─── % Owned (real progress bar) + chip-mix bar ───
+                    Two stacked, clearly-labeled rows so the ownership %
+                    and the manufacturer mix can't be visually confused.
+                    The OWNED fill width literally equals the percentage
+                    — Anthropic 25% renders as a quarter-filled bar, not
+                    the near-full green bar the chip-mix used to draw. */}
                 {(r.pctOwned != null || r.chipMix) && (
                   <div className={styles.ownership}>
                     {r.pctOwned != null && (
-                      <span
-                        className={styles.ownedLabel}
+                      <div
+                        className={styles.ownedRow}
                         title={r.pctOwned.footnote ?? PCT_OWNED_TOOLTIP}
                       >
-                        Owned <strong>{r.pctOwned.pct}%</strong>
-                      </span>
+                        <span className={styles.ownershipLabel}>OWNED</span>
+                        <div className={styles.ownedTrack}>
+                          <div
+                            className={styles.ownedFill}
+                            style={{
+                              width: `${r.pctOwned.pct}%`,
+                              background: color,
+                            }}
+                          />
+                        </div>
+                        <span className={styles.ownedPct}>
+                          {r.pctOwned.pct}%
+                        </span>
+                      </div>
                     )}
-                    <div className={styles.chipMixSlot}>
-                      <ManufacturerMixBar
-                        segments={r.chipMix}
-                        size="tiny"
-                        showSegmentTitle
-                      />
-                    </div>
+                    {r.chipMix && (
+                      <div className={styles.chipsRow}>
+                        <span className={styles.ownershipLabel}>CHIPS</span>
+                        <div className={styles.chipMixSlot}>
+                          <ManufacturerMixBar
+                            segments={r.chipMix}
+                            size="tiny"
+                            showSegmentTitle
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
