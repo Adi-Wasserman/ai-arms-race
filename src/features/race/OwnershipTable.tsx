@@ -1,18 +1,30 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import {
+  PCT_OWNED_FOOTNOTE,
+  PCT_OWNED_TOOLTIP,
+} from '@/config/labOwnershipMapping';
 import { LAB_COLORS } from '@/config/labs';
 import { PROJ_2029_TARGETS } from '@/data/projections';
 import { useEpochChipOwners } from '@/hooks/useEpochChipOwners';
-import { formatH100, formatPower } from '@/services/format';
+import { formatH100 } from '@/services/format';
+import {
+  computePctOwned,
+  type PctOwnedResult,
+} from '@/services/ownershipMath';
+import { useDashboard } from '@/store';
 import {
   type ChipManufacturer,
+  type EpochChipOwnersData,
   type Lab,
   OWNER_TO_LAB,
   type OwnerSnapshot,
 } from '@/types';
 
 import styles from './OwnershipTable.module.css';
+
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 /* ─────────────────────────────────────────────────────────────
    Chip-mix color palette.
@@ -126,6 +138,13 @@ interface DerivedRow {
   h100eHigh: number;
   powerGw: number;
   pctGlobal: number;
+  /**
+   * Hybrid % Owned result: sum of Epoch chip-owner medians for the
+   * lab's `selfOwned` entries ÷ lab's total effective fleet. Null
+   * when the owner doesn't map to a tracked lab — Oracle/China/Other
+   * have no "effective fleet" concept in our data model.
+   */
+  pctOwned: PctOwnedResult | null;
   chipMix: ChipMixSegment[];
   proj2029: number | null;
   proj2029Growth: number | null;
@@ -185,7 +204,11 @@ function buildChipMix(snapshot: OwnerSnapshot): ChipMixSegment[] {
     }));
 }
 
-function deriveRows(snapshots: OwnerSnapshot[]): DerivedRow[] {
+function deriveRows(
+  snapshots: OwnerSnapshot[],
+  fleetByLab: Partial<Record<Lab, number>>,
+  chipOwners: EpochChipOwnersData | null,
+): DerivedRow[] {
   const totalH100e = snapshots.reduce((s, x) => s + x.h100e, 0) || 1;
 
   return snapshots.map((s, i) => {
@@ -204,6 +227,14 @@ function deriveRows(snapshots: OwnerSnapshot[]): DerivedRow[] {
       }
     }
 
+    // % Owned: hybrid ratio — sum of Epoch chip-owner medians for the
+    // lab's `selfOwned` entries ÷ lab's total effective fleet. Only
+    // computable for tracked labs (unmapped owners have no fleet).
+    const pctOwned =
+      mappedLab && fleetByLab[mappedLab] !== undefined
+        ? computePctOwned(mappedLab, fleetByLab[mappedLab] ?? 0, chipOwners)
+        : null;
+
     return {
       rank: i + 1,
       owner: s.owner,
@@ -213,6 +244,7 @@ function deriveRows(snapshots: OwnerSnapshot[]): DerivedRow[] {
       h100eHigh: s.h100eHigh,
       powerGw: s.powerMw / 1000,
       pctGlobal: (s.h100e / totalH100e) * 100,
+      pctOwned,
       chipMix: buildChipMix(s),
       proj2029,
       proj2029Growth,
@@ -432,10 +464,27 @@ export function OwnershipTable(): JSX.Element {
   const { data, loading, error, lastUpdated, fromCache, refresh } =
     useEpochChipOwners();
 
+  // Pull the full fleet series so deriveRows has a per-lab denominator
+  // for % Owned. dataVersion drives memo invalidation when fresh
+  // Epoch data lands.
+  const seriesFull = useDashboard((s) => s.seriesFull);
+  const dataVersion = useDashboard((s) => s.dataVersion);
+
   const rows = useMemo<DerivedRow[]>(() => {
     if (!data) return [];
-    return deriveRows(data.latestByOwner);
-  }, [data]);
+    const past = seriesFull.filter((x) => x.date <= TODAY_ISO);
+    const fullPt = past.length > 0 ? past[past.length - 1] : null;
+    const fleetByLab: Partial<Record<Lab, number>> = {};
+    if (fullPt) {
+      (['OpenAI', 'Anthropic', 'Gemini', 'Meta', 'xAI'] as Lab[]).forEach(
+        (lab) => {
+          fleetByLab[lab] = fullPt[lab];
+        },
+      );
+    }
+    return deriveRows(data.latestByOwner, fleetByLab, data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, dataVersion]);
 
   /**
    * Currently-hovered chip-mix segment. Tracks the segment + its
@@ -566,6 +615,12 @@ export function OwnershipTable(): JSX.Element {
             </th>
             <th className={`${styles.th} ${styles.right}`}>OWNED POWER</th>
             <th className={`${styles.th} ${styles.right}`}>% OF GLOBAL</th>
+            <th
+              className={`${styles.th} ${styles.right}`}
+              title={PCT_OWNED_TOOLTIP}
+            >
+              % OWNED ⓘ
+            </th>
             <th className={styles.th}>CHIP MIX</th>
             <th className={`${styles.th} ${styles.right}`}>2029 PROJECTION</th>
             <th className={`${styles.th} ${styles.right}`}>CONF</th>
@@ -617,6 +672,45 @@ export function OwnershipTable(): JSX.Element {
                     </div>
                   </div>
                 </td>
+                <td
+                  className={`${styles.td} ${styles.right}`}
+                  title={
+                    row.pctOwned != null
+                      ? (row.pctOwned.footnote ?? PCT_OWNED_TOOLTIP)
+                      : 'Unmapped owner — no effective-fleet data to compare against'
+                  }
+                >
+                  {row.pctOwned != null ? (
+                    <div className={styles.pctOwnedCell}>
+                      <span className={styles.pctOwnedValue}>
+                        {row.pctOwned.pct}%
+                        {!row.pctOwned.isDerivedFromEpoch && (
+                          <span
+                            style={{
+                              marginLeft: 4,
+                              fontSize: 9,
+                              color: 'var(--color-text-tertiary)',
+                              fontWeight: 400,
+                            }}
+                          >
+                            *
+                          </span>
+                        )}
+                      </span>
+                      <div className={styles.pctOwnedBarTrack}>
+                        <div
+                          className={styles.pctOwnedBarFill}
+                          style={{
+                            width: `${row.pctOwned.pct}%`,
+                            background: row.mappedLab ? labColor : '#666',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <span className={styles.projMuted}>—</span>
+                  )}
+                </td>
                 <td className={styles.td}>
                   <ChipMixCell
                     row={row}
@@ -660,6 +754,10 @@ export function OwnershipTable(): JSX.Element {
         }}
       >
         <strong style={{ color: 'rgba(255,255,255,0.65)' }}>{TOOLTIP_TEXT}</strong>
+        <br />
+        <span style={{ color: 'rgba(255,255,255,0.55)' }}>
+          * {PCT_OWNED_FOOTNOTE}
+        </span>
         <br />
         Confidence bands derived from Epoch's Monte Carlo 5th/95th percentile spread.
         2029 projection uses our power-constrained per-lab targets where the owner

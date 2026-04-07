@@ -1,9 +1,17 @@
 import { useMemo } from 'react';
 
+import { ManufacturerMixBar } from '@/components/ui/ManufacturerMixBar';
 import { Toggle } from '@/components/ui/Toggle';
+import { PCT_OWNED_TOOLTIP } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { ANALYST_ESTIMATES } from '@/data/projections';
 import { formatH100, formatPower } from '@/services/format';
+import {
+  computeManufacturerMix,
+  computePctOwned,
+  type ManufacturerSegment,
+  type PctOwnedResult,
+} from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
 import {
   activeProj,
@@ -26,6 +34,10 @@ interface Row {
   lab: Lab;
   h: number;
   p: number;
+  /** Hybrid % Owned result: Epoch-derived chip ownership ÷ effective fleet. */
+  pctOwned: PctOwnedResult | null;
+  /** Manufacturer-rollup chip mix from the Epoch chip-owners snapshot. */
+  chipMix: ManufacturerSegment[] | null;
 }
 
 function rankClass(i: number): string {
@@ -41,6 +53,9 @@ export function Leaderboard(): JSX.Element | null {
   const projMode = useDashboard((s) => s.projMode);
   const setScope = useDashboard((s) => s.setScope);
   const dataVersion = useDashboard((s) => s.dataVersion);
+  // Live chip ownership data + version stamp for memo invalidation.
+  const chipOwners = useDashboard((s) => s.chipOwners);
+  const chipOwnersVersion = useDashboard((s) => s.chipOwnersVersion);
 
   const content = useMemo(() => {
     const state = useDashboard.getState();
@@ -54,10 +69,21 @@ export function Leaderboard(): JSX.Element | null {
     const proj2029Pt =
       proj && proj.central.length > 0 ? proj.central[proj.central.length - 1] : null;
 
+    // % Owned uses the full fleet (+cloud lease) as the denominator
+    // regardless of current scope toggle — the ratio is "of lab's
+    // total effective fleet, how much hardware do they actually own".
+    const seriesFull = state.seriesFull;
+    const fullPast = seriesFull.filter((x) => x.date <= TODAY_ISO);
+    const fullPt = fullPast.length > 0 ? fullPast[fullPast.length - 1] : null;
+
     const rows: Row[] = LAB_NAMES.map((lab) => ({
       lab,
       h: pt[lab],
       p: pt[`${lab}_pw`],
+      pctOwned: fullPt
+        ? computePctOwned(lab, fullPt[lab], chipOwners)
+        : null,
+      chipMix: computeManufacturerMix(lab, chipOwners),
     })).filter((r) => r.h > 0 || r.p > 0);
 
     rows.sort((a, b) => (metric === 'power' ? b.p - a.p : b.h - a.h));
@@ -68,7 +94,9 @@ export function Leaderboard(): JSX.Element | null {
     const totalP = rows.reduce((s, r) => s + r.p, 0);
 
     return { pt, rows, maxVal, totalH, totalP, proj2029Pt, is2029 };
-  }, [metric, scope, projMode, dataVersion]);
+    // chipOwnersVersion drives recompute when the ZIP refreshes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metric, scope, projMode, dataVersion, chipOwnersVersion]);
 
   if (!content) return null;
   const { rows, maxVal, totalH, totalP, proj2029Pt, is2029 } = content;
@@ -144,6 +172,27 @@ export function Leaderboard(): JSX.Element | null {
                     style={{ width: `${barW}%`, background: color }}
                   />
                 </div>
+
+                {/* ─── % Owned + chip-mix bar ─── */}
+                {(r.pctOwned != null || r.chipMix) && (
+                  <div className={styles.ownership}>
+                    {r.pctOwned != null && (
+                      <span
+                        className={styles.ownedLabel}
+                        title={r.pctOwned.footnote ?? PCT_OWNED_TOOLTIP}
+                      >
+                        Owned <strong>{r.pctOwned.pct}%</strong>
+                      </span>
+                    )}
+                    <div className={styles.chipMixSlot}>
+                      <ManufacturerMixBar
+                        segments={r.chipMix}
+                        size="tiny"
+                        showSegmentTitle
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );
