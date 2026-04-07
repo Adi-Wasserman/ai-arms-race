@@ -129,27 +129,21 @@
 }
 
 /**
- * Two stacked rows under each lab's metric bar:
- *   OWNED [██████░░░░░] 25%   ← real progress bar (lab-colored, fill = pct)
- *   CHIPS [████████████]      ← manufacturer mix bar (separate visual)
- * The dedicated OWNED progress bar means the fill width literally
- * equals the % owned — no more confusion with the chip-mix bar.
+ * Single OWNED progress bar under each lab's metric bar.
+ * The chip-mix bar that used to sit below this was visually
+ * redundant (4 of 5 labs are ~100% Nvidia → uniform green strip
+ * with zero signal). Chip-mix info is now surfaced via the OWNED
+ * bar's hover tooltip and lives primarily in OwnershipTable +
+ * OwnershipSidePanel where there's room for the full breakdown.
  */
 .ownership {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   margin-top: 6px;
 }
 
-.ownedRow,
-.chipsRow {
+.ownedRow {
   display: flex;
   align-items: center;
   gap: 7px;
-}
-
-.ownedRow {
   cursor: help;
 }
 
@@ -189,10 +183,6 @@
   flex-shrink: 0;
 }
 
-.chipMixSlot {
-  flex: 1;
-  min-width: 0;
-}
 
 .total {
   margin-top: var(--space-sm);

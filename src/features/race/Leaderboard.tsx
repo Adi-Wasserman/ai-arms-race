@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import { ManufacturerMixBar } from '@/components/ui/ManufacturerMixBar';
 import { Toggle } from '@/components/ui/Toggle';
 import { PCT_OWNED_TOOLTIP } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
@@ -36,7 +35,8 @@ interface Row {
   p: number;
   /** Hybrid % Owned result: Epoch-derived chip ownership ÷ effective fleet. */
   pctOwned: PctOwnedResult | null;
-  /** Manufacturer-rollup chip mix from the Epoch chip-owners snapshot. */
+  /** Manufacturer-rollup chip mix — surfaced via the OWNED bar's hover
+      tooltip only. The full bar lives in OwnershipTable / OwnershipSidePanel. */
   chipMix: ManufacturerSegment[] | null;
 }
 
@@ -45,6 +45,25 @@ function rankClass(i: number): string {
   if (i === 1) return styles.rankSilver;
   if (i === 2) return styles.rankBronze;
   return styles.rankDefault;
+}
+
+/**
+ * Compose the OWNED bar's hover tooltip. Combines the % Owned
+ * footnote (override caveats etc.) with a one-line chip-mix
+ * summary so the chip-manufacturer info is still discoverable
+ * after the dedicated CHIPS row was removed for being visually
+ * redundant with the OWNED bar.
+ */
+function buildOwnedTitle(
+  pct: PctOwnedResult,
+  chipMix: ManufacturerSegment[] | null,
+): string {
+  const base = pct.footnote ?? PCT_OWNED_TOOLTIP;
+  if (!chipMix || chipMix.length === 0) return base;
+  const mfrLine = chipMix
+    .map((s) => `${s.manufacturer} ${Math.round(s.pct)}%`)
+    .join(' · ');
+  return `${base} · Chip mix: ${mfrLine}`;
 }
 
 export function Leaderboard(): JSX.Element | null {
@@ -173,46 +192,37 @@ export function Leaderboard(): JSX.Element | null {
                   />
                 </div>
 
-                {/* ─── % Owned (real progress bar) + chip-mix bar ───
-                    Two stacked, clearly-labeled rows so the ownership %
-                    and the manufacturer mix can't be visually confused.
-                    The OWNED fill width literally equals the percentage
-                    — Anthropic 25% renders as a quarter-filled bar, not
-                    the near-full green bar the chip-mix used to draw. */}
-                {(r.pctOwned != null || r.chipMix) && (
+                {/* ─── % Owned progress bar ───
+                    The chip-mix bar that used to sit below this was
+                    visually redundant: 4 of 5 labs are ~100% Nvidia,
+                    so it rendered as a uniform green strip with zero
+                    additional signal — and its similarity to the OWNED
+                    bar above made the whole block read as duplicate.
+                    The full chip-mix breakdown still lives in the
+                    OwnershipTable + OwnershipSidePanel, which have
+                    space for it. The chip-mix data is surfaced here
+                    only as enriched hover-tooltip text on the OWNED
+                    bar so it's still discoverable. */}
+                {r.pctOwned != null && (
                   <div className={styles.ownership}>
-                    {r.pctOwned != null && (
-                      <div
-                        className={styles.ownedRow}
-                        title={r.pctOwned.footnote ?? PCT_OWNED_TOOLTIP}
-                      >
-                        <span className={styles.ownershipLabel}>OWNED</span>
-                        <div className={styles.ownedTrack}>
-                          <div
-                            className={styles.ownedFill}
-                            style={{
-                              width: `${r.pctOwned.pct}%`,
-                              background: color,
-                            }}
-                          />
-                        </div>
-                        <span className={styles.ownedPct}>
-                          {r.pctOwned.pct}%
-                        </span>
+                    <div
+                      className={styles.ownedRow}
+                      title={buildOwnedTitle(r.pctOwned, r.chipMix)}
+                    >
+                      <span className={styles.ownershipLabel}>OWNED</span>
+                      <div className={styles.ownedTrack}>
+                        <div
+                          className={styles.ownedFill}
+                          style={{
+                            width: `${r.pctOwned.pct}%`,
+                            background: color,
+                          }}
+                        />
                       </div>
-                    )}
-                    {r.chipMix && (
-                      <div className={styles.chipsRow}>
-                        <span className={styles.ownershipLabel}>CHIPS</span>
-                        <div className={styles.chipMixSlot}>
-                          <ManufacturerMixBar
-                            segments={r.chipMix}
-                            size="tiny"
-                            showSegmentTitle
-                          />
-                        </div>
-                      </div>
-                    )}
+                      <span className={styles.ownedPct}>
+                        {r.pctOwned.pct}%
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
