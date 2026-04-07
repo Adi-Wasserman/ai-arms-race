@@ -1,0 +1,154 @@
+.intro {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border-left: 3px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  font-size: 13px;
+  line-height: var(--line-height-base);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.intro strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition:
+    color var(--transition-base),
+    background var(--transition-base),
+    border-color var(--transition-base),
+    opacity var(--transition-base);
+}
+
+.legendItem:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.legendItem.active {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-border-strong);
+}
+
+.legendItem.dim {
+  opacity: 0.4;
+}
+
+.legendDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+}
+
+.countLine {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+}
+
+.countLine strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.controlRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.regionGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.regionButton {
+  padding: 5px 14px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.regionButton.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+}
+
+.regionArrow {
+  color: var(--color-text-quaternary);
+  align-self: center;
+}
+
+.mapRow {
+  display: flex;
+  gap: 16px;
+}
+
+.mapRow > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.fn {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  line-height: 1.6;
+  margin-top: var(--space-sm);
+}
+
+.fn a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.2);
+  text-underline-offset: 2px;
+}
+
+.fn a:hover {
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .regionButton {
+    padding: 5px 10px;
+    font-size: var(--font-size-sm);
+  }
+}

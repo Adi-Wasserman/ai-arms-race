@@ -1,0 +1,44 @@
+.fallback {
+  padding: var(--space-lg);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  background: rgba(255, 68, 68, 0.04);
+  border-radius: var(--radius-xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+.heading {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-wide);
+  color: rgba(255, 68, 68, 0.9);
+  margin-bottom: 6px;
+}
+
+.message {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: 6px;
+  overflow-wrap: break-word;
+}
+
+.retry {
+  margin-top: var(--space-md);
+  padding: 4px 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255, 68, 68, 0.8);
+  background: rgba(255, 68, 68, 0.08);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+
+.retry:hover {
+  color: rgba(255, 68, 68, 1);
+  background: rgba(255, 68, 68, 0.14);
+}

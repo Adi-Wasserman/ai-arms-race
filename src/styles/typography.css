@@ -1,0 +1,71 @@
+/* ─────────────────────────────────────────────────────────────
+   Global typography — heading gradients + monospace numbers.
+   Ported from the .st / .nb / .mono patterns in ai-arms-race.html.
+   ───────────────────────────────────────────────────────────── */
+
+/* Section titles + brand wordmark use a white → gray gradient.
+   Apply via class="heading-gradient" or attach to an h1/h2. */
+.heading-gradient {
+  background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Section title ("THE AI ARMS RACE") — .st in legacy. */
+.section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-widest);
+  background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Section subtitle — .ss in legacy. */
+.section-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  letter-spacing: var(--letter-spacing-wider);
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+/* Monospace numeric styling for data tables, rankings, chart ticks.
+   Uses tabular figures so digits align vertically in columns. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Compact numeric label (e.g. "1.2M H100e"). */
+.mono-label {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* Uppercase label style used throughout nav, toggle groups, columns. */
+.eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+
+/* Numeric display for stat cards — large tabular digits. */
+.stat-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}

@@ -1,0 +1,192 @@
+.wrap {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  position: sticky;
+  /* Sticky relative to the .wrap scroll container (which is created
+     by `overflow-x: auto`), not the viewport. `top: 0` keeps the
+     header pinned to the top of the wrap so it never overlaps row 1. */
+  top: 0;
+  background: rgba(8, 8, 28, 0.95);
+  backdrop-filter: var(--blur-panel);
+  padding: 10px 12px;
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color var(--transition-base);
+}
+
+.th:hover {
+  color: var(--color-text-primary);
+}
+
+.th.asc::after {
+  content: ' ↑';
+  color: var(--color-text-tertiary);
+}
+
+.th.desc::after {
+  content: ' ↓';
+  color: var(--color-text-tertiary);
+}
+
+.row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.row.selected {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.td {
+  padding: 10px 12px;
+  font-size: var(--font-size-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.rk {
+  width: 32px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
+.statusCell {
+  text-align: center;
+}
+
+.nm {
+  white-space: normal;
+  min-width: 160px;
+  max-width: 280px;
+}
+
+.nmTitle {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+}
+
+.nmSub {
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  margin-top: 1px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+}
+
+.dim {
+  color: var(--color-text-quaternary);
+}
+
+.confCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.confScore {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.confBarTrack {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  min-width: 40px;
+  max-width: 60px;
+}
+
+.confBarFill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.confLabel {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+
+.confTag {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.confTag.confident {
+  color: rgba(0, 255, 135, 0.8);
+  background: rgba(0, 255, 135, 0.1);
+}
+
+.confTag.likely {
+  color: rgba(255, 170, 0, 0.8);
+  background: rgba(255, 170, 0, 0.1);
+}
+
+.confTag.speculative {
+  color: rgba(255, 100, 100, 0.8);
+  background: rgba(255, 100, 100, 0.1);
+}
+
+.obsBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 220px;
+}
+
+.obsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+}
+
+.obsBadge.pos {
+  color: rgba(0, 255, 135, 0.8);
+  border-color: rgba(0, 255, 135, 0.2);
+  background: rgba(0, 255, 135, 0.06);
+}
+
+.obsBadge.neg {
+  color: rgba(255, 68, 68, 0.8);
+  border-color: rgba(255, 68, 68, 0.2);
+  background: rgba(255, 68, 68, 0.06);
+}

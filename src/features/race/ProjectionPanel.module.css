@@ -1,0 +1,181 @@
+.panel {
+  margin-bottom: 14px;
+}
+
+.columns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.column {
+  flex: 1;
+  min-width: 280px;
+  padding: var(--space-md);
+  border-radius: var(--radius-xl);
+}
+
+.column.now {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+}
+
+.column.future {
+  background: rgba(255, 170, 0, 0.03);
+  border: 1px solid rgba(255, 170, 0, 0.12);
+}
+
+.colHeading {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wider);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.colHeading.now {
+  color: var(--color-text-tertiary);
+}
+
+.colHeading.future {
+  color: rgba(255, 170, 0, 0.7);
+}
+
+.arrow {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--color-text-quaternary);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.row.future {
+  border-bottom-color: rgba(255, 170, 0, 0.06);
+}
+
+.rank {
+  font-size: var(--font-size-md);
+  width: 22px;
+  text-align: center;
+}
+
+.labName {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  flex: 1;
+}
+
+.primary {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.secondary {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  width: 55px;
+  text-align: right;
+}
+
+.growth {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: rgba(255, 170, 0, 0.7);
+  width: 40px;
+  text-align: right;
+}
+
+.total {
+  margin-top: 6px;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+}
+
+.total.now {
+  color: var(--color-text-tertiary);
+}
+
+.total.future {
+  color: rgba(255, 170, 0, 0.6);
+}
+
+.assumptions {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.assumptionsHeading {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.card {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.cardLab {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.cardLine {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+.cardLine strong {
+  color: var(--color-text-primary);
+}
+
+.cardGrowth {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+}
+
+.cardBasis {
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+  line-height: var(--line-height-tight);
+}
+
+.footnote {
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+}
+
+.footnote strong {
+  color: rgba(255, 170, 0, 0.7);
+}

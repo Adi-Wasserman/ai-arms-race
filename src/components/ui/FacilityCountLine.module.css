@@ -1,0 +1,19 @@
+.line {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shown {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.dot {
+  color: var(--color-text-quaternary);
+}

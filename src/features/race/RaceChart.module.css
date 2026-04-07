@@ -1,0 +1,51 @@
+.wrapper {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  height: 55vh;
+  min-height: 340px;
+}
+
+/**
+ * Pinned chart tooltip — sits in the empty upper-left region of the
+ * chart plot area (past the Y-axis labels, above the data lines during
+ * the low-value early years). Never follows the cursor. Contents are
+ * written directly via innerHTML from the Chart.js `external` callback.
+ */
+.pinnedTooltip {
+  position: absolute;
+  /* Horizontally centered in the band between the Y-axis (~6% of wrapper)
+     and the TODAY annotation line (~56% of wrapper). Midpoint ≈ 31%.
+     Vertically pulled down so the box sits more centered in the upper
+     dead zone above the rising data lines. */
+  top: 50%;
+  left: 31%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  min-width: 260px;
+  max-width: 320px;
+  padding: 14px 16px;
+  background: rgba(8, 8, 28, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur-panel);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    height: 45vh;
+    min-height: 280px;
+  }
+  .pinnedTooltip {
+    min-width: 180px;
+    max-width: 220px;
+    padding: 8px 10px;
+    font-size: var(--font-size-base);
+  }
+}

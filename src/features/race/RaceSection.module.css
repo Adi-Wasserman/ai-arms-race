@@ -1,0 +1,78 @@
+.intro {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border-left: 3px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  font-size: 13px;
+  line-height: var(--line-height-base);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.intro strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.toggleRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sep {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.chartRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.fn {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  line-height: 1.6;
+  margin-top: var(--space-md);
+}
+
+.fn a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.2);
+  text-underline-offset: 2px;
+  transition: color var(--transition-base);
+}
+
+.fn a:hover {
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .chartRow {
+    flex-direction: column;
+  }
+  .chartRow > :last-child {
+    width: 100%;
+    max-height: none;
+    flex-shrink: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .toggleRow {
+    gap: 6px;
+  }
+  .sep {
+    display: none;
+  }
+}

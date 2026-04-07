@@ -1,0 +1,117 @@
+/* ─────────────────────────────────────────────────────────────
+   Design tokens — single source of truth for all visual values.
+   Ported from ai-arms-race.html (CFG + inline style block).
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Surface & background ───────────────────────────────── */
+  --color-bg-deep: #050510;
+  --color-bg-mid: #080820;
+  --color-bg-accent: #0a0a2e;
+  --color-bg-low: #0d0d1a;
+  --color-bg-gradient: linear-gradient(
+    180deg,
+    #050510 0%,
+    #080820 30%,
+    #0a0a2e 60%,
+    #0d0d1a 100%
+  );
+  --color-bg-surface: rgba(255, 255, 255, 0.015);
+  --color-bg-surface-raised: rgba(255, 255, 255, 0.02);
+  --color-bg-surface-hover: rgba(255, 255, 255, 0.04);
+  --color-bg-nav: rgba(5, 5, 16, 0.92);
+  --color-bg-tooltip: rgba(8, 8, 28, 0.95);
+
+  /* ── Text ───────────────────────────────────────────────── */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.5);
+  --color-text-tertiary: rgba(255, 255, 255, 0.3);
+  --color-text-quaternary: rgba(255, 255, 255, 0.15);
+
+  /* ── Borders ────────────────────────────────────────────── */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* ── Lab colors (match CFG.colors in legacy HTML) ───────── */
+  --color-lab-openai: #00ff87;
+  --color-lab-gemini: #4285f4;
+  --color-lab-meta: #00d4ff;
+  --color-lab-xai: #ff4444;
+  --color-lab-anthropic: #ffaa00;
+
+  /* ── Signal colors ──────────────────────────────────────── */
+  --color-signal-positive: rgba(0, 255, 135, 0.8);
+  --color-signal-positive-bg: rgba(0, 255, 135, 0.06);
+  --color-signal-positive-border: rgba(0, 255, 135, 0.2);
+  --color-signal-negative: rgba(255, 68, 68, 0.8);
+  --color-signal-negative-bg: rgba(255, 68, 68, 0.06);
+  --color-signal-negative-border: rgba(255, 68, 68, 0.2);
+  --color-signal-warning: rgba(255, 170, 0, 0.8);
+  --color-signal-warning-bg: rgba(255, 170, 0, 0.04);
+  --color-signal-warning-border: rgba(255, 170, 0, 0.12);
+
+  /* ── Medal colors (benchmark winner matrix) ─────────────── */
+  --color-medal-gold: #ffd700;
+  --color-medal-silver: #c0c0c0;
+  --color-medal-bronze: #cd7f32;
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', Menlo, monospace;
+
+  --font-size-xs: 9px;
+  --font-size-sm: 10px;
+  --font-size-base: 11px;
+  --font-size-md: 12px;
+  --font-size-lg: 14px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 22px;
+
+  --letter-spacing-tight: 0.3px;
+  --letter-spacing-base: 1px;
+  --letter-spacing-wide: 1.5px;
+  --letter-spacing-wider: 2px;
+  --letter-spacing-widest: 3px;
+
+  --line-height-tight: 1.4;
+  --line-height-base: 1.55;
+  --line-height-loose: 1.7;
+
+  /* ── Spacing scale ──────────────────────────────────────── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 28px;
+  --space-xl: 40px;
+
+  /* ── Radii ──────────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+
+  /* ── Transitions ────────────────────────────────────────── */
+  --transition-fast: 0.12s;
+  --transition-base: 0.15s;
+  --transition-med: 0.2s;
+  --transition-slow: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Elevation ──────────────────────────────────────────── */
+  --blur-panel: blur(12px);
+  --blur-nav: blur(20px);
+
+  /* ── Legacy short aliases (match ai-arms-race.html) ─────── */
+  --m: var(--font-mono);
+  --t2: var(--color-text-secondary);
+  --t3: var(--color-text-tertiary);
+  --t4: var(--color-text-quaternary);
+  --bd: var(--color-border);
+}
+
+body {
+  background: var(--color-bg-gradient);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}

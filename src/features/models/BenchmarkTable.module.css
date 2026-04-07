@@ -1,0 +1,403 @@
+.section {
+  margin-top: var(--space-lg);
+}
+
+.heading {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.chipRow {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.chip {
+  padding: 6px 14px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  transition:
+    color var(--transition-base),
+    background var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.chip:hover {
+  color: var(--color-text-primary);
+}
+
+.chip.selected {
+  /* per-chip color inlined via style attribute */
+}
+
+.clearBtn {
+  padding: 4px 10px;
+  font-size: 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.comparison {
+  margin-bottom: 18px;
+  padding: var(--space-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.comparisonHeading {
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.winCards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.winCard {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.winCardName {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.winCardCount {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  margin: 4px 0;
+}
+
+.winCardLabel {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-base);
+  color: var(--color-text-tertiary);
+}
+
+.derivedHeading {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+  margin: 12px 0 8px;
+}
+
+.derivedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-sm);
+}
+
+.derivedCard {
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.derivedLab {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.derivedBody {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  font-family: var(--font-mono);
+}
+
+.derivedBody b {
+  color: var(--color-text-primary);
+}
+
+.snapshot {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.snapshot .muted {
+  color: var(--color-text-tertiary);
+}
+
+/* ─── Winner matrix table ─────────────────────────────────── */
+.matrix {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.015);
+  overflow-x: auto;
+}
+
+.matrix table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.matrix th {
+  padding: 14px;
+  font-size: var(--font-size-base);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 8, 28, 0.97);
+  backdrop-filter: var(--blur-panel);
+}
+
+.matrix th:first-child {
+  text-align: left;
+  min-width: 220px;
+}
+
+.matrix th:nth-child(2) {
+  text-align: left;
+  min-width: 140px;
+}
+
+.matrix td {
+  padding: 12px 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.matrix td:first-child {
+  text-align: left;
+  padding-left: 16px;
+}
+
+.matrix td:nth-child(2) {
+  text-align: left;
+}
+
+.matrix tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.benchTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.benchDesc {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.benchSource {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.benchSourceSub {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  margin-top: 1px;
+}
+
+.domainRow {
+  padding: 20px 16px 10px !important;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 2px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: none !important;
+}
+
+.domainRow span {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  color: var(--color-text-primary);
+}
+
+.mc {
+  padding: 10px 6px;
+}
+
+.cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  border-radius: var(--radius-lg);
+  min-width: 62px;
+  position: relative;
+}
+
+.cell.gold {
+  background: rgba(255, 215, 0, 0.15);
+  border: 2px solid rgba(255, 215, 0, 0.45);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.1);
+}
+
+.cell.gold .cellScore {
+  font-size: 16px;
+}
+
+.cell.gold .cellRank {
+  background: rgba(255, 215, 0, 0.2);
+  color: var(--color-medal-gold);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.cell.silver {
+  background: rgba(192, 192, 192, 0.1);
+  border: 2px solid rgba(192, 192, 192, 0.3);
+}
+
+.cell.silver .cellRank {
+  color: var(--color-medal-silver);
+}
+
+.cell.bronze {
+  background: rgba(205, 127, 50, 0.08);
+  border: 2px solid rgba(205, 127, 50, 0.25);
+}
+
+.cell.bronze .cellRank {
+  color: var(--color-medal-bronze);
+}
+
+.cell.other {
+  background: transparent;
+  border: 1px solid var(--color-border);
+}
+
+.cell.other .cellRank {
+  color: var(--color-text-quaternary);
+}
+
+.cell.na {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.cellScore {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cellRank {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--color-text-tertiary);
+}
+
+.td.dimmed {
+  opacity: 0.35;
+}
+
+.td.selected {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.th.dimmed {
+  opacity: 0.35;
+}
+
+.th.selected {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.colName {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.colLab {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.keyFinding {
+  margin-top: var(--space-md);
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.keyFindingLabel {
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+}
+
+.notesGrid {
+  margin-top: var(--space-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.noteCard {
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.noteName {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.noteSub {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.noteBody {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-sm);
+  line-height: 1.5;
+}

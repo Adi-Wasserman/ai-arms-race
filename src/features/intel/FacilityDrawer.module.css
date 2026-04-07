@@ -1,0 +1,368 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 3000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 520px;
+  max-width: 92vw;
+  height: 100vh;
+  background: linear-gradient(180deg, #0a0a24, #080818);
+  border-left: 1px solid var(--color-border);
+  z-index: 3001;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.closeBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(8, 8, 28, 0.92);
+  backdrop-filter: var(--blur-panel);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.closeBarTitle {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.closeBtn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: #fff;
+  padding: 4px 12px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: var(--letter-spacing-base);
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.body {
+  padding: 0 20px 40px;
+}
+
+.satWrap {
+  height: 200px;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  margin: 20px 0 16px;
+  position: relative;
+  background: #070720;
+}
+
+.satImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.satCaption {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(5, 5, 16, 0.8);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+}
+
+.scoreHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.score {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.scoreValue {
+  font-size: 36px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.scorePct {
+  font-size: var(--font-size-lg);
+}
+
+.scoreLabel {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: 700;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.headerTitle {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.headerLab {
+  font-size: var(--font-size-base);
+  margin-top: 2px;
+}
+
+.headerChip {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: 1px;
+}
+
+.progress {
+  margin-bottom: 20px;
+}
+
+.progressTrack {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width var(--transition-slow);
+}
+
+.progressLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  margin-top: 4px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+}
+
+.statCardLabel {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+}
+
+.statCardValue {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-top: 4px;
+}
+
+.sectionLabel {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  margin-bottom: 4px;
+  margin-top: 20px;
+}
+
+.sectionLabel:first-child {
+  margin-top: 0;
+}
+
+.obsCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: 8px 0;
+}
+
+.obsCard {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+}
+
+.obsCard.pos {
+  background: rgba(0, 255, 135, 0.04);
+  border: 1px solid rgba(0, 255, 135, 0.15);
+}
+
+.obsCard.neg {
+  background: rgba(255, 68, 68, 0.04);
+  border: 1px solid rgba(255, 68, 68, 0.15);
+}
+
+.obsCard.neutral {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+}
+
+.obsIcon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.obsCat {
+  font-size: 9px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+}
+
+.obsValue {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.obsValue.pos {
+  color: rgba(0, 255, 135, 0.7);
+}
+
+.obsValue.neg {
+  color: rgba(255, 68, 68, 0.7);
+}
+
+.obsMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  margin: 12px 0;
+}
+
+/* ─── Vertical timeline stepper ───────────────────────── */
+.timeline {
+  position: relative;
+  padding: 16px 0 0 28px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 24px;
+  bottom: 8px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1px;
+}
+
+.timelineItem {
+  position: relative;
+  padding: 0 0 20px;
+}
+
+.timelineDot {
+  position: absolute;
+  left: -23px;
+  top: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-text-quaternary);
+  background: #0a0a24;
+}
+
+.timelineItem.past .timelineDot {
+  border-color: rgba(0, 255, 135, 0.5);
+  background: rgba(0, 255, 135, 0.15);
+}
+
+.timelineItem.future .timelineDot {
+  border-color: var(--color-text-quaternary);
+  background: transparent;
+}
+
+.timelineDate {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  margin-bottom: 3px;
+}
+
+.timelineDate.past {
+  color: rgba(0, 255, 135, 0.6);
+}
+
+.timelineDate.future {
+  color: var(--color-text-tertiary);
+}
+
+.timelineText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.timelineMetrics {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .drawer {
+    width: 100%;
+    max-width: 100vw;
+  }
+}
