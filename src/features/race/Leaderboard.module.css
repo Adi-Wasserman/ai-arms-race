@@ -1,19 +1,19 @@
 .container {
-  width: 260px;
+  width: 300px;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: 14px;
+  padding: 16px;
   max-height: 55vh;
   overflow-y: auto;
 }
 
 .heading {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: var(--letter-spacing-wider);
-  color: var(--color-text-tertiary);
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
 }
 
 .scopeBar {
@@ -22,9 +22,9 @@
 }
 
 .dateLine {
-  font-size: var(--font-size-base);
+  font-size: 12px;
   font-family: var(--font-mono);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   margin: 4px 0 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--color-border);
@@ -38,19 +38,19 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .rank {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   font-family: var(--font-mono);
   flex-shrink: 0;
@@ -79,37 +79,39 @@
 }
 
 .labName {
-  font-size: var(--font-size-base);
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .metrics {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--font-mono);
-  color: var(--color-text-secondary);
-  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
 }
 
 .metrics strong {
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .projLine {
-  font-size: 8px;
+  font-size: 10px;
   font-family: var(--font-mono);
-  color: rgba(255, 170, 0, 0.6);
-  margin-top: 2px;
+  color: rgba(255, 170, 0, 0.85);
+  margin-top: 3px;
 }
 
 .projLine strong {
-  color: rgba(255, 170, 0, 0.8);
+  color: rgba(255, 190, 60, 1);
 }
 
 .analystLine {
-  font-size: 8px;
+  font-size: 10px;
   font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.25);
-  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
 }
 
 .bar {
@@ -136,15 +138,15 @@
 .ownership {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin-top: 5px;
+  gap: 4px;
+  margin-top: 6px;
 }
 
 .ownedRow,
 .chipsRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .ownedRow {
@@ -152,20 +154,20 @@
 }
 
 .ownershipLabel {
-  font-size: 8px;
+  font-size: 10px;
   font-family: var(--font-mono);
-  color: var(--color-text-quaternary);
+  color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.05em;
   font-weight: 700;
-  width: 32px;
+  width: 36px;
   flex-shrink: 0;
 }
 
 .ownedTrack {
   flex: 1;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 3px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
   overflow: hidden;
   position: relative;
   min-width: 0;
@@ -173,16 +175,16 @@
 
 .ownedFill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: width 0.3s ease;
 }
 
 .ownedPct {
-  font-size: 10px;
+  font-size: 12px;
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--color-text-primary);
-  min-width: 28px;
+  min-width: 32px;
   text-align: right;
   flex-shrink: 0;
 }
@@ -198,34 +200,35 @@
   border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .totalLabel {
-  color: var(--color-text-tertiary);
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.04em;
 }
 
 .totalValue {
   font-family: var(--font-mono);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .total2029 {
-  margin-top: 4px;
+  margin-top: 5px;
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--font-mono);
-  color: rgba(255, 170, 0, 0.5);
+  color: rgba(255, 170, 0, 0.8);
 }
 
 .disclaimer {
-  font-size: 9px;
-  color: rgba(255, 170, 0, 0.6);
+  font-size: 11px;
+  color: rgba(255, 170, 0, 0.85);
   letter-spacing: 0.3px;
-  padding: 6px 0 0;
-  line-height: var(--line-height-tight);
+  padding: 8px 0 0;
+  line-height: 1.45;
   border-top: 1px solid var(--color-border);
-  margin-top: 6px;
+  margin-top: 8px;
 }
