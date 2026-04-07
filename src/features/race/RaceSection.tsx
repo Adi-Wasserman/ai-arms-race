@@ -14,6 +14,7 @@ import type {
   VelocityMode,
 } from '@/types';
 
+import { FrontierOutlookCard } from './FrontierOutlookCard';
 import { Leaderboard } from './Leaderboard';
 import { OwnershipTable } from './OwnershipTable';
 import { ProjectionPanel } from './ProjectionPanel';
@@ -115,6 +116,11 @@ function RaceSectionInner(): JSX.Element {
       </div>
 
       <StatCards />
+
+      {/* Frontier Leadership Outlook — only relevant when the fleet
+          (cloud-lease adjusted) view is active, since the entire
+          ownership question presupposes the +cloud-lease scope. */}
+      {scope === 'fleet' && <FrontierOutlookCard />}
 
       <div className={styles.toggleRow}>
         <Toggle<MetricMode>
