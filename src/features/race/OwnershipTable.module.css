@@ -135,6 +135,33 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+/**
+ * Row highlight — applied for ~1.8s after the user clicks an
+ * operator card in the OwnershipSidePanel. The card sets
+ * `highlightedOwner` in raceSlice; the OwnershipTable scrolls
+ * the matching row into view, applies this class for the
+ * highlight flash, then clears the store value.
+ */
+.rowHighlight {
+  animation: rowFlash 1.8s ease-out;
+  position: relative;
+}
+
+@keyframes rowFlash {
+  0% {
+    background: rgba(77, 142, 234, 0);
+    box-shadow: inset 3px 0 0 0 rgba(77, 142, 234, 0);
+  }
+  15% {
+    background: rgba(77, 142, 234, 0.18);
+    box-shadow: inset 3px 0 0 0 rgba(77, 142, 234, 1);
+  }
+  100% {
+    background: rgba(77, 142, 234, 0);
+    box-shadow: inset 3px 0 0 0 rgba(77, 142, 234, 0);
+  }
+}
+
 .td {
   padding: 12px;
   vertical-align: middle;

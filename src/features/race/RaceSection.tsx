@@ -2,6 +2,7 @@ import type { Chart as ChartJS } from 'chart.js';
 import { useRef } from 'react';
 
 import { ExportMenu, type ExportMenuItem } from '@/components/ui/ExportMenu';
+import { OwnershipSidePanel } from '@/components/ui/OwnershipSidePanel';
 import { SectionShell } from '@/components/ui/SectionShell';
 import { Toggle } from '@/components/ui/Toggle';
 import { useDashboard } from '@/store';
@@ -176,6 +177,14 @@ function RaceSectionInner(): JSX.Element {
           <Leaderboard />
         </div>
       )}
+
+      {/* Hardware Ownership Snapshot — collapsible side panel.
+          Mounted below the main row so it doesn't compete with the
+          leaderboard for vertical space, but uses the live ZIP data
+          via the shared `useEpochChipOwners` singleton. */}
+      <div className={styles.snapshotRow}>
+        <OwnershipSidePanel />
+      </div>
 
       <ProjectionPanel />
 

@@ -39,6 +39,16 @@
 }
 
 /**
+ * Operator cross-check strip — full-width, sits between the chart row
+ * and the projection panel. Designed as a horizontal data strip
+ * (not a sidebar), so it spans the full content width to match the
+ * StatCards / FacilityCountLine pattern.
+ */
+.snapshotRow {
+  margin: 4px 0 16px;
+}
+
+/**
  * Mode toggle row — only rendered when scope=fleet. Sits between the
  * primary toggle row and the chart/ownership body.
  */
@@ -52,7 +62,7 @@
 .modeInfo {
   font-size: 14px;
   color: var(--color-text-tertiary);
-  cursor: help;
+  cursor: default;
   user-select: none;
   line-height: 1;
   padding: 2px;

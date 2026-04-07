@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
@@ -469,6 +469,10 @@ export function OwnershipTable(): JSX.Element {
   // Epoch data lands.
   const seriesFull = useDashboard((s) => s.seriesFull);
   const dataVersion = useDashboard((s) => s.dataVersion);
+  // Owner name set by OwnershipSidePanel cards — tells us which row to
+  // scroll into view + highlight when the user jumps in from the panel.
+  const highlightedOwner = useDashboard((s) => s.highlightedOwner);
+  const setHighlightedOwner = useDashboard((s) => s.setHighlightedOwner);
 
   const rows = useMemo<DerivedRow[]>(() => {
     if (!data) return [];
@@ -482,7 +486,21 @@ export function OwnershipTable(): JSX.Element {
         },
       );
     }
-    return deriveRows(data.latestByOwner, fleetByLab, data);
+    // ── Reorder snapshots so frontier-anchored owners come first ──
+    // The OwnershipSidePanel sorts the 5 frontier operators by H100e
+    // descending; we mirror that order here so the panel and table
+    // read as a coherent pair. Non-frontier owners (Other, Oracle,
+    // China) follow, also sorted by H100e desc.
+    const isFrontier = (ownerName: string): boolean =>
+      OWNER_TO_LAB[ownerName as keyof typeof OWNER_TO_LAB] != null;
+    const frontier = data.latestByOwner
+      .filter((s) => isFrontier(s.owner))
+      .sort((a, b) => b.h100e - a.h100e);
+    const nonFrontier = data.latestByOwner
+      .filter((s) => !isFrontier(s.owner))
+      .sort((a, b) => b.h100e - a.h100e);
+    const ordered = [...frontier, ...nonFrontier];
+    return deriveRows(ordered, fleetByLab, data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dataVersion]);
 
@@ -492,6 +510,30 @@ export function OwnershipTable(): JSX.Element {
    * body and escape the table's `overflow-x: auto` clipping.
    */
   const [hovered, setHovered] = useState<HoveredSegment | null>(null);
+
+  /**
+   * Per-owner row refs — the highlight effect uses these to call
+   * `scrollIntoView` on the right row when the user clicks a card
+   * in the OwnershipSidePanel.
+   */
+  const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
+
+  /**
+   * When `highlightedOwner` changes, scroll the matching row into
+   * view, then clear the store value after a short delay so the
+   * highlight class drops off and re-clicking re-fires the effect.
+   */
+  useEffect(() => {
+    if (!highlightedOwner) return;
+    const row = rowRefs.current.get(highlightedOwner);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    const t = window.setTimeout(() => {
+      setHighlightedOwner(null);
+    }, 1800);
+    return () => window.clearTimeout(t);
+  }, [highlightedOwner, setHighlightedOwner]);
 
   // Clear the popover when the user scrolls or resizes — segment
   // coordinates would otherwise be stale.
@@ -629,8 +671,16 @@ export function OwnershipTable(): JSX.Element {
         <tbody>
           {rows.map((row) => {
             const labColor = row.mappedLab ? LAB_COLORS[row.mappedLab] : '#888';
+            const isHighlighted = highlightedOwner === row.owner;
             return (
-              <tr key={row.owner} className={styles.row}>
+              <tr
+                key={row.owner}
+                ref={(el) => {
+                  if (el) rowRefs.current.set(row.owner, el);
+                  else rowRefs.current.delete(row.owner);
+                }}
+                className={`${styles.row}${isHighlighted ? ` ${styles.rowHighlight}` : ''}`}
+              >
                 <td className={styles.td}>
                   <div className={`${styles.rank} ${rankClass(row.rank)}`}>
                     {row.rank}
