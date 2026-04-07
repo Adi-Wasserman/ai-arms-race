@@ -251,19 +251,16 @@ function ChipMixCell({ row }: { row: DerivedRow }): JSX.Element {
             key={`${seg.chipType}-${i}`}
             className={styles.chipMixSegment}
             style={{ width: `${seg.pct}%`, background: seg.color }}
-            title={`${seg.chipType} (${seg.manufacturer}) — ${formatH100(seg.h100e)} H100e · ${seg.pct.toFixed(1)}%`}
+            aria-label={`${seg.chipType}: ${seg.pct.toFixed(1)}%`}
           />
         ))}
       </div>
 
-      {/* ─── Per-chip-type legend (always visible — no hover needed) ─── */}
+      {/* ─── Per-chip-type legend — the canonical info surface.
+              Lists every chip type with its share, no hover required.   ─── */}
       <div className={styles.chipMixLegend}>
         {sorted.map((seg) => (
-          <span
-            key={seg.chipType}
-            className={styles.chipMixLegendItem}
-            title={`${seg.manufacturer} · ${formatH100(seg.h100e)} H100e`}
-          >
+          <span key={seg.chipType} className={styles.chipMixLegendItem}>
             <span
               className={styles.chipMixLegendDot}
               style={{ background: seg.color }}
