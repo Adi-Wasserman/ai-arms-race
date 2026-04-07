@@ -269,6 +269,18 @@
   height: 100%;
   flex-shrink: 0;
   cursor: help;
+  /* Thin dark divider between adjacent segments so similar shades
+     within the same manufacturer family stay visually distinct. */
+  box-shadow: inset -1px 0 0 0 rgba(0, 0, 0, 0.4);
+  transition: filter 0.12s;
+}
+
+.chipMixSegment:last-child {
+  box-shadow: none;
+}
+
+.chipMixSegment:hover {
+  filter: brightness(1.25);
 }
 
 .chipMixLegend {

@@ -14,17 +14,77 @@ import {
 import styles from './OwnershipTable.module.css';
 
 /* ─────────────────────────────────────────────────────────────
-   Manufacturer color palette for the chip-mix stacked bar.
-   Mirrors each vendor's brand color so the bar is self-legible.
+   Chip-mix color palette.
+
+   Each chip TYPE gets a distinct color so the stacked bar
+   actually shows the breakdown — earlier we colored by
+   manufacturer, which made every Microsoft / Meta / Amazon
+   row look like one undifferentiated green block (since they
+   all use multiple Nvidia chip types).
+
+   Within a manufacturer family the colors are tonally grouped
+   (greens for Nvidia, blues for Google TPU, oranges for AWS
+   Trainium, reds for AMD, purples for Huawei) and ordered by
+   chip generation — older/dimmer → newer/brighter.
    ───────────────────────────────────────────────────────────── */
+
+const CHIP_COLORS: Record<string, string> = {
+  // ── Nvidia (greens) ───────────────────────────────
+  A100: '#3a6b00',
+  A800: '#5c9e00',
+  'H100/H200': '#76b900',
+  H800: '#8fcc1f',
+  H20: '#a8db44',
+  B200: '#bce665',
+  B300: '#d2f085',
+
+  // ── Google TPU (blues) ────────────────────────────
+  'TPU v4': '#1a3a8a',
+  'TPU v4i': '#2a4f9f',
+  'TPU v5e': '#3b66b8',
+  'TPU v5p': '#4285f4',
+  'TPU v6e': '#6ba0f7',
+  'TPU v7': '#9bc1fa',
+
+  // ── AWS Trainium (oranges) ────────────────────────
+  Trainium1: '#cc7700',
+  Trainium2: '#ff9900',
+
+  // ── AMD Instinct (reds) ───────────────────────────
+  'Instinct MI250X': '#7a0c10',
+  'Instinct MI300A': '#9b1015',
+  'Instinct MI300X': '#bc141a',
+  'Instinct MI308X': '#dd181f',
+  'Instinct MI325X': '#ed1c24',
+  'Instinct MI350X': '#f43d44',
+  'Instinct MI355X': '#fa6066',
+
+  // ── Huawei Ascend (purples) ───────────────────────
+  'Ascend 910B': '#7a1c5e',
+  'Ascend 910C': '#a32477',
+};
+
+/**
+ * Manufacturer color used by the compact legend below each bar.
+ * The bar segments themselves use `CHIP_COLORS[chipType]`.
+ */
 const MFR_COLORS: Record<ChipManufacturer | 'Unknown', string> = {
   Nvidia: '#76b900',
   Google: '#4285f4',
   Amazon: '#ff9900',
   AMD: '#ed1c24',
-  Huawei: '#c6171c',
+  Huawei: '#a32477',
   Unknown: '#666666',
 };
+
+/** Resolve a per-segment color, falling back through chip-type → manufacturer → unknown. */
+function chipColor(chipType: string, manufacturer: string): string {
+  return (
+    CHIP_COLORS[chipType] ??
+    MFR_COLORS[manufacturer as ChipManufacturer] ??
+    MFR_COLORS.Unknown
+  );
+}
 
 const TOOLTIP_TEXT =
   'Ownership = who bought the chips. Access = who can use them (current view). Live from https://epoch.ai/data/ai_chip_owners.zip';
@@ -95,7 +155,9 @@ function buildChipMix(snapshot: OwnerSnapshot): ChipMixSegment[] {
       manufacturer: c.manufacturer,
       h100e: c.h100e,
       pct: (c.h100e / total) * 100,
-      color: MFR_COLORS[c.manufacturer as ChipManufacturer] ?? MFR_COLORS.Unknown,
+      // Per-chip-type color so multi-Nvidia rows show the breakdown
+      // visually, not as one undifferentiated green block.
+      color: chipColor(c.chipType, c.manufacturer),
     }));
 }
 
@@ -175,12 +237,12 @@ function ChipMixCell({ row }: { row: DerivedRow }): JSX.Element {
   if (row.chipMix.length === 0) {
     return <span style={{ color: 'var(--color-text-quaternary)' }}>—</span>;
   }
-  // Group identical-color segments for the legend (one entry per manufacturer).
-  const byMfr = new Map<string, { color: string; pct: number }>();
+  // Manufacturer rollup for the compact legend below the bar.
+  // The bar segments themselves are per-chip-type; the legend just
+  // tells you "this row is X% Nvidia, Y% Google TPU".
+  const byMfr = new Map<string, number>();
   for (const seg of row.chipMix) {
-    const cur = byMfr.get(seg.manufacturer);
-    if (cur) cur.pct += seg.pct;
-    else byMfr.set(seg.manufacturer, { color: seg.color, pct: seg.pct });
+    byMfr.set(seg.manufacturer, (byMfr.get(seg.manufacturer) ?? 0) + seg.pct);
   }
 
   return (
@@ -191,18 +253,21 @@ function ChipMixCell({ row }: { row: DerivedRow }): JSX.Element {
             key={`${seg.chipType}-${i}`}
             className={styles.chipMixSegment}
             style={{ width: `${seg.pct}%`, background: seg.color }}
-            title={`${seg.chipType} (${seg.manufacturer}) — ${formatH100(seg.h100e)} H100e (${seg.pct.toFixed(1)}%)`}
+            title={`${seg.chipType} (${seg.manufacturer}) — ${formatH100(seg.h100e)} H100e · ${seg.pct.toFixed(1)}%`}
           />
         ))}
       </div>
       <div className={styles.chipMixLegend}>
-        {Array.from(byMfr.entries()).map(([mfr, info]) => (
+        {Array.from(byMfr.entries()).map(([mfr, pct]) => (
           <span key={mfr} className={styles.chipMixLegendItem}>
             <span
               className={styles.chipMixLegendDot}
-              style={{ background: info.color }}
+              style={{
+                background:
+                  MFR_COLORS[mfr as ChipManufacturer] ?? MFR_COLORS.Unknown,
+              }}
             />
-            {mfr} {info.pct.toFixed(0)}%
+            {mfr} {pct.toFixed(0)}%
           </span>
         ))}
       </div>
