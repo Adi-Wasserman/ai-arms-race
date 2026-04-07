@@ -17,6 +17,9 @@ dist-ssr/
 *.swp
 *.swo
 
+# Claude Code local settings
+.claude/
+
 # Vite
 .vite/
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 
 import { BENCHMARK_META, DOMAIN_GROUPS } from '@/config/benchmarks';
 import { LAB_COLORS } from '@/config/labs';
@@ -314,8 +314,8 @@ export function BenchmarkTable(): JSX.Element {
 
             {/* Domain groups */}
             {DOMAIN_GROUPS.map((d) => (
-              <>
-                <tr key={`domain-${d.key}`}>
+              <Fragment key={d.key}>
+                <tr>
                   <td className={styles.domainRow} colSpan={MODEL_SPECS.length + 2}>
                     <span>
                       {d.icon} {d.label}
@@ -355,7 +355,7 @@ export function BenchmarkTable(): JSX.Element {
                     </tr>
                   );
                 })}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

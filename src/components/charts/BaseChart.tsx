@@ -1,7 +1,9 @@
 import 'chartjs-adapter-date-fns';
 
 import {
+  BarController,
   BarElement,
+  BubbleController,
   CategoryScale,
   Chart as ChartJS,
   type ChartData,
@@ -10,9 +12,11 @@ import {
   Filler,
   Legend,
   LinearScale,
+  LineController,
   LineElement,
   LogarithmicScale,
   PointElement,
+  ScatterController,
   TimeScale,
   Title,
   Tooltip,
@@ -29,13 +33,24 @@ import styles from './BaseChart.module.css';
    ───────────────────────────────────────────────────────────── */
 
 ChartJS.register(
+  // Controllers — required for each chart `type` we use. Chart.js v4
+  // no longer auto-registers these; omitting them blows up at first
+  // render with "<type> is not a registered controller" — and only in
+  // production builds (dev has looser linking that masks the issue).
+  LineController,
+  ScatterController,
+  BarController,
+  BubbleController,
+  // Scales
   CategoryScale,
   LinearScale,
   LogarithmicScale,
   TimeScale,
+  // Elements
   PointElement,
   LineElement,
   BarElement,
+  // Plugins
   Title,
   Tooltip,
   Legend,
