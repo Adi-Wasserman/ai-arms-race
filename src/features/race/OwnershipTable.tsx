@@ -237,18 +237,16 @@ function ChipMixCell({ row }: { row: DerivedRow }): JSX.Element {
   if (row.chipMix.length === 0) {
     return <span style={{ color: 'var(--color-text-quaternary)' }}>—</span>;
   }
-  // Manufacturer rollup for the compact legend below the bar.
-  // The bar segments themselves are per-chip-type; the legend just
-  // tells you "this row is X% Nvidia, Y% Google TPU".
-  const byMfr = new Map<string, number>();
-  for (const seg of row.chipMix) {
-    byMfr.set(seg.manufacturer, (byMfr.get(seg.manufacturer) ?? 0) + seg.pct);
-  }
+  // Sort the segments by share descending so the legend matches the
+  // visual prominence of the bar (biggest slice first). The bar itself
+  // also draws in this order so the largest type sits on the left.
+  const sorted = [...row.chipMix].sort((a, b) => b.pct - a.pct);
 
   return (
     <div className={styles.chipMix}>
+      {/* ─── Stacked bar — one segment per chip type ─── */}
       <div className={styles.chipMixBar}>
-        {row.chipMix.map((seg, i) => (
+        {sorted.map((seg, i) => (
           <div
             key={`${seg.chipType}-${i}`}
             className={styles.chipMixSegment}
@@ -257,17 +255,23 @@ function ChipMixCell({ row }: { row: DerivedRow }): JSX.Element {
           />
         ))}
       </div>
+
+      {/* ─── Per-chip-type legend (always visible — no hover needed) ─── */}
       <div className={styles.chipMixLegend}>
-        {Array.from(byMfr.entries()).map(([mfr, pct]) => (
-          <span key={mfr} className={styles.chipMixLegendItem}>
+        {sorted.map((seg) => (
+          <span
+            key={seg.chipType}
+            className={styles.chipMixLegendItem}
+            title={`${seg.manufacturer} · ${formatH100(seg.h100e)} H100e`}
+          >
             <span
               className={styles.chipMixLegendDot}
-              style={{
-                background:
-                  MFR_COLORS[mfr as ChipManufacturer] ?? MFR_COLORS.Unknown,
-              }}
+              style={{ background: seg.color }}
             />
-            {mfr} {pct.toFixed(0)}%
+            <span className={styles.chipMixLegendType}>{seg.chipType}</span>
+            <span className={styles.chipMixLegendPct}>
+              {seg.pct < 1 ? '<1%' : `${seg.pct.toFixed(0)}%`}
+            </span>
           </span>
         ))}
       </div>
