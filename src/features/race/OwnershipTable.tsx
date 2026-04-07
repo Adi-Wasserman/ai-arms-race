@@ -16,65 +16,82 @@ import styles from './OwnershipTable.module.css';
 /* ─────────────────────────────────────────────────────────────
    Chip-mix color palette.
 
-   Each chip TYPE gets a distinct color so the stacked bar
-   actually shows the breakdown — earlier we colored by
-   manufacturer, which made every Microsoft / Meta / Amazon
-   row look like one undifferentiated green block (since they
-   all use multiple Nvidia chip types).
+   Design rationale: assign maximally distinct colors to chip
+   types that ACTUALLY APPEAR TOGETHER in the same row. Earlier
+   tries grouped tonally by manufacturer (all Nvidia = greens),
+   which blended Microsoft / Meta / Amazon / Oracle into one
+   undifferentiated green block — those 4 owners all hold the
+   same 4 Nvidia chip types in the current snapshot.
 
-   Within a manufacturer family the colors are tonally grouped
-   (greens for Nvidia, blues for Google TPU, oranges for AWS
-   Trainium, reds for AMD, purples for Huawei) and ordered by
-   chip generation — older/dimmer → newer/brighter.
+   Strategy:
+   - The 4 high-frequency Nvidia chips that co-occur in every
+     hyperscaler row (A100, H100/H200, B200, B300) get the 4
+     most distinct hues from Tableau 10 (blue, green, orange,
+     purple).
+   - Google's 10-chip row consumes the rest of Tableau 10 plus
+     a few Tableau 20 entries for the TPU variants.
+   - China-only export variants (A800, H20, H800) and Amazon's
+     Trainium use the lighter Tableau 20 tints — they never
+     appear in rows that already have the 4 main Nvidia chips,
+     so reuse-by-similarity is fine.
+   - AMD Instinct + Huawei Ascend rarely appear in the snapshot;
+     they get the remaining Tableau 20 entries.
+
+   Source: Tableau 10/20 categorical palette — these colors are
+   engineered to be perceptually distinguishable from each other.
    ───────────────────────────────────────────────────────────── */
 
 const CHIP_COLORS: Record<string, string> = {
-  // ── Nvidia (greens) ───────────────────────────────
-  A100: '#3a6b00',
-  A800: '#5c9e00',
-  'H100/H200': '#76b900',
-  H800: '#8fcc1f',
-  H20: '#a8db44',
-  B200: '#bce665',
-  B300: '#d2f085',
+  // ── Top 4 Nvidia chips (always together in hyperscaler rows) ──
+  // Maximum contrast among themselves.
+  A100: '#4e79a7', // blue   — older generation
+  'H100/H200': '#59a14f', // green  — current Nvidia association
+  B200: '#f28e2c', // orange — newer
+  B300: '#af7aa1', // purple — newest
 
-  // ── Google TPU (blues) ────────────────────────────
-  'TPU v4': '#1a3a8a',
-  'TPU v4i': '#2a4f9f',
-  'TPU v5e': '#3b66b8',
-  'TPU v5p': '#4285f4',
-  'TPU v6e': '#6ba0f7',
-  'TPU v7': '#9bc1fa',
+  // ── Google TPU family (only co-occurs with the 4 above in Google's row) ──
+  'TPU v4': '#76b7b2', // teal
+  'TPU v4i': '#9c755f', // brown
+  'TPU v5e': '#edc949', // yellow
+  'TPU v5p': '#ff9da7', // pink
+  'TPU v6e': '#e15759', // red
+  'TPU v7': '#bab0ab', // warm gray
 
-  // ── AWS Trainium (oranges) ────────────────────────
-  Trainium1: '#cc7700',
-  Trainium2: '#ff9900',
+  // ── China-only Nvidia export variants (China row only) ──
+  A800: '#8ed3f4', // light blue
+  H800: '#ffc6cd', // light pink
+  H20: '#c8a482', // tan
 
-  // ── AMD Instinct (reds) ───────────────────────────
-  'Instinct MI250X': '#7a0c10',
-  'Instinct MI300A': '#9b1015',
-  'Instinct MI300X': '#bc141a',
-  'Instinct MI308X': '#dd181f',
-  'Instinct MI325X': '#ed1c24',
-  'Instinct MI350X': '#f43d44',
-  'Instinct MI355X': '#fa6066',
+  // ── AWS Trainium (Amazon row only) ──
+  Trainium1: '#fcc658', // light yellow-orange
+  Trainium2: '#abd089', // light green
 
-  // ── Huawei Ascend (purples) ───────────────────────
-  'Ascend 910B': '#7a1c5e',
-  'Ascend 910C': '#a32477',
+  // ── AMD Instinct (rare) ──
+  'Instinct MI250X': '#d4b9d2', // mauve
+  'Instinct MI300A': '#d3ccc8', // taupe
+  'Instinct MI300X': '#aaccc4', // light teal
+  'Instinct MI308X': '#fff89e', // cream
+  'Instinct MI325X': '#8ed3f4', // light blue (alt)
+  'Instinct MI350X': '#fcc658', // light yellow (alt)
+  'Instinct MI355X': '#ff9896', // salmon
+
+  // ── Huawei Ascend (rare) ──
+  'Ascend 910B': '#4e79a7', // blue (no co-occurrence with A100)
+  'Ascend 910C': '#af7aa1', // purple (no co-occurrence with B300)
 };
 
 /**
- * Manufacturer color used by the compact legend below each bar.
- * The bar segments themselves use `CHIP_COLORS[chipType]`.
+ * Manufacturer color used as a fallback when a future Epoch release
+ * adds an unknown chip type. Each manufacturer maps to its own
+ * Tableau 10 hue so the fallback color stays distinguishable.
  */
 const MFR_COLORS: Record<ChipManufacturer | 'Unknown', string> = {
-  Nvidia: '#76b900',
-  Google: '#4285f4',
-  Amazon: '#ff9900',
-  AMD: '#ed1c24',
-  Huawei: '#a32477',
-  Unknown: '#666666',
+  Nvidia: '#59a14f',
+  Google: '#76b7b2',
+  Amazon: '#fcc658',
+  AMD: '#d4b9d2',
+  Huawei: '#4e79a7',
+  Unknown: '#bab0ab',
 };
 
 /** Resolve a per-segment color, falling back through chip-type → manufacturer → unknown. */
