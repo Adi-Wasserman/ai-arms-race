@@ -275,13 +275,44 @@
   /* Thin dark divider between adjacent segments so similar shades
      within the same manufacturer family stay visually distinct. */
   box-shadow: inset -1px 0 0 0 rgba(0, 0, 0, 0.4);
-  /* No cursor change and no hover popover — the legend below the
-     bar is the canonical info source. Native HTML `title` tooltips
-     are unreliable across browsers and confusing to discover. */
+  cursor: pointer;
+  transition: filter 0.12s;
 }
 
 .chipMixSegment:last-child {
   box-shadow: none;
+}
+
+.chipMixSegment:hover,
+.chipMixSegmentActive {
+  filter: brightness(1.35);
+}
+
+/* Manufacturer rollup line — sits between the bar and the chip-type
+   list. Quick "Nvidia 67% · Google 33%" summary so the user has a
+   one-glance answer without parsing the per-chip list below. */
+.chipMixMfrRollup {
+  margin-top: 6px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+}
+
+.chipMixMfrName {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.chipMixMfrPct {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.chipMixMfrSep {
+  color: var(--color-text-quaternary);
+  margin: 0 2px;
 }
 
 /* Per-chip-type legend — always visible, no hover required. */
@@ -289,7 +320,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 8px;
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 10px;
   font-family: var(--font-mono);
   color: var(--color-text-secondary);
@@ -389,4 +420,104 @@
   color: rgba(255, 100, 100, 0.85);
   font-size: var(--font-size-md);
   font-family: var(--font-mono);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Hover popover (chip-mix segments).
+
+   Rendered via React Portal to document.body so it escapes the
+   table's `overflow-x: auto` clipping. Position is set inline
+   from the segment's getBoundingClientRect — `left` is the
+   segment center-x, `top` is the segment top, then we
+   `translate(-50%, calc(-100% - 10px))` to anchor the popover's
+   bottom-center 10px above the segment.
+   ───────────────────────────────────────────────────────────── */
+.tooltip {
+  position: fixed;
+  z-index: 4000;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+  min-width: 180px;
+  max-width: 260px;
+  padding: 10px 12px;
+  background: rgba(8, 8, 28, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur-panel);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-sans);
+  /* Subtle slide-in so the popover doesn't pop abruptly. */
+  animation: tooltipFadeIn 0.12s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 10px));
+  }
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tooltipDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipChip {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.2px;
+}
+
+.tooltipMeta {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+
+.tooltipMetaLabel {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.tooltipBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tooltipBody > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltipBodyLabel {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.tooltipBodyValue {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
