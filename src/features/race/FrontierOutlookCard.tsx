@@ -89,8 +89,44 @@ export function FrontierOutlookCard(): JSX.Element | null {
     const since2022 = chipOwners.timeseries.filter(
       (p) => p.endDate >= '2022-01-01',
     );
-    const sparklineFor = (ownerName: string): number[] =>
-      since2022.map((p) => p.byOwner[ownerName] ?? 0);
+    /**
+     * Cumulative sparkline values for one owner. Two edge cases the
+     * raw `byOwner[ownerName] ?? 0` lookup got wrong on live data:
+     *
+     *   1. Sparse trailing quarters — Epoch's most recent release does
+     *      not always include every owner (e.g. xAI is absent from
+     *      2026-Q1's `cumulative_by_chip_type.csv` even though it
+     *      appears in earlier quarters). The default `?? 0` collapses
+     *      those quarters to the floor, producing a sparkline that
+     *      spikes and then crashes at the end. Forward-fill from the
+     *      last known value instead — cumulative chip totals don't
+     *      drop to zero between Epoch publishes.
+     *
+     *   2. Long leading-zero runs — labs founded after 2022 (xAI in
+     *      2023) have 6+ quarters of legitimate zero before any chip
+     *      acquisitions. Self-normalizing min/max compresses the real
+     *      buildout into a squiggle in the rightmost corner. Drop the
+     *      leading zeros so the line starts where the lab actually
+     *      began appearing in Epoch's data.
+     *
+     * Real Epoch revisions where the cumulative number genuinely
+     * decreases between quarters (Meta 2025-Q4 → 2026-Q1 went from
+     * 2.30M to 1.95M) ARE preserved — only undefined / missing rows
+     * are forward-filled.
+     */
+    const sparklineFor = (ownerName: string): number[] => {
+      let lastKnown = 0;
+      const filled = since2022.map((p) => {
+        const v = p.byOwner[ownerName];
+        if (v != null) {
+          lastKnown = v;
+          return v;
+        }
+        return lastKnown;
+      });
+      const firstNonZero = filled.findIndex((v) => v > 0);
+      return firstNonZero === -1 ? [] : filled.slice(firstNonZero);
+    };
 
     const rows: RankedLab[] = LAB_NAMES.map((lab): RankedLab => {
       const result: PctOwnedResult = computePctOwned(
