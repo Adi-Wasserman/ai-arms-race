@@ -126,6 +126,33 @@
   transition: width 0.25s;
 }
 
+/* "Owned X% · [chip mix bar]" line under each row's metric bar. */
+.ownership {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ownedLabel {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ownedLabel strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.chipMixSlot {
+  flex: 1;
+  min-width: 0;
+}
+
 .total {
   margin-top: var(--space-sm);
   padding-top: var(--space-sm);

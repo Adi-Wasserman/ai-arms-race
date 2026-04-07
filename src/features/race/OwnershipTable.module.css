@@ -250,6 +250,38 @@
   border-radius: 2px;
 }
 
+/* % Owned column — same visual shape as % Global, different framing.
+   "Of this lab's effective fleet, what share sits in their own
+   satellite-verified facilities (vs cloud-leased)?" Computed from
+   seriesEpoch / seriesFull, not from the chip-owners ZIP itself. */
+.pctOwnedCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 80px;
+}
+
+.pctOwnedValue {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.pctOwnedBarTrack {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pctOwnedBarFill {
+  height: 100%;
+  border-radius: 2px;
+}
+
 /* Chip mix column */
 .chipMix {
   /* Wider so the per-chip-type legend has room to wrap cleanly. */

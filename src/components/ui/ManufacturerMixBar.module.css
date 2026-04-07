@@ -1,0 +1,42 @@
+/* ─────────────────────────────────────────────────────────────
+   Tiny manufacturer-rollup chip mix bar.
+
+   Used in the Race section's Leaderboard sidebar (and could be
+   used anywhere else that needs a compact chip-mix indicator).
+   The OwnershipTable has its own per-chip-type bar that's wider
+   and more detailed; this one is the 5-color rollup version.
+   ───────────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+}
+
+.bar.tiny {
+  height: 6px;
+}
+
+.bar.small {
+  height: 10px;
+}
+
+.segment {
+  height: 100%;
+  flex-shrink: 0;
+  min-width: 2px;
+  box-shadow: inset -1px 0 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.segment:last-child {
+  box-shadow: none;
+}
+
+.empty {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-text-quaternary);
+}
