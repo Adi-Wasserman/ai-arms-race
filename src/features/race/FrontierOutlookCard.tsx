@@ -40,7 +40,8 @@ const PROOF_LINES: Readonly<Record<Lab, string>> = {
   Gemini: 'largest self-operated TPU fleet (Google owns the silicon)',
   Meta: 'full control of Hyperion + Prometheus — own data centers, own Nvidia chips',
   xAI: 'most vertically integrated pure-play lab — built and operates Colossus 1+2',
-  Anthropic: 'transition phase — Trainium2 in flight + first owned sites coming online',
+  Anthropic:
+    'all-3-hyperscaler tenant — AWS Trainium + multi-GW Google/Broadcom TPU agreement for 2027+',
   OpenAI: 'fully cloud-dependent (Microsoft Stargate / Azure + Oracle)',
 };
 
@@ -309,6 +310,23 @@ export function FrontierOutlookCard(): JSX.Element | null {
             algorithms, data, and talent also matter — see the{' '}
             <a href="#models">Models view</a> for latest releases.
             <span className={styles.footnoteMuted}>{PCT_OWNED_FOOTNOTE}</span>
+            <span className={styles.footnoteCallout}>
+              <strong className={styles.footnoteCalloutTag}>
+                Announced Apr 6 2026
+              </strong>
+              Anthropic ↔ Google + Broadcom multi-GW TPU deal (~3.5 GW per
+              Broadcom filing) for 2027+ delivery — further evidence that
+              even access leaders must rely on hyperscaler custom silicon
+              for sustained scaling. The deal is rented capacity, so the
+              ownership-moat thesis above still holds.{' '}
+              <a
+                href="https://www.anthropic.com/news/google-broadcom-partnership-compute"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Anthropic announcement →
+              </a>
+            </span>
           </p>
         </div>
       )}

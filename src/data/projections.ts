@@ -45,7 +45,8 @@ export const PROJ_2029_TARGETS: ProjectionTargetMap = {
   Anthropic: {
     h: 9_000_000,
     p: 5_500,
-    basis: 'Epoch satellite (~2M) + 3-cloud fleet (~7M). All sourced.',
+    basis:
+      'Epoch satellite (~2M) + 3-cloud fleet including multi-GW Google/Broadcom TPU deal announced Apr 2026 for 2027+ delivery (~7–9M total). All sourced.',
   },
 } as const;
 
@@ -77,6 +78,6 @@ export const ANALYST_ESTIMATES: AnalystEstimateMap = {
   Anthropic: {
     semi: 1_500_000,
     aa: 1_400_000,
-    note: "3-cloud est. (SemiAnalysis Q1 '26, AA Q1 '26)",
+    note: "3-cloud est. incl. new ~3.5 GW Google/Broadcom TPU deal announced Apr 6 2026 (SemiAnalysis Q1 '26, AA Q1 '26)",
   },
 } as const;

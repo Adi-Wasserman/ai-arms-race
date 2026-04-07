@@ -304,6 +304,54 @@
   font-size: 11.5px;
 }
 
+/**
+ * Dated news callout — surfaces breaking news that bears on the
+ * card's thesis without changing the underlying ranking. Visually
+ * distinct from the muted footnote (amber accent + brighter text)
+ * so the reader notices it as a recent datapoint.
+ */
+.footnoteCallout {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 170, 0, 0.06);
+  border-left: 2px solid rgba(255, 170, 0, 0.55);
+  border-radius: 0 4px 4px 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* Outscope the .footnote strong color rule via compound selector
+   specificity (0,2,0) > (0,1,1) — no !important needed. */
+.footnote .footnoteCalloutTag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 6px;
+  background: rgba(255, 170, 0, 0.18);
+  border: 1px solid rgba(255, 170, 0, 0.5);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 80, 1);
+  vertical-align: baseline;
+}
+
+.footnoteCallout a {
+  color: rgba(255, 200, 80, 0.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 200, 80, 0.45);
+  text-underline-offset: 2px;
+  font-weight: 600;
+}
+
+.footnoteCallout a:hover {
+  color: #ffd060;
+}
+
 /* ─── Loading skeleton ─── */
 
 .skeleton {
