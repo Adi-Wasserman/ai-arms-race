@@ -9,14 +9,13 @@ import { useDashboard } from '@/store';
 import type {
   MetricMode,
   ProjMode,
-  RaceMode,
   ScopeMode,
   VelocityMode,
 } from '@/types';
 
 import { FrontierOutlookCard } from './FrontierOutlookCard';
 import { Leaderboard } from './Leaderboard';
-import { OwnershipTable } from './OwnershipTable';
+import { OwnershipLabTable } from './OwnershipLabTable';
 import { ProjectionPanel } from './ProjectionPanel';
 import { RaceChart } from './RaceChart';
 import styles from './RaceSection.module.css';
@@ -40,14 +39,31 @@ const VELOCITY_OPTS = [
   { value: 'velocity' as const, label: 'GROWTH VELOCITY 📈' },
 ];
 
-const MODE_OPTS = [
-  { value: 'effective' as const, label: 'EFFECTIVE FLEET (ACCESS)' },
-  { value: 'ownership' as const, label: 'HARDWARE OWNERSHIP' },
-];
+/**
+ * Master view toggle — sits at the very top of the Race section,
+ * directly under the page title / intro. Collapses the existing
+ * scope=fleet + raceMode selectors into a single two-option pick:
+ *
+ *   ACCESS    = scope='fleet', raceMode='effective'
+ *               ("who can train today" — effective fleet w/ cloud-lease)
+ *   OWNERSHIP = scope='fleet', raceMode='ownership'
+ *               ("who controls the silicon for 2027+" — Epoch lab view)
+ *
+ * Clicking either option forces scope='fleet' so the ownership story
+ * presupposes the cloud-lease-adjusted fleet (satellite-verified alone
+ * excludes cloud-dependent labs entirely). The existing SCOPE toggle
+ * in the secondary row still works for fine-grained control when the
+ * user wants satellite-verified only.
+ *
+ * Keeps the URL hash at ?scope=fleet&mode=ownership (or mode=effective)
+ * via the existing setScope / setRaceMode slice actions, which
+ * useHashState already syncs to the hash.
+ */
+type AccessMode = 'access' | 'ownership';
 
-const MODE_TOOLTIP =
-  'Ownership = who bought the chips. Access = who can use them (current view). ' +
-  'Live from https://epoch.ai/data/ai_chip_owners.zip';
+const ACCESS_MODE_TOOLTIP =
+  'Ownership = who bought the chips (Epoch live data, lab view). ' +
+  'Access = who can train today (effective fleet incl. cloud-lease).';
 
 function RaceSectionInner(): JSX.Element {
   const metric = useDashboard((s) => s.metric);
@@ -71,11 +87,25 @@ function RaceSectionInner(): JSX.Element {
     exportOwnershipJSON,
   } = useRaceExport(chartRef);
 
-  // Mode toggle is only visible when scope=fleet (ownership data is
-  // a fleet-only concept). Toggling away from fleet automatically
-  // resets raceMode → 'effective' in the slice setter.
-  const showModeToggle = scope === 'fleet';
-  const isOwnership = showModeToggle && raceMode === 'ownership';
+  // Ownership is a fleet-only concept (satellite-verified alone
+  // excludes cloud-dependent labs). The master toggle forces
+  // scope=fleet on either selection so `isOwnership` is purely a
+  // function of raceMode.
+  const isOwnership = scope === 'fleet' && raceMode === 'ownership';
+
+  // Derived "which pill is active" state for the master toggle.
+  const accessMode: AccessMode = isOwnership ? 'ownership' : 'access';
+
+  /**
+   * Handler for the master ACCESS / OWNERSHIP toggle. Always sets
+   * scope=fleet (the slice auto-resets raceMode when leaving fleet,
+   * but here we're always entering fleet, so it's safe) and then
+   * sets the target raceMode.
+   */
+  const onAccessModeChange = (next: AccessMode): void => {
+    if (scope !== 'fleet') setScope('fleet');
+    setRaceMode(next === 'ownership' ? 'ownership' : 'effective');
+  };
 
   // Export menu items adapt to the active view.
   const exportItems: ExportMenuItem[] = isOwnership
@@ -113,6 +143,54 @@ function RaceSectionInner(): JSX.Element {
         has changed hands multiple times since 2023 — and the gap between first and
         second place is narrowing. This chart tracks{' '}
         <strong>satellite-verified compute capacity</strong> across every major facility.
+      </div>
+
+      {/* ─── Master ACCESS / OWNERSHIP toggle ───
+          Sits at the very top of the section so the two-story narrative
+          ("who can train today" vs "who controls the silicon for 2027+")
+          is the first thing the user sees. Syncs to URL hash via the
+          existing scope + raceMode slice actions. */}
+      <div
+        className={styles.accessModeRow}
+        role="radiogroup"
+        aria-label="Race view: Access or Ownership"
+      >
+        <button
+          type="button"
+          role="radio"
+          aria-checked={accessMode === 'access'}
+          className={`${styles.accessModeBtn}${
+            accessMode === 'access' ? ` ${styles.accessModeBtnActive}` : ''
+          }`}
+          onClick={() => onAccessModeChange('access')}
+        >
+          <span className={styles.accessModeTitle}>ACCESS</span>
+          <span className={styles.accessModeSub}>
+            Effective Fleet — who can train today
+          </span>
+        </button>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={accessMode === 'ownership'}
+          className={`${styles.accessModeBtn}${
+            accessMode === 'ownership' ? ` ${styles.accessModeBtnActive}` : ''
+          }`}
+          onClick={() => onAccessModeChange('ownership')}
+        >
+          <span className={styles.accessModeTitle}>OWNERSHIP</span>
+          <span className={styles.accessModeSub}>
+            Hardware — who controls the silicon for 2027+
+          </span>
+        </button>
+        <span
+          className={styles.accessModeInfo}
+          role="img"
+          aria-label="info"
+          title={ACCESS_MODE_TOOLTIP}
+        >
+          ⓘ
+        </span>
       </div>
 
       <StatCards />
@@ -154,29 +232,12 @@ function RaceSectionInner(): JSX.Element {
         <ExportMenu items={exportItems} />
       </div>
 
-      {/* Mode toggle (only visible when scope=fleet) */}
-      {showModeToggle && (
-        <div className={styles.modeRow}>
-          <Toggle<RaceMode>
-            value={raceMode}
-            options={MODE_OPTS}
-            onChange={setRaceMode}
-            ariaLabel="Race view mode"
-          />
-          <span
-            className={styles.modeInfo}
-            role="img"
-            aria-label="info"
-            title={MODE_TOOLTIP}
-          >
-            ⓘ
-          </span>
-        </div>
-      )}
-
-      {/* Body — chart row OR ownership table */}
+      {/* Body — chart row OR lab-based ownership table.
+          The secondary modeRow that used to live between the toggleRow
+          and the body has been subsumed by the master ACCESS /
+          OWNERSHIP toggle at the top of the section. */}
       {isOwnership ? (
-        <OwnershipTable />
+        <OwnershipLabTable />
       ) : (
         <div className={styles.chartRow}>
           <RaceChart ref={chartRef} />
