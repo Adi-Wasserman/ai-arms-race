@@ -44,6 +44,43 @@
   border-bottom-color: rgba(255, 255, 255, 0.3);
 }
 
+/**
+ * Truth & Data Limitations trigger — pushed to the right edge of
+ * the nav so it reads as a meta affordance rather than a section
+ * link. Mono font + ? glyph signal that it's about the data, not
+ * about navigation.
+ */
+.truthBtn {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 5px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-base),
+    color var(--transition-base), border-color var(--transition-base);
+}
+
+.truthBtn:hover,
+.truthBtn:focus-visible {
+  background: rgba(77, 142, 234, 0.1);
+  color: #ffffff;
+  border-color: rgba(77, 142, 234, 0.4);
+  outline: none;
+}
+
+.truthBtn span {
+  color: rgba(77, 142, 234, 0.9);
+  font-weight: 700;
+  margin-right: 2px;
+}
+
 @media (max-width: 768px) {
   .nav {
     padding: 0 var(--space-md);
@@ -58,5 +95,9 @@
   .link {
     font-size: var(--font-size-sm);
     padding: 12px 0;
+  }
+  .truthBtn {
+    font-size: 9px;
+    padding: 4px 8px;
   }
 }

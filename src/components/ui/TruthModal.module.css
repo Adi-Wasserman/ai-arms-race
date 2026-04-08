@@ -1,0 +1,421 @@
+/* ─────────────────────────────────────────────────────────────
+   Truth & Data Limitations modal.
+
+   Portal-mounted to document.body so the backdrop covers the
+   fixed nav bar. Centered card with scrollable body and a
+   sticky header that always shows the close affordance.
+   ───────────────────────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: rgba(2, 2, 8, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: backdropFadeIn 0.18s ease-out;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 15, 32, 0.98) 0%,
+    rgba(8, 8, 22, 0.98) 100%
+  );
+  border: 1px solid rgba(77, 142, 234, 0.32);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(77, 142, 234, 0.08);
+  font-family: var(--font-sans);
+  color: rgba(255, 255, 255, 0.85);
+  animation: modalSlideIn 0.22s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ─── Header ────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(77, 142, 234, 0.85);
+  margin-bottom: 6px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.closeBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-base),
+    color var(--transition-base), border-color var(--transition-base);
+}
+
+.closeBtn:hover,
+.closeBtn:focus-visible {
+  background: rgba(255, 100, 100, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 100, 100, 0.35);
+  outline: none;
+}
+
+/* ─── Body (scrollable) ─────────────────────────── */
+.body {
+  padding: 18px 26px 26px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Subtle scrollbar styling so the modal feels intentional */
+.body::-webkit-scrollbar {
+  width: 8px;
+}
+.body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+.body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ─── Summary lede ──────────────────────────────── */
+.summary {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(77, 142, 234, 0.08);
+  border-left: 3px solid rgba(77, 142, 234, 0.55);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.summary strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* ─── Section ───────────────────────────────────── */
+.section {
+  margin: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.sectionMeta {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: none;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+/* ─── Sources list ──────────────────────────────── */
+.sourceList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sourceList > li {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.sourceLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.sourceLinks {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.sourceLinks a {
+  color: rgba(77, 142, 234, 0.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(77, 142, 234, 0.35);
+  text-underline-offset: 2px;
+}
+
+.sourceLinks a:hover {
+  color: #ffffff;
+}
+
+.sourceCsv {
+  color: rgba(0, 255, 135, 0.85) !important;
+  text-decoration-color: rgba(0, 255, 135, 0.35) !important;
+}
+
+.sourceMeta {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Ownership config table ────────────────────── */
+.tableWrap {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 10px 12px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table .right {
+  text-align: right;
+}
+
+.rowOverride {
+  background: rgba(255, 170, 0, 0.04);
+}
+
+.labName {
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.muted {
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+}
+
+.overrideBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 170, 0, 0.95);
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.32);
+  border-radius: var(--radius-sm);
+}
+
+.resolution {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.45;
+  min-width: 220px;
+}
+
+.tableNote {
+  margin: 10px 2px 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Uncertainty list ──────────────────────────── */
+.uncertaintyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.uncertaintyList > li {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.uncMetric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.uncLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.uncBand {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 170, 0, 0.85);
+  white-space: nowrap;
+}
+
+.uncSource {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ─── Closing line ──────────────────────────────── */
+.closing {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.closing a {
+  color: rgba(77, 142, 234, 0.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(77, 142, 234, 0.35);
+}
+
+.closing a:hover {
+  color: #ffffff;
+}
+
+/* ─── Mobile ────────────────────────────────────── */
+@media (max-width: 720px) {
+  .backdrop {
+    padding: 12px;
+  }
+  .modal {
+    max-height: calc(100vh - 24px);
+  }
+  .header {
+    padding: 18px 20px 12px;
+  }
+  .title {
+    font-size: 18px;
+  }
+  .body {
+    padding: 14px 20px 20px;
+    gap: 18px;
+  }
+  .resolution {
+    min-width: 0;
+  }
+  .table {
+    font-size: 10px;
+  }
+}
