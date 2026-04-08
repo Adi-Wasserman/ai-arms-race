@@ -167,7 +167,7 @@ function RaceSectionInner(): JSX.Element {
         >
           <span className={styles.accessModeTitle}>ACCESS</span>
           <span className={styles.accessModeSub}>
-            Effective Fleet — who can train today
+            who can train frontier models today
           </span>
         </button>
         <button
@@ -181,7 +181,7 @@ function RaceSectionInner(): JSX.Element {
         >
           <span className={styles.accessModeTitle}>OWNERSHIP</span>
           <span className={styles.accessModeSub}>
-            Hardware — who controls the silicon for 2027+
+            who controls the silicon for 2027+
           </span>
         </button>
         <span
@@ -233,18 +233,18 @@ function RaceSectionInner(): JSX.Element {
         <ExportMenu items={exportItems} />
       </div>
 
-      {/* Body — chart row OR lab-based ownership table.
-          The secondary modeRow that used to live between the toggleRow
-          and the body has been subsumed by the master ACCESS /
-          OWNERSHIP toggle at the top of the section. */}
-      {isOwnership ? (
-        <OwnershipLabTable />
-      ) : (
+      {/* Body. The 6-col OwnershipLabTable always renders — its
+          first column flips between EFFECTIVE FLEET H100e (ACCESS)
+          and OWNED H100e (EPOCH) (OWNERSHIP) based on the master
+          toggle. The chart + leaderboard sidebar still render in
+          ACCESS mode above the table for continuity. */}
+      {!isOwnership && (
         <div className={styles.chartRow}>
           <RaceChart ref={chartRef} />
           <Leaderboard />
         </div>
       )}
+      <OwnershipLabTable />
 
       {/* Hardware Ownership Snapshot — collapsible side panel.
           Mounted below the main row so it doesn't compete with the
