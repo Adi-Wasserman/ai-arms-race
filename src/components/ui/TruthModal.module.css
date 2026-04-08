@@ -181,6 +181,24 @@
   margin-left: 4px;
 }
 
+/**
+ * Short paragraph used to introduce a section (currently the
+ * "Why we show cloud providers as the owners" section above the
+ * LAB_OWNERSHIP_CONFIG table). Keeps the visual rhythm light so
+ * the modal still reads as a quick reference rather than an essay.
+ */
+.methodologyText {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.methodologyText strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
 /* ─── Sources list ──────────────────────────────── */
 .sourceList {
   list-style: none;

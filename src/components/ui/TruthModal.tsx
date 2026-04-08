@@ -214,14 +214,23 @@ export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | nu
             </ul>
           </section>
 
-          {/* ─── LAB_OWNERSHIP_CONFIG table ─── */}
+          {/* ─── Why cloud providers appear as owners + LAB_OWNERSHIP_CONFIG table ─── */}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>
-              2 · Lab Ownership Config{' '}
-              <span className={styles.sectionMeta}>
-                (the entire override surface area)
-              </span>
+              2 · Why we show cloud providers as the owners
             </h3>
+            <p className={styles.methodologyText}>
+              Epoch&apos;s Chip Owners dataset attributes every chip to{' '}
+              <strong>whoever bought it</strong>, not whoever trains on it.
+              That means Microsoft&apos;s 3M+ H100e includes capacity sold to
+              OpenAI, Bing, Copilot, and every Azure customer — Epoch does
+              not publish the per-tenant breakdown. The dashboard mirrors
+              this 1:1 in the operator-row table, then layers a documented
+              override path on top for the two frontier labs that own none
+              of their own silicon (OpenAI, Anthropic). The full surface
+              area of those overrides is below — every other lab&apos;s
+              percentage is 100% derived from the live ZIP.
+            </p>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
