@@ -8,6 +8,724 @@ A React + Vite dashboard tracking the AI infrastructure race — compute buildou
 
 ---
 
+## Current State (post-migration)
+
+The P1+P2 migration is **done**. All 4 sections ship and render from live
+Epoch AI data with fallback. Recent feature work (post-migration):
+
+- **Hardware Ownership view** (Race section → scope=fleet → mode=ownership):
+  new `OwnershipTable` sourced from `useEpochChipOwners` which fetches
+  `https://epoch.ai/data/ai_chip_owners.zip`, parses via JSZip + PapaParse,
+  caches in `localStorage` (24h TTL, key `epochChipOwnersCache_v1`).
+- **Chip-mix palette**: bounded hue ranges per manufacturer (greens for
+  Nvidia, blues for Google TPU, ambers for AWS Trainium, reds for AMD,
+  purples for Huawei). Per-chip-type legend always visible; portal-based
+  hover popover escapes the table's `overflow-x: auto` clipping.
+- **Hybrid % Owned column**: structural mapping in
+  `src/config/labOwnershipMapping.ts` (`LAB_OWNERSHIP_CONFIG`) with
+  `selfOwned` (Epoch owner names) + optional `overridePct`. Calculation in
+  `src/services/ownershipMath.ts` — `computePctOwned(lab, totalFleetH100e,
+  chipOwners)` returns `{ pct, ownedH100e, isDerivedFromEpoch, footnote? }`.
+  Expected values: Gemini/Meta 100%, xAI ~99%, Anthropic 25% (override, *),
+  OpenAI 0% (override). Shared `PCT_OWNED_TOOLTIP` + `PCT_OWNED_FOOTNOTE`
+  surfaced in both `Leaderboard` (sidebar) and `OwnershipTable` (full view).
+- **"Who Owns the AI Chips?" panel**: full-width horizontal
+  strip below the Race chart row, mounted in `RaceSection.tsx` between
+  `chartRow` and `ProjectionPanel`. Despite the filename
+  (`OwnershipSidePanel.tsx`), it is **NOT a sidebar** — it's a 5-card
+  grid of frontier-anchored hyperscalers (Google, Microsoft, Amazon,
+  Meta, xAI sorted by H100e desc), each with a `SELF-OPERATED` (green)
+  / `SHARED HOST` (amber) integration pill. Cards are `<button>`s that
+  click-through to the Hardware Ownership table — see the editorial
+  framing + click-through pattern below.
+- **Frontier Leadership Outlook card**: collapsible summary
+  card mounted in `RaceSection.tsx` directly after `<StatCards />` and
+  before the master toggle, gated on `scope === 'fleet'`. Title: *"Who
+  is positioned to lead frontier models in 2027+?"*. Lives in
+  `src/features/race/FrontierOutlookCard.tsx` — despite the file
+  location it is NOT race-section-specific UI (no chart, no toggles),
+  it's a strategic overview that ranks the 5 labs by % Owned descending
+  with a per-row "data proof" line, a sparkline of Epoch's cumulative
+  chip-owner timeseries since 2022 (only for the 3 self-operated labs
+  Gemini/Meta/xAI — OpenAI and Anthropic show "N/A — cloud-dependent"),
+  and a footnote explaining the override path. Lede paragraph reacts
+  to `raceMode` via Zustand selector — different first sentence in
+  ACCESS vs OWNERSHIP mode. Header has a "Data: Epoch AI Chip Owners
+  (live)" badge with a green dot, a "Currently viewing" mode indicator,
+  and an `ⓘ` info icon linking to Epoch's chip-owners blog post.
+  **OpenAI's row is gray, not green** — its lab brand color (#10a37f)
+  reads as "good/positive" but OpenAI is the 0%-owned "last place"
+  row, so the row uses #7a7a7a accent + #9a9a9a name text as a local
+  override. **The footnote has a dated callout block** (amber
+  left-border) for breaking news that bears on the card's thesis — as
+  of 2026-04-07 it surfaces the Anthropic ↔ Google + Broadcom multi-GW
+  TPU deal (announced 2026-04-06) with a link to anthropic.com.
+
+- **Master ACCESS / OWNERSHIP pill toggle**: prominent two-segment
+  pill switch (`border-radius: 999px`) directly under the section
+  intro, replacing the older secondary `modeRow` toggle. The active
+  segment fills with a strong blue gradient + lift shadow so the
+  selected lens is unmistakable. ACCESS = `scope='fleet' +
+  raceMode='effective'`, OWNERSHIP = `scope='fleet' +
+  raceMode='ownership'`. Both selections force `scope=fleet` so the
+  ownership lens presupposes the cloud-lease-adjusted fleet — the
+  secondary scope toggle in `toggleRow` is still available for fine-
+  grained satellite-verified-only control. Mode-specific headline
+  *"Hardware Ownership — Who controls the silicon (Epoch AI live
+  data)"* with a live blue dot is rendered above `OwnershipTable` in
+  OWNERSHIP mode only.
+
+- **Operator/lab badges in OwnershipTable** (OWNERSHIP mode):
+  three-category taxonomy as tiny mono-font pill chips in the
+  `OWNER / LAB` column:
+    - `Pure Owner` (green) — Meta, xAI, Google/Alphabet
+    - `Cloud Provider` (blue) — Microsoft, Oracle, Amazon
+    - `Major Tenant` (gray) — OpenAI, Anthropic
+  The operator badge sits next to the top-line owner name. When the
+  mapped lab is a Major Tenant (Microsoft → OpenAI, Amazon →
+  Anthropic), a second gray Major Tenant badge sits next to the
+  "→ Lab" sub-label and the entire row gets a `.rowMajorTenant`
+  background tint (`rgba(255,255,255,0.022)`). Constants live at
+  the top of `OwnershipTable.tsx`:
+  `PURE_OWNER_OPERATORS`, `CLOUD_PROVIDER_OPERATORS`,
+  `MAJOR_TENANT_LABS`. The `LabBadge` component is local to
+  `OwnershipTable.tsx`.
+
+- **HardwareRealityCheckPanel**: full-width editorial card mounted
+  in `RaceSection.tsx` between `OwnershipSidePanel` (snapshotRow)
+  and `ProjectionPanel`. Visible in both modes. Internal **3-column
+  grid** (1.35fr / 1fr / 1.2fr) so it fills the full content width:
+    1. Top 5 owners horizontal bar chart (lab-colored where the
+       operator maps to a tracked lab, neutral gray otherwise)
+    2. Total cumulative ownership growth sparkline since 2022 with
+       start/end captions, sums `byOwner` per quarter from
+       `chipOwners.timeseries`, defensively trims leading zeros
+    3. Three editorial bullets (OpenAI 0%, Gemini largest fleet,
+       Anthropic 25% rising) + amber-bordered "% Owned override"
+       footnote
+  Dismissible — preference persists in localStorage key
+  `hardwareRealityCheckDismissed_v1`, read synchronously in
+  `useState`'s initializer so a dismissed panel never flashes
+  visible-then-hidden on hydration. Mobile breakpoint at 900px
+  collapses the 3-col grid to single-column.
+
+- **KnownLeasesCard**: minimalist collapsible editorial card mounted
+  in `RaceSection.tsx` directly after `OwnershipTable` inside the
+  `isOwnership` branch. **OWNERSHIP mode only.** Surfaces the
+  public cloud → lab relationships that the operator-row table
+  cannot show directly because Epoch reports operator totals, not
+  per-tenant allocation. Six bullets (Microsoft Azure + Stargate →
+  OpenAI · Google TPU fleet → Gemini · AWS Trainium + EC2 →
+  Anthropic · Google + Broadcom multi-GW TPU → Anthropic · Meta
+  Hyperion + Prometheus → Meta · xAI Colossus 1+2 → xAI). Disclaimer
+  block: *"Exact fractional allocation of each hyperscaler's chips
+  to each lab is proprietary and not published by Epoch."* Header
+  is the toggle (chevron + title + italic subtitle). localStorage
+  key `knownLeasesCardCollapsed_v1`, also read synchronously on
+  first render to avoid flash.
+
+- **TruthModal** + **DataBanner sticky redesign**: methodology /
+  sources / overrides / uncertainty modal. Lives at
+  `src/components/ui/TruthModal.tsx`, mounted **inside DataBanner**
+  (not Nav). Trigger is the new `ⓘ ABOUT THIS DATA` button in the
+  DataBanner action row alongside `↻ REFRESH` and `📋 SHARE`.
+  Three sections: (1) Sources with direct ZIP/CSV download links,
+  (2) "Why we show cloud providers as the owners" with a methodology
+  paragraph + the full `LAB_OWNERSHIP_CONFIG` table iterated from
+  the source of truth (override rows get amber tint + override-pct
+  badge), (3) Uncertainty notes (six structured rows). Modal is
+  Escape-dismissable, backdrop-click-dismissable, locks body scroll,
+  auto-focuses the close button on open. **DataBanner is now
+  `position: sticky; top: 48px; z-index: 900;`** with a darker
+  background + `backdrop-filter: var(--blur-nav)` so it stays
+  legible when content scrolls under, and the methodology trigger
+  travels with the user on scroll. Nav bar is back to plain
+  navigation — no truth button.
+
+- **`computeOwnedH100e` helper** (in `src/services/ownershipMath.ts`):
+  raw lab-level owned median, propagates 5th/95th Monte Carlo
+  range. Distinct from `computePctOwned`'s `ownedH100e` field —
+  no override fallthrough. Returns `{ median, low, high,
+  isDerivedFromEpoch, sources }`. OpenAI / Anthropic always return
+  zero from this — by design — because the override path lives in
+  `computePctOwned` only.
+
+- **`OwnershipLabTable.tsx` (file exists, not currently rendered)**:
+  earlier prompt experimented with a lab-row pivot (5 rows keyed
+  to LAB_NAMES instead of 8 operator rows). After A/B comparison
+  the user preferred the original operator-row `OwnershipTable`
+  for the chip-mix bars + Monte Carlo range column + confidence
+  badges. The lab-row file is left in place in case it's reused
+  later — currently tree-shook out of the bundle since nothing
+  imports it. Don't delete without checking with the user.
+
+- **Footer / sources readability pass**: `OwnershipSidePanel`
+  summary footer + `OwnershipTable` table footer were both set in
+  `var(--color-text-tertiary)` (`rgba(255,255,255,0.3)`) — the exact
+  failure mode the project's own design memory warns against. Both
+  promoted to `12.5px / rgba(255,255,255,0.78)` body text. The
+  `OwnershipTable` footer was also slimmed from a 4-paragraph wall
+  of fine print to three readable lines (the † marker explanation,
+  the editorial framing, and a pointer to the Truth modal for the
+  full methodology / uncertainty / override surface area). The
+  `PCT_OWNED_FOOTNOTE` import + the technical caveats paragraph
+  (confidence bands / projection logic / owner→lab attribution)
+  were removed because the Truth modal section 2 already has all
+  of it.
+
+### Editorial framing — operator vs lab (DO NOT REVERT)
+
+Epoch's dataset reports **operators**, not labs — "Microsoft bought
+3.4M H100e" with no breakdown of how much is OpenAI vs. Bing/Copilot/
+Azure customers. Earlier iterations of the panel labeled bars directly
+as "OpenAI / Anthropic / Gemini" which silently over-attributed each
+hyperscaler's full chip total to its frontier partner. **The user
+explicitly pushed back on this** — the panel now matches Epoch 1:1 on
+the operator label and uses the integration pill to surface the
+structural difference.
+
+Only **Meta and xAI are operator = consumer** (`integration: 'self'`).
+The other 3 are anchor tenants on shared infrastructure
+(`integration: 'shared'`). The single defensible quantitative claim is
+in the panel header: *"5 hyperscalers buy the chips — but only 2 of 5
+frontier labs actually operate them. The other 3 are tenants on
+shared infrastructure."* Don't add invented self-owned percentages,
+sparklines that imply growth from cumulative-reporting artifacts, or
+any framing that treats `Microsoft H100e` as `OpenAI H100e`.
+
+### Click-through pattern — panel cards → OwnershipTable row highlight
+
+The OwnershipSidePanel cards trigger a navigation flow that:
+
+1. Sets `scope='fleet'` and `raceMode='ownership'` (the slice's
+   `setScope` setter auto-resets `raceMode` when leaving fleet, but
+   here we're entering it, so the order is safe).
+2. Sets `highlightedOwner` in `raceSlice` to the Epoch owner name
+   (e.g. "Google", "Microsoft").
+3. Smooth-scrolls `#race` into view.
+
+The `OwnershipTable` consumes `highlightedOwner` via a `useEffect`,
+looks up the row in a `rowRefs: useRef<Map<string, HTMLTableRowElement>>`,
+calls `scrollIntoView({ behavior: 'smooth', block: 'center' })`, and
+applies a `.rowHighlight` class for a 1.8s blue flash keyframe
+(`rowFlash` in `OwnershipTable.module.css`). The store value is
+cleared after 1800ms via `setTimeout` so re-clicking the same card
+re-fires the effect.
+
+**Footgun:** the `setHighlightedOwner` call in the click handler is
+deferred via `requestAnimationFrame` because the OwnershipTable might
+not be mounted yet when scope/mode change — without the defer, the
+effect runs against an empty `rowRefs` map and the highlight no-ops.
+The handler also calls `setHighlightedOwner(null)` first so that
+re-clicking the SAME card (where the value would otherwise be unchanged)
+still re-fires the effect.
+
+### OwnershipTable row order
+
+`OwnershipTable` reorders `data.latestByOwner` before passing to
+`deriveRows`: **frontier-anchored owners first** (sorted by H100e desc
+— Google, Microsoft, Meta, Amazon, xAI), then **non-frontier**
+(Other, Oracle, China, also sorted desc). Ranks are renumbered 1–8
+against the new ordering, so gold/silver/bronze marks the top 3
+frontier-anchored operators rather than mixing in `Other`. This
+mirrors the panel's ordering so the two views read as a coherent pair.
+Frontier membership is checked via `OWNER_TO_LAB[owner] != null`.
+
+### Key files for ownership work
+
+```
+src/config/labOwnershipMapping.ts        # LAB_OWNERSHIP_CONFIG + tooltip/footnote
+src/services/ownershipMath.ts            # computePctOwned, computeOwnedH100e (raw median),
+                                         # computeManufacturerMix, LAB_TO_OWNER
+src/services/chipOwners.ts               # ZIP fetch + parse + cache + buildTimeseries
+src/store/slices/chipOwnersSlice.ts      # chipOwners, version, lastUpdated
+src/store/slices/raceSlice.ts            # + highlightedOwner field for panel→table jumps
+src/hooks/useEpochChipOwners.ts          # StrictMode-safe fetch, refresh()
+src/features/race/OwnershipTable.tsx     # operator rows + LabBadge taxonomy +
+                                         # frontier-first row reorder + highlight effect +
+                                         # slimmed 3-line footer
+src/features/race/OwnershipTable.module.css  # .rowHighlight + rowFlash keyframe +
+                                             # .badge* + .rowMajorTenant + .footer*
+src/features/race/OwnershipLabTable.tsx  # LAB-row pivot (NOT currently rendered — kept
+                                         # for possible future reuse, tree-shook out)
+src/features/race/Leaderboard.tsx        # sidebar — single OWNED progress bar
+src/features/race/Leaderboard.module.css
+src/features/race/FrontierOutlookCard.tsx       # collapsible "2027+" summary card
+src/features/race/FrontierOutlookCard.module.css
+src/features/race/HardwareRealityCheckPanel.tsx  # full-width 3-col editorial card,
+                                                 # localStorage-dismissible
+src/features/race/HardwareRealityCheckPanel.module.css
+src/features/race/KnownLeasesCard.tsx    # OWNERSHIP-only collapsible "Known Major
+                                         # Leases" card (public info, not in Epoch ZIP)
+src/features/race/KnownLeasesCard.module.css
+src/features/race/RaceSection.tsx        # master ACCESS/OWNERSHIP pill toggle +
+                                         # mode-specific headline + body branch
+src/features/race/RaceSection.module.css # .accessModeRow pill + .modeHeadline +
+                                         # .accessModeBtn / .accessModeBtnActive
+src/components/ui/OwnershipSidePanel.tsx # "Who Owns the AI Chips?" strip (NOT a sidebar)
+src/components/ui/OwnershipSidePanel.module.css  # color-mix(in oklab) per-card tints +
+                                                 # readable summary footer (12.5px / 0.78)
+src/components/ui/ManufacturerMixBar.tsx
+src/components/ui/TruthModal.tsx         # methodology modal — sources, ownership config
+                                         # table, uncertainty notes
+src/components/ui/TruthModal.module.css
+src/components/layout/Nav.tsx            # plain nav (truth button removed — moved to DataBanner)
+src/components/layout/DataBanner.tsx     # sticky data-status bar + ⓘ ABOUT THIS DATA
+                                         # button that opens TruthModal
+src/components/layout/DataBanner.module.css  # position: sticky + backdrop-filter +
+                                             # .buttonInfo blue variant
+scripts/check-spark.ts                   # diagnostic — verify Epoch ZIP timeseries per owner
+scripts/diagnose-epoch-chipowners.ts     # one-off Epoch ZIP schema diagnostic
+```
+
+---
+
+## Deployment Workflow (IMPORTANT — two repos)
+
+There are **two working copies** of the repo on this machine:
+
+1. `/Users/adiwasserman/ai-arms-race` — primary source (has `node_modules`,
+   used for `npm run dev`, `npm run build`, `tsc --noEmit`). **NOT a git
+   repo** — no `.git`.
+2. `/tmp/ai-arms-race-deploy` — git clone of
+   `github.com/Adi-Wasserman/ai-arms-race`. Used for commits + push.
+   **No `node_modules`** — CI builds it.
+
+### To ship a change
+1. Edit files under `/Users/adiwasserman/ai-arms-race/src/...`
+2. `npx tsc --noEmit` + `npm run build` in the source repo (must pass)
+3. `cp` every changed file into `/tmp/ai-arms-race-deploy/src/...`
+   — **use `diff -rq` to catch missing files**, e.g.:
+   ```
+   diff -rq /Users/adiwasserman/ai-arms-race/src /tmp/ai-arms-race-deploy/src
+   ```
+4. `cd /tmp/ai-arms-race-deploy && git add ... && git commit && git push`
+5. GitHub Actions `.github/workflows/deploy.yml` builds + deploys to Pages
+
+### Known footgun
+Every time I've skipped step 3's `diff` check I've missed files. Prior
+incidents: `ManufacturerMixBar.tsx`, `ownershipMath.ts`, updated
+`*.module.css` files — all compiled locally but broke CI because they
+weren't mirrored. **Always `diff -rq` before committing.**
+
+---
+
+## Epoch AI Chip Owners ZIP — data shape reference
+
+Source: `https://epoch.ai/data/ai_chip_owners.zip`
+Fetched via `src/services/chipOwners.ts` with a CORS proxy fallback
+(`https://corsproxy.io/?...`) because Epoch's host doesn't send CORS
+headers. Parsed via JSZip + PapaParse, dispatched by **filename suffix**
+(not hard-coded names) so Epoch can rename files without breaking us.
+
+**Current contents (as of 2026-Q1):**
+| File | Rows | Purpose |
+|---|---|---|
+| `cumulative_by_designer.csv` | 194 | Historical cumulative H100e per owner |
+| `cumulative_by_chip_type.csv` | 489 | Historical cumulative per (owner, chip type) |
+| `quarters_by_chip_type.csv` | 358 | Quarterly deliveries per (owner, chip type) |
+
+**8 owners** in the dataset: `Microsoft`, `Meta`, `Amazon`, `Google`,
+`Oracle`, `xAI`, `China`, `Other`. Epoch does NOT currently split
+`Alphabet` from `Google` or surface `Anthropic` as a standalone owner —
+hence the override path in `LAB_OWNERSHIP_CONFIG`.
+
+**5 manufacturers**: `Nvidia`, `Google`, `Amazon`, `AMD`, `Huawei`.
+**~24 chip types** across those mfrs (A100, H100/H200, B200, B300, TPU
+v4/v4i/v5e/v5p/v6e/v7, Trainium1/2, Instinct MI250X/300A/300X/etc.,
+Ascend 910B/C, Nvidia China variants A800/H800/H20).
+
+**`OWNER_TO_LAB`** (in `src/types/chipOwners.ts`) — approximate
+attribution, documented as such in the table footnote:
+```
+Microsoft → OpenAI       (includes Bing/Office workloads, not just OAI)
+Amazon    → Anthropic    (includes general AWS, not just Anthropic)
+Google    → Gemini       (includes all Google, not just Gemini's slice)
+Meta      → Meta
+xAI       → xAI
+Oracle, China, Other → no lab attribution
+```
+
+**`EpochChipOwnersData`** shape (in `src/types/chipOwners.ts`):
+```ts
+{
+  asOf: string;                    // ISO date from the newest row
+  latestByOwner: OwnerSnapshot[];  // cumulative, sorted by h100e desc
+  timeseries: OwnerTimeseries[];   // for future charting
+  rawRowCount: number;
+}
+
+OwnerSnapshot {
+  owner: string; h100e: number; h100eLow: number; h100eHigh: number;
+  powerMw: number; asOf: string;
+  byChipType: Array<{ chipType, manufacturer, h100e }>;
+}
+```
+
+Diagnostic script if Epoch changes schema again:
+`scripts/diagnose-epoch-chipowners.ts` (node-runnable) — fetches the
+ZIP, lists files, parses sample rows, prints owners/mfrs/chip types.
+
+---
+
+## Gotchas learned the hard way (do NOT re-discover)
+
+### Chart.js controllers must be explicitly registered
+`BaseChart.tsx` registers `LineController, ScatterController,
+BarController, BubbleController` alongside scales/plugins. **Required
+even for `react-chartjs-2`**: Vite tree-shakes unused exports in prod,
+and controllers loaded implicitly in dev get pruned, causing
+`"line" is not a registered controller` to throw only in the production
+build. If you add a new chart type, register the controller.
+
+### StrictMode-safe data fetching
+`useEpochData` and `useEpochChipOwners` both guard with a module-level
+`bootstrapStarted` (or `startedRef`) flag — **not** the classic
+`cancelled` flag in the cleanup. StrictMode's intentional
+unmount/remount trips the cancelled flag during the first effect run,
+preventing `setData` from ever being called. Use the module-level
+flag pattern; don't revert to `let cancelled = false; return () => {
+cancelled = true }`.
+
+### Module-level singleton fetch dedupe
+`useEpochChipOwners` stores an `inflightFetch: Promise | null` at
+module scope so that mounting the hook from multiple places (e.g.
+`App.tsx` + a future component) only triggers one ZIP download.
+
+### `dataVersion` + `chipOwnersVersion` memo invalidation
+Both slices bump a version number on hydrate. Any `useMemo` that
+derives from `seriesFull` / `chipOwners` should depend on the version,
+NOT the object reference — with the eslint-disable-next-line escape
+so `react-hooks/exhaustive-deps` doesn't demand the object in the dep
+array. Pattern already used in `Leaderboard.tsx` and `OwnershipTable.tsx`.
+
+### Epoch CSV schema drift — facility coordinates
+In early 2026 Epoch dropped `Latitude`/`Longitude` columns from their
+satellite-verified CSV. `src/data/facilities.ts` compensates with:
+- `FACILITY_COORDS` extended with Epoch's **short-name aliases** for
+  all 22 tracked sites (not just long names).
+- `FACILITY_COORD_OVERRIDES` map — hand-verified coordinates that
+  beat Epoch's value when Epoch ships something off by km's (e.g.
+  Microsoft Fairwater Wisconsin was in the middle of a lake).
+
+If the map ever shows <22 facilities, first check whether new
+handles need to be added to `FACILITY_COORDS`.
+
+### vite.config.js shadowing vite.config.ts
+`tsc -b` previously emitted a `vite.config.js` to project root that
+Vite preferred over the `.ts` version, silently breaking the `@/`
+alias. Fix is in place (`tsconfig.node.json` has `outDir:
+./node_modules/.cache/tsconfig-node`) — do NOT remove.
+
+### `color-mix(in oklab, ...)` per-card tinting
+
+`OwnershipSidePanel.module.css` derives every per-card accent (top
+glow line, background gradient, operator name color, anchor lab name
+color, bar fill, hover border, focus ring) from a single CSS custom
+property `--card-color` set inline by the component. The mixing uses
+`color-mix(in oklab, var(--card-color) X%, transparent | white)` —
+OKLab gives perceptually-uniform tints (true pastels, not muddy
+darkened versions), so the saturated lab brand colors only ever
+appear as low-opacity surfaces.
+
+**Browser support is fine** — `color-mix` is in all modern browsers
+since 2023 (Chrome 111+, Safari 16.2+, Firefox 113+). No fallback
+needed. If you ever rip this out, the fallback would be passing 5
+pre-mixed colors per lab through inline styles, which is uglier and
+duplicates what the CSS already does.
+
+### Panel→table click-through requires requestAnimationFrame defer
+
+In `OwnershipSidePanel.tsx`, the `jumpToOwnershipRow` handler calls
+`setHighlightedOwner(null)` first, then defers the actual
+`setHighlightedOwner(ownerName)` inside `requestAnimationFrame`.
+Both are load-bearing:
+
+- The `null` clear lets re-clicking the SAME card re-fire the
+  highlight effect (otherwise the value would be unchanged and
+  the effect wouldn't run).
+- The rAF defer waits for the OwnershipTable to mount after the
+  scope/raceMode change. Without it, the table's effect runs against
+  an empty `rowRefs.current` Map and the row scroll/highlight no-ops.
+
+If you ever simplify this to a single synchronous setter call, the
+highlight will silently break only on cold-jumps from `effective`
+mode, which is the most common entry path.
+
+### Legacy HTML at `public/ai-arms-race.html`
+The original vanilla-JS single-file app lives at `public/` so Vite
+copies it to `dist/` as a static asset. Needed for backlinks from old
+places that still point at `/ai-arms-race.html`. Do not delete.
+
+### High-res PNG exports
+`useChartExport` captures at `window.devicePixelRatio * 2` (or a
+forced 3200px target width) to produce crisp shareable images. Low-res
+export is a regression, not a feature.
+
+### `<ol>` markers leak through `list-style: none` when `<li>` is `display: grid`
+
+The FrontierOutlookCard ranked list originally used `<ol>`/`<li>`
+with `list-style: none` + `padding: 0`. On Chrome/Safari this still
+rendered the browser numeric marker to the left of grid items —
+`padding: 0` (physical) doesn't always reset `padding-inline-start`
+(logical, default 40px on `<ol>`), and even when it does, marker
+boxes interact unpredictably with grid items. Result: rows showed
+"1. 1 Gemini" with the rank doubled. **Use `<div role="list">` /
+`<div role="listitem">` for any "ranked list" with grid items** —
+preserves semantics via aria, zero browser markers possible.
+
+### Epoch ZIP cumulative timeseries — sparse trailing quarters + leading zeros
+
+The `cumulative_by_chip_type.csv` ZIP entry has two real edge cases
+that broke the FrontierOutlookCard sparklines until they were
+specifically handled in `sparklineFor()`:
+
+1. **Trailing quarters can be missing per owner.** As of 2026-Q1
+   Epoch's release does not include xAI in the most recent quarter
+   even though earlier quarters do. A naive `byOwner[owner] ?? 0`
+   lookup collapses the latest point to the floor and produces a
+   sparkline that spikes then crashes — visually broken. **Forward-
+   fill missing values from the last known cumulative total** —
+   cumulative chip totals don't go to zero between Epoch publishes.
+   Real downward revisions where Epoch genuinely revises a number
+   down (Meta 2025-Q4 → 2026-Q1: 2.30M → 1.95M) ARE preserved —
+   only `undefined` rows are forward-filled.
+2. **Leading-zero runs for late-founded labs.** xAI was founded
+   2023, so a since-2022 series has 10 leading zero quarters before
+   any chip acquisitions. Self-normalizing min/max compresses the
+   real buildout into a squiggle in the rightmost ~15% of the chart.
+   **Drop leading zeros via `findIndex(v => v > 0)`** so the line
+   starts at the lab's first non-zero quarter and uses the full
+   sparkline width.
+
+Verified via `scripts/check-spark.ts` against the live ZIP — keep
+that script around as a regression check if Epoch's data drifts again.
+
+### Body text needs direct rgba, not the dim text-tertiary tokens
+
+`tokens.css` defines `--color-text-tertiary: rgba(255,255,255,0.3)`
+and `--color-text-quaternary: rgba(255,255,255,0.15)`. These are
+intentionally dim — they're meant for de-emphasized metadata in
+"data strip" patterns where you scan, not for body text where you
+read. **For card body content (proof lines, captions, footnotes,
+labels) use direct `rgba(255,255,255, 0.55–0.85)` values** — the
+range that actually meets readable contrast on the dark surface.
+The FrontierOutlookCard + Leaderboard + OwnershipSidePanel summary
++ OwnershipTable footer readability passes all replaced every
+tertiary/quaternary use in those files with concrete rgba values
+in this range and bumped the small text 1.5–3px. If a future
+component reuses the dim tokens for body text, it'll fail the same
+readability test.
+
+### TruthModal lives in DataBanner, not Nav
+
+The methodology / sources / overrides / uncertainty modal is
+mounted **inside `DataBanner.tsx`** (not Nav), and the open-state
+is local to DataBanner. The trigger is the `ⓘ ABOUT THIS DATA`
+button in the DataBanner action row. This is intentional:
+
+- DataBanner is the meta-data surface (status dot + last-updated
+  + refresh + share). Methodology semantically belongs in the
+  same row, not in the navigation bar.
+- Single source of truth: one component owns both the trigger
+  and the modal mount. No cross-component custom events or
+  hoisted Zustand state required.
+- DataBanner is `position: sticky; top: 48px; z-index: 900;` so
+  the trigger travels with the user on scroll.
+
+If you ever need to open the modal from another component, the
+right move is to hoist the open-state to a `uiSlice` in the Zustand
+store rather than re-introducing the trigger in Nav. Don't add a
+duplicate trigger — the user previously asked us to consolidate
+this to one place.
+
+### DataBanner sticky requires darker background + backdrop-filter
+
+When `DataBanner` became `position: sticky`, the original
+translucent green tint (`rgba(0,255,135,0.04)`) made content
+unreadable as it scrolled under. Fix: bumped to
+`rgba(4,6,16,0.88)` + `backdrop-filter: var(--blur-nav)` so the
+banner stays legible while preserving the green status accent
+on the bottom border. Don't revert the background to the previous
+translucent value — the page-content scroll-through will look
+broken.
+
+### Master ACCESS / OWNERSHIP pill toggle — both setters fire
+
+In `RaceSection.tsx`, the `onAccessModeChange` handler always
+calls `setScope('fleet')` followed by `setRaceMode(...)` — even
+if the current scope is already `'fleet'`. This is intentional
+because:
+
+1. The slice's `setScope` setter auto-resets `raceMode` to
+   `'effective'` when leaving fleet, but here we're always
+   *entering* fleet, so the order is safe.
+2. The mobile breakpoint at 768px collapses the pill from
+   `border-radius: 999px` to the rectangular `--radius-xl`
+   because a thin 999px pill is awkward to tap. If you change
+   the breakpoint, also re-check the corner-radius transition
+   for the active segment (`.accessModeBtnActive`).
+
+The toggle copy is editorial, not technical: titles `ACCESS` /
+`OWNERSHIP` (mono caps, weight 800, 0.14em letter-spacing), with
+a small subtitle below ("who can train frontier models today" /
+"who controls the silicon for 2027+"). Don't shorten the
+subtitles — the user explicitly requested those exact phrasings.
+
+### LocalStorage preferences — read synchronously in useState init
+
+Both `HardwareRealityCheckPanel` and `KnownLeasesCard` use
+`localStorage` to persist their dismissed/collapsed state. The
+read MUST happen synchronously inside the `useState` initializer
+function, not in a `useEffect`:
+
+```ts
+const [dismissed, setDismissed] = useState<boolean>(() => readDismissed());
+useEffect(() => { writeDismissed(dismissed); }, [dismissed]);
+```
+
+If you read inside `useEffect` instead, the panel renders OPEN
+on first paint and then collapses after the effect runs — a
+visible flash on every page load for users who previously
+dismissed it. The synchronous initializer pattern is the only way
+to avoid that flash. Same goes for any future card with persistent
+collapse state.
+
+Storage keys in use (don't repurpose):
+- `hardwareRealityCheckDismissed_v1`
+- `knownLeasesCardCollapsed_v1`
+- `epochChipOwnersCache_v1` (the ZIP cache)
+
+### OwnershipTable footer minimization — Truth modal is the canonical home
+
+The OwnershipTable footer used to be a 4-paragraph wall of fine
+print: the `† Owned H100e` marker explanation, the editorial
+framing (`TOOLTIP_TEXT`), the `PCT_OWNED_FOOTNOTE` override
+caveat, and a technical caveats paragraph (confidence bands /
+projection logic / power-TDP note / owner→lab attribution).
+Three of those four were unreadable at `font-size: var(--font-size-base)
++ color: var(--color-text-tertiary)` and the user explicitly
+called it out as illegible.
+
+Current state: the footer has just three readable lines —
+`.footerLead` (the † marker explanation), `.footerNote` (the
+editorial framing), and `.footerPointer` (a single line pointing
+to `ⓘ ABOUT THIS DATA` in the DataBanner). The override caveat
+and technical caveats now live ONLY in the Truth modal section 2.
+Don't re-add inline copies — the user explicitly approved the
+deletion as repetitive.
+
+If you ever need to surface a new methodology caveat in OWNERSHIP
+mode, add it to the Truth modal, not the table footer.
+
+### LabBadge taxonomy is operator-vs-lab, not just operator
+
+The `LabBadge` system in `OwnershipTable.tsx` has three categories:
+
+- `pureOwner` (green) — Meta, xAI, Google, Alphabet
+- `cloudProvider` (blue) — Microsoft, Oracle, Amazon
+- `majorTenant` (gray) — OpenAI, Anthropic
+
+The first two badge categories live on the operator name (top
+line of the OWNER / LAB cell). The third lives on the **lab
+sub-label** ("→ OpenAI", "→ Anthropic") because OpenAI/Anthropic
+aren't operator rows. Rows whose mapped lab is a Major Tenant
+also get `.rowMajorTenant` background tint.
+
+The `.badge` base class resets `text-transform: none` because
+its parent `.ownerLab` has `text-transform: uppercase` — without
+the reset, the pill labels would be rendered as "PURE OWNER"
+which looks shouty at 8px. Don't remove the reset.
+
+---
+
+## URL hash state (current, post-ownership-view)
+
+| Param | Values | Default |
+|-------|--------|---------|
+| `metric` | `h100e`, `power` | `h100e` |
+| `scope` | `tracked`, `fleet` | `tracked` |
+| `mode` | `effective`, `ownership` | `effective` (only meaningful when scope=fleet; auto-resets otherwise) |
+| `proj` | `current`, `2029` | `current` |
+| `scatter` | `observed`, `projected` | `observed` |
+| `velocity` | `absolute`, `velocity` | `absolute` |
+| `lab` | lab name | `ALL` |
+
+The `raceSlice.setScope` setter auto-resets `raceMode` → `'effective'`
+when scope leaves `'fleet'`, so there's no reachable state where
+`mode=ownership` with `scope=tracked`.
+
+---
+
+## Race section — state shape + component hierarchy
+
+```
+RaceSection (container)
+├── intro paragraph
+├── accessModeRow  ← MASTER PILL TOGGLE [ ACCESS | OWNERSHIP ]
+│     Single fully-rounded container, max-width 760px centered.
+│     Active segment: blue gradient + lift shadow.
+│     Both selections force scope='fleet'.
+│     ACCESS    = scope='fleet', raceMode='effective'
+│     OWNERSHIP = scope='fleet', raceMode='ownership'
+├── StatCards
+├── FrontierOutlookCard  ← only when scope === 'fleet'
+│     "Who is positioned to lead frontier models in 2027+?"
+│     collapsible · ranks 5 labs by % Owned · sparkline + caption
+│     dated callout block surfacing breaking news (Anthropic-Google deal)
+│     Lede paragraph + "Currently viewing" badge react to raceMode.
+├── toggle row:   metric · scope · proj · velocity · ExportMenu
+│     (the secondary modeRow that used to live here is GONE — the
+│      master accessModeRow at the top has subsumed it)
+├── if !isOwnership (ACCESS):
+│     chartRow:
+│       ├── RaceChart (Chart.js line/projection)
+│       └── Leaderboard  ← sidebar with single OWNED progress bar
+│                          (chip-mix bar removed — was visually
+│                          redundant with OWNED for ~100% Nvidia labs)
+├── if isOwnership (OWNERSHIP):
+│     ├── modeHeadline  ← "● Hardware Ownership — Who controls the
+│     │                    silicon (Epoch AI live data)"
+│     │                    blue dot matches DataBanner status indicator
+│     ├── OwnershipTable (full-width, replaces chartRow)
+│     │     ↑ rowRefs + highlightedOwner effect — see click-through
+│     │     ↑ LabBadge taxonomy (Pure Owner / Cloud Provider / Major Tenant)
+│     │     ↑ .rowMajorTenant tint on rows whose mapped lab is OpenAI/Anthropic
+│     │     ↑ slimmed 3-line footer (no inline override caveat — Truth modal has it)
+│     └── KnownLeasesCard  ← OWNERSHIP-only collapsible card
+│                            6 cloud→lab bullets + proprietary disclaimer
+│                            localStorage: knownLeasesCardCollapsed_v1
+├── snapshotRow (full width, both modes):
+│     OwnershipSidePanel  ← "Who Owns the AI Chips?" 5-card strip
+│       ↑ cards click-through to OwnershipTable + highlight row
+│       ↑ readable 12.5px / 0.78 alpha summary footer
+├── HardwareRealityCheckPanel (full width, both modes):
+│     3-col editorial card — top 5 owners bars · sparkline · bullets+footnote
+│     localStorage: hardwareRealityCheckDismissed_v1
+├── ProjectionPanel (when proj === '2029')
+└── ExportMenu lives in toggle row, items branch by mode:
+      effective → exportRaceCSV/JSON/PNG
+      ownership → exportOwnershipCSV/JSON
+```
+
+**Store slice** (`src/store/slices/raceSlice.ts`) owns:
+`metric`, `scope`, `projMode`, `velocityMode`, `raceMode`, `hoveredLab`,
+`highlightedOwner` + their setters. `setScope` auto-resets `raceMode`
+when leaving fleet. `highlightedOwner` is set by OwnershipSidePanel
+cards and consumed by OwnershipTable's effect (cleared after 1.8s).
+The master pill toggle calls both `setScope('fleet')` and
+`setRaceMode(...)` so URL hash sync (`?scope=fleet&mode=ownership`)
+just works through the existing `useHashState` plumbing.
+
+**App-shell sticky stack** (top → bottom, by z-index):
+- `Nav` (`position: fixed`, `top: 0`, `z-index: 1000`, `height: 48px`)
+- `DataBanner` (`position: sticky`, `top: 48px`, `z-index: 900`,
+  `backdrop-filter`) — owns the `TruthModal` mount + `ⓘ ABOUT THIS DATA`
+  trigger
+- Section content scrolls under both
+
+---
+
 ## Tech Stack
 
 | Layer | Choice | Why |
@@ -359,7 +1077,7 @@ Components use **CSS Modules** (`.module.css` files) that reference tokens:
 | Gemini | 454K | 9M | ~20× | Epoch satellite (~4M) + Ironwood TPU fleet (~5M) |
 | Meta | 761K | 6M | ~7.9× | Epoch satellite only, owned infra |
 | xAI | 557K | 2.2M | ~3.9× | Colossus 1+2 (Epoch satellite) |
-| Anthropic | 1.8M | 9M | ~5× | Epoch satellite (~2M) + 3-cloud fleet (~7M) |
+| Anthropic | 1.8M | 9M | ~5× | Epoch satellite (~2M) + 3-cloud fleet incl. multi-GW Google/Broadcom TPU deal for 2027+ (~7M) |
 | **TOTAL** | **5.3M** | **~38M** | **~7×** | |
 
 **Layers:** L1 = Epoch satellite ramps (sourced). L2 = cloud-lease fleet (sourced announcements). No L3 speculative.
@@ -380,14 +1098,9 @@ Components use **CSS Modules** (`.module.css` files) that reference tokens:
 
 ## URL Hash State
 
-| Param | Values | Default |
-|-------|--------|---------|
-| `metric` | `h100e`, `power` | `h100e` |
-| `scope` | `tracked`, `fleet` | `tracked` |
-| `proj` | `current`, `2029` | `current` |
-| `scatter` | `observed`, `projected` | `observed` |
-| `velocity` | `absolute`, `velocity` | `absolute` |
-| `lab` | lab name | `ALL` |
+See the authoritative table near the top of this file (under
+"URL hash state (current, post-ownership-view)"). The `mode` param
+was added with the Hardware Ownership view.
 
 ---
 
