@@ -57,35 +57,19 @@ const OWNED_TOOLTIP =
   'Raw median from Epoch AI Chip Owners ZIP (live). ' +
   '5th–95th percentile range available at epoch.ai/data/ai-chip-owners';
 
-/** Hover tooltip applied to every cell in the ACCESS-mode column. */
-const EFFECTIVE_TOOLTIP =
-  'Effective fleet H100e — Epoch satellite-verified facilities + ' +
-  'cloud-lease estimates for tracked labs. What each lab can train on ' +
-  'today, regardless of who bought the chips.';
-
 interface LabRow {
   lab: Lab;
   rank: number;
-  /** Owned H100e from selfOwned snapshots (the OWNERSHIP-mode value). */
   owned: OwnedH100eResult;
-  /**
-   * Effective fleet H100e from `seriesFull` (the ACCESS-mode value).
-   * Includes cloud-lease estimates for tracked labs — what each lab
-   * can actually train on today, regardless of who bought the chips.
-   */
-  effectiveFleet: number;
   pctGlobal: number;
   proj2029: number | null;
   proj2029Growth: number | null;
   pctOwned: PctOwnedResult | null;
 }
 
-type SortKey = 'owned' | 'effective';
-
 function buildLabRows(
   chipOwners: EpochChipOwnersData,
   fleetByLab: Partial<Record<Lab, number>>,
-  sortKey: SortKey,
 ): LabRow[] {
   // Global denominator — total median H100e across every owner in
   // the ZIP. Gives "% of Global" a consistent total regardless of
@@ -110,7 +94,6 @@ function buildLabRows(
       lab,
       rank: 0, // set after sort
       owned,
-      effectiveFleet: fleetByLab[lab] ?? 0,
       pctGlobal: (owned.median / globalTotal) * 100,
       proj2029,
       proj2029Growth,
@@ -118,13 +101,8 @@ function buildLabRows(
     };
   });
 
-  // Sort by the active mode's primary metric, then renumber ranks 1..N
-  // so the medal classes (gold/silver/bronze) reflect the visible order.
-  rows.sort((a, b) => {
-    const av = sortKey === 'owned' ? a.owned.median : a.effectiveFleet;
-    const bv = sortKey === 'owned' ? b.owned.median : b.effectiveFleet;
-    return bv - av;
-  });
+  // Sort by owned median desc, then renumber ranks 1..N.
+  rows.sort((a, b) => b.owned.median - a.owned.median);
   rows.forEach((r, i) => {
     r.rank = i + 1;
   });
@@ -148,11 +126,6 @@ export function OwnershipLabTable(): JSX.Element {
 
   const seriesFull = useDashboard((s) => s.seriesFull);
   const dataVersion = useDashboard((s) => s.dataVersion);
-  // Master toggle state — drives the first column's label, source,
-  // sort order, and tooltip text. URL hash already syncs this via the
-  // existing raceSlice setters (?scope=fleet&mode=ownership).
-  const raceMode = useDashboard((s) => s.raceMode);
-  const isOwnership = raceMode === 'ownership';
   // Owner name set by OwnershipSidePanel cards — we map it to a lab
   // via OWNER_TO_LAB and highlight that lab's row instead.
   const highlightedOwner = useDashboard((s) => s.highlightedOwner);
@@ -186,9 +159,9 @@ export function OwnershipLabTable(): JSX.Element {
         fleetByLab[lab] = fullPt[lab];
       });
     }
-    return buildLabRows(data, fleetByLab, isOwnership ? 'owned' : 'effective');
+    return buildLabRows(data, fleetByLab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, dataVersion, isOwnership]);
+  }, [data, dataVersion]);
 
   // ── Loading / error states ──
   if (!data && loading) {
@@ -298,13 +271,8 @@ export function OwnershipLabTable(): JSX.Element {
           <tr>
             <th className={styles.th}>#</th>
             <th className={styles.th}>LAB</th>
-            <th
-              className={`${styles.th} ${styles.right}`}
-              title={isOwnership ? OWNED_TOOLTIP : EFFECTIVE_TOOLTIP}
-            >
-              {isOwnership
-                ? 'OWNED H100e (EPOCH)'
-                : 'EFFECTIVE FLEET H100e'}
+            <th className={`${styles.th} ${styles.right}`}>
+              OWNED H100e (EPOCH MEDIAN)
             </th>
             <th className={`${styles.th} ${styles.right}`}>% OF GLOBAL</th>
             <th className={`${styles.th} ${styles.right}`}>2029 PROJECTION</th>
@@ -319,12 +287,7 @@ export function OwnershipLabTable(): JSX.Element {
         <tbody>
           {rows.map((row) => {
             const labColor = LAB_COLORS[row.lab];
-            // Gray-out treatment only applies in OWNERSHIP mode where
-            // OpenAI/Anthropic legitimately show 0. In ACCESS mode
-            // they have non-zero effective fleet so they render in
-            // their normal lab color.
-            const isZeroLab =
-              isOwnership && !row.owned.isDerivedFromEpoch;
+            const isZeroLab = !row.owned.isDerivedFromEpoch;
             const mappedFromHighlight = highlightedOwner
               ? (OWNER_TO_LAB[
                   highlightedOwner as keyof typeof OWNER_TO_LAB
@@ -358,19 +321,17 @@ export function OwnershipLabTable(): JSX.Element {
                     </div>
                   )}
                 </td>
-                {/* First column — flips between OWNED H100e (Epoch
-                    median, OWNERSHIP mode) and EFFECTIVE FLEET H100e
-                    (seriesFull, ACCESS mode) based on the master
-                    toggle. Tooltip text + value source change with it;
-                    every other column stays identical between modes. */}
+                {/* Owned H100e — always renders the real number from
+                    the live Epoch ZIP via computeOwnedH100e (selfOwned
+                    sum). OpenAI is 0 because its selfOwned list is
+                    empty, by design. Tooltip surfaces the methodology
+                    + percentile-range link. */}
                 <td
                   className={`${styles.td} ${styles.right}`}
-                  title={isOwnership ? OWNED_TOOLTIP : EFFECTIVE_TOOLTIP}
+                  title={OWNED_TOOLTIP}
                 >
                   <div className={styles.h100eMain}>
-                    {formatH100(
-                      isOwnership ? row.owned.median : row.effectiveFleet,
-                    )}
+                    {formatH100(row.owned.median)}
                   </div>
                 </td>
                 <td className={`${styles.td} ${styles.right}`}>
