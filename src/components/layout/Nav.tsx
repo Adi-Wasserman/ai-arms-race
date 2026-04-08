@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { TruthModal } from '@/components/ui/TruthModal';
-
 import styles from './Nav.module.css';
 
 interface NavLink {
@@ -43,32 +41,19 @@ function useActiveSection(ids: readonly string[]): string {
 
 export function Nav(): JSX.Element {
   const active = useActiveSection(LINK_IDS);
-  const [truthOpen, setTruthOpen] = useState(false);
 
   return (
-    <>
-      <nav className={styles.nav}>
-        <span className={styles.brand}>AI ARMS RACE</span>
-        {LINKS.map((link) => (
-          <a
-            key={link.id}
-            href={`#${link.id}`}
-            className={`${styles.link} ${active === link.id ? styles.active : ''}`}
-          >
-            {link.label}
-          </a>
-        ))}
-        <button
-          type="button"
-          className={styles.truthBtn}
-          onClick={() => setTruthOpen(true)}
-          title="Sources, override table, uncertainty notes"
-          aria-haspopup="dialog"
+    <nav className={styles.nav}>
+      <span className={styles.brand}>AI ARMS RACE</span>
+      {LINKS.map((link) => (
+        <a
+          key={link.id}
+          href={`#${link.id}`}
+          className={`${styles.link} ${active === link.id ? styles.active : ''}`}
         >
-          <span aria-hidden="true">?</span> Truth &amp; Data Limitations
-        </button>
-      </nav>
-      <TruthModal open={truthOpen} onClose={() => setTruthOpen(false)} />
-    </>
+          {link.label}
+        </a>
+      ))}
+    </nav>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { TruthModal } from '@/components/ui/TruthModal';
 import { useDashboard } from '@/store';
 
 import styles from './DataBanner.module.css';
@@ -38,6 +39,7 @@ export function DataBanner(): JSX.Element {
   const { status, text } = deriveStatus(loading, error, dataSource, dataCenters);
 
   const [copied, setCopied] = useState(false);
+  const [truthOpen, setTruthOpen] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clean up any pending copy-confirmation timer on unmount.
@@ -79,33 +81,50 @@ export function DataBanner(): JSX.Element {
   };
 
   return (
-    <div className={`${styles.banner} ${styles[status]}`}>
-      <div className={styles.left}>
-        <span className={`${styles.dot} ${styles[status]}`} />
-        <span>{text}</span>
-        {lastUpdated && (
-          <>
-            <span className={styles.separator}>·</span>
-            <span className={styles.meta}>
-              Updated {new Date(lastUpdated).toLocaleTimeString()}
-            </span>
-          </>
-        )}
+    <>
+      <div className={`${styles.banner} ${styles[status]}`}>
+        <div className={styles.left}>
+          <span className={`${styles.dot} ${styles[status]}`} />
+          <span>{text}</span>
+          {lastUpdated && (
+            <>
+              <span className={styles.separator}>·</span>
+              <span className={styles.meta}>
+                Updated {new Date(lastUpdated).toLocaleTimeString()}
+              </span>
+            </>
+          )}
+        </div>
+        <div className={styles.actions}>
+          {/* Methodology trigger — anchors the row because it
+              answers "how was this data made" before any other
+              action makes sense. Same button style as the data-
+              action buttons to the right so it reads as an equal
+              peer, not a heavy CTA. */}
+          <button
+            type="button"
+            className={`${styles.button} ${styles.buttonInfo}`}
+            onClick={() => setTruthOpen(true)}
+            title="Sources, override table, uncertainty notes"
+            aria-haspopup="dialog"
+          >
+            ⓘ ABOUT THIS DATA
+          </button>
+          <button type="button" className={styles.button} onClick={handleRefresh}>
+            ↻ REFRESH DATA
+          </button>
+          <button
+            type="button"
+            className={styles.button}
+            onClick={handleShare}
+            aria-live="polite"
+          >
+            {copied ? '✓ COPIED' : '📋 SHARE VIEW'}
+          </button>
+        </div>
       </div>
-      <div className={styles.actions}>
-        <button type="button" className={styles.button} onClick={handleRefresh}>
-          ↻ REFRESH DATA
-        </button>
-        <button
-          type="button"
-          className={styles.button}
-          onClick={handleShare}
-          aria-live="polite"
-        >
-          {copied ? '✓ COPIED' : '📋 SHARE VIEW'}
-        </button>
-      </div>
-    </div>
+      <TruthModal open={truthOpen} onClose={() => setTruthOpen(false)} />
+    </>
   );
 }
 

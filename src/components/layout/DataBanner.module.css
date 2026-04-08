@@ -1,12 +1,24 @@
 .banner {
+  /**
+   * Sticky under the fixed nav (height 48px, z-index 1000). The
+   * initial margin-top keeps the banner below the nav in normal
+   * flow; the sticky position pins it at top:48px once the page
+   * scrolls past it, so the methodology button + data-status dot
+   * travel with the user. z-index < nav so the nav's shadow sits
+   * above the banner when scrolling.
+   */
+  position: sticky;
+  top: 48px;
+  z-index: 900;
+  margin-top: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
   padding: 6px var(--space-lg);
-  margin-top: 48px; /* sit directly below the fixed nav */
-  background: rgba(0, 255, 135, 0.04);
-  border-bottom: 1px solid rgba(0, 255, 135, 0.1);
+  background: rgba(4, 6, 16, 0.88);
+  border-bottom: 1px solid rgba(0, 255, 135, 0.14);
+  backdrop-filter: var(--blur-nav);
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
   flex-wrap: wrap;
@@ -97,6 +109,23 @@
 .button:hover {
   background: rgba(0, 255, 135, 0.12);
   color: var(--color-lab-openai);
+}
+
+/**
+ * Info-variant button — same footprint as the green data-action
+ * buttons but in a calm blue. Signals "meta information about the
+ * data" vs "perform an action on the data". Used for the
+ * methodology/limitations trigger.
+ */
+.buttonInfo {
+  border-color: rgba(77, 142, 234, 0.28);
+  background: rgba(77, 142, 234, 0.08);
+  color: rgba(77, 142, 234, 0.95);
+}
+
+.buttonInfo:hover {
+  background: rgba(77, 142, 234, 0.16);
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {
