@@ -128,6 +128,87 @@ const TOOLTIP_TEXT =
   'Ownership = who bought the chips. Access = who can use them (current view). Live from https://epoch.ai/data/ai_chip_owners.zip';
 
 /* ─────────────────────────────────────────────────────────────
+   Lab/operator badge taxonomy.
+
+   3 categories surfaced as tiny pill badges next to the entity
+   name in the OWNER / LAB column. The taxonomy describes the
+   structural relationship between the operator (who bought the
+   chips) and the frontier lab (who trains on them):
+
+     Pure Owner    — operator IS the lab parent (Meta, xAI,
+                     Google/Alphabet). Operator = consumer.
+     Cloud Provider — pure hyperscaler hosting workloads for
+                     others (Microsoft, Oracle, Amazon).
+     Major Tenant  — frontier lab that runs entirely on rented
+                     capacity from a Cloud Provider above
+                     (OpenAI, Anthropic).
+
+   Operators NOT in either set (Other, China) get no badge —
+   they aren't structurally either thing in our editorial frame.
+
+   Rows whose mapped lab is a Major Tenant also get a very
+   subtle row tint via .rowMajorTenant so the structural
+   relationship is visible at a glance.
+   ───────────────────────────────────────────────────────────── */
+
+type BadgeKind = 'pureOwner' | 'cloudProvider' | 'majorTenant';
+
+const PURE_OWNER_OPERATORS = new Set<string>([
+  'Meta',
+  'xAI',
+  'Google',
+  'Alphabet',
+]);
+const CLOUD_PROVIDER_OPERATORS = new Set<string>([
+  'Microsoft',
+  'Oracle',
+  'Amazon',
+]);
+const MAJOR_TENANT_LABS = new Set<Lab>(['OpenAI', 'Anthropic']);
+
+function operatorBadge(owner: string): BadgeKind | null {
+  if (PURE_OWNER_OPERATORS.has(owner)) return 'pureOwner';
+  if (CLOUD_PROVIDER_OPERATORS.has(owner)) return 'cloudProvider';
+  return null;
+}
+
+function isMajorTenantLab(lab: Lab | null): boolean {
+  return lab != null && MAJOR_TENANT_LABS.has(lab);
+}
+
+const BADGE_LABELS: Record<BadgeKind, string> = {
+  pureOwner: 'Pure Owner',
+  cloudProvider: 'Cloud Provider',
+  majorTenant: 'Major Tenant',
+};
+
+const BADGE_TOOLTIPS: Record<BadgeKind, string> = {
+  pureOwner:
+    'Operator IS the lab — bought the chips and runs the workloads themselves.',
+  cloudProvider:
+    'Hyperscaler that hosts workloads for others. Owns the chips, rents the capacity.',
+  majorTenant:
+    'Frontier lab that runs entirely on rented capacity from a hyperscaler.',
+};
+
+function LabBadge({ kind }: { kind: BadgeKind }): JSX.Element {
+  const cls =
+    kind === 'pureOwner'
+      ? styles.badgePureOwner
+      : kind === 'cloudProvider'
+        ? styles.badgeCloudProvider
+        : styles.badgeMajorTenant;
+  return (
+    <span
+      className={`${styles.badge} ${cls}`}
+      title={BADGE_TOOLTIPS[kind]}
+    >
+      {BADGE_LABELS[kind]}
+    </span>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
    Per-row derived values
    ───────────────────────────────────────────────────────────── */
 
@@ -774,6 +855,13 @@ export function OwnershipTable(): JSX.Element {
           {rows.map((row) => {
             const labColor = row.mappedLab ? LAB_COLORS[row.mappedLab] : '#888';
             const isHighlighted = highlightedOwner === row.owner;
+            // Badge taxonomy. The operator badge sits next to the
+            // top-line owner name; the major-tenant badge (if any)
+            // sits next to the "→ Lab" sub-label below it. Rows
+            // whose lab is a Major Tenant get a subtle gray tint
+            // via .rowMajorTenant.
+            const opBadge = operatorBadge(row.owner);
+            const tenantRow = isMajorTenantLab(row.mappedLab);
             return (
               <tr
                 key={row.owner}
@@ -781,7 +869,7 @@ export function OwnershipTable(): JSX.Element {
                   if (el) rowRefs.current.set(row.owner, el);
                   else rowRefs.current.delete(row.owner);
                 }}
-                className={`${styles.row}${isHighlighted ? ` ${styles.rowHighlight}` : ''}`}
+                className={`${styles.row}${isHighlighted ? ` ${styles.rowHighlight}` : ''}${tenantRow ? ` ${styles.rowMajorTenant}` : ''}`}
               >
                 <td className={styles.td}>
                   <div className={`${styles.rank} ${rankClass(row.rank)}`}>
@@ -789,10 +877,14 @@ export function OwnershipTable(): JSX.Element {
                   </div>
                 </td>
                 <td className={styles.td}>
-                  <div className={styles.ownerName}>{row.owner}</div>
+                  <div className={styles.ownerName}>
+                    {row.owner}
+                    {opBadge && <LabBadge kind={opBadge} />}
+                  </div>
                   {row.mappedLab && (
                     <div className={styles.ownerLab} style={{ color: labColor }}>
                       → {row.mappedLab}
+                      {tenantRow && <LabBadge kind="majorTenant" />}
                     </div>
                   )}
                   {!row.mappedLab && (

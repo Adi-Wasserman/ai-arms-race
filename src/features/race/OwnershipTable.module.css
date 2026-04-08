@@ -211,6 +211,10 @@
   font-weight: 700;
   font-size: var(--font-size-md);
   color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .ownerLab {
@@ -218,6 +222,10 @@
   letter-spacing: 0.5px;
   margin-top: 2px;
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .ownerSub {
@@ -616,4 +624,64 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--color-text-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Lab/operator badges (OWNERSHIP-mode taxonomy).
+
+   Tiny pill chips next to the operator name (column 2) and the
+   "→ Lab" sub-label below it. Three category colors map to the
+   structural relationship: green = Pure Owner (operator = lab),
+   blue = Cloud Provider (hyperscaler), gray = Major Tenant
+   (frontier lab on rented capacity).
+   ───────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: 3px;
+  border: 1px solid;
+  vertical-align: middle;
+  /* Reset case sensitivity from the parent .ownerLab which is
+     text-transform: uppercase — badge labels look better as
+     "Pure Owner" not "PURE OWNER" given their already-tiny size. */
+  text-transform: none;
+}
+
+.badgePureOwner {
+  color: rgba(0, 255, 135, 0.95);
+  background: rgba(0, 255, 135, 0.08);
+  border-color: rgba(0, 255, 135, 0.32);
+}
+
+.badgeCloudProvider {
+  color: rgba(77, 142, 234, 0.95);
+  background: rgba(77, 142, 234, 0.08);
+  border-color: rgba(77, 142, 234, 0.32);
+}
+
+.badgeMajorTenant {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/**
+ * Subtle row tint for operator rows whose mapped lab is a Major
+ * Tenant (Microsoft → OpenAI, Amazon → Anthropic). Quiet enough
+ * that it doesn't compete with the existing rowHighlight flash
+ * animation, which still wins via animation-fill during click-
+ * through from the OwnershipSidePanel.
+ */
+.rowMajorTenant {
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.rowMajorTenant:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
