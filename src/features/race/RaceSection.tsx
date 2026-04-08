@@ -16,7 +16,7 @@ import type {
 import { FrontierOutlookCard } from './FrontierOutlookCard';
 import { HardwareRealityCheckPanel } from './HardwareRealityCheckPanel';
 import { Leaderboard } from './Leaderboard';
-import { OwnershipLabTable } from './OwnershipLabTable';
+import { OwnershipTable } from './OwnershipTable';
 import { ProjectionPanel } from './ProjectionPanel';
 import { RaceChart } from './RaceChart';
 import styles from './RaceSection.module.css';
@@ -238,7 +238,7 @@ function RaceSectionInner(): JSX.Element {
           and the body has been subsumed by the master ACCESS /
           OWNERSHIP toggle at the top of the section. */}
       {isOwnership ? (
-        <OwnershipLabTable />
+        <OwnershipTable />
       ) : (
         <div className={styles.chartRow}>
           <RaceChart ref={chartRef} />
