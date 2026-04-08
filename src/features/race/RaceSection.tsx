@@ -240,6 +240,17 @@ function RaceSectionInner(): JSX.Element {
           OWNERSHIP toggle at the top of the section. */}
       {isOwnership ? (
         <>
+          {/* Mode-specific headline — anchors the OwnershipTable
+              with a one-line editorial framing so the user always
+              knows which lens they're reading. Live blue dot
+              matches the DataBanner status indicator. */}
+          <h2 className={styles.modeHeadline}>
+            <span className={styles.modeHeadlineDot} aria-hidden="true" />
+            Hardware Ownership
+            <span className={styles.modeHeadlineSub}>
+              — Who controls the silicon (Epoch AI live data)
+            </span>
+          </h2>
           <OwnershipTable />
           {/* Editorial card explaining the public cloud→lab
               relationships that the operator-row OwnershipTable
