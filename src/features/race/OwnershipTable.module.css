@@ -309,6 +309,43 @@
   border-radius: 2px;
 }
 
+/* ─── "Owned H100e (Epoch)" column ─────────────────────
+   Raw median pulled straight from the live chip-owners ZIP
+   for the lab's `selfOwned` entries. Cell is an anchor tag
+   that links to Epoch's methodology page; hover shows a
+   portal tooltip with the 5-95 Monte Carlo range. */
+.ownedEpochCell {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+  padding: 1px 2px;
+  transition: color var(--transition-fast),
+    border-color var(--transition-fast);
+  cursor: help;
+}
+
+.ownedEpochCell:hover {
+  color: rgba(0, 255, 135, 0.95);
+  border-bottom-color: rgba(0, 255, 135, 0.55);
+}
+
+.ownedEpochZero {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+
+.ownedEpochZero sup {
+  font-size: 8px;
+  color: var(--color-text-quaternary);
+  margin-left: 1px;
+}
+
 /* Chip mix column */
 .chipMix {
   /* Wider so the per-chip-type legend has room to wrap cleanly. */

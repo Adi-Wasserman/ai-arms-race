@@ -222,3 +222,40 @@
   border-top: 1px solid var(--color-border);
   margin-top: 8px;
 }
+
+/* Raw Epoch median owned H100e — small metric line under the OWNED
+   progress bar. Distinct from the % Owned bar because it shows the
+   absolute number (not a ratio) pulled straight from the ZIP for the
+   lab's selfOwned entries. Zero for OpenAI + Anthropic by design. */
+.ownedEpochLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 4px;
+  padding-left: 48px; /* align with the ownedTrack above */
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.55);
+  cursor: help;
+  white-space: pre-line;
+}
+
+.ownedEpochLabel {
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.ownedEpochValue {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+}
+
+.epochFootnote {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--color-border);
+  margin-top: 8px;
+}

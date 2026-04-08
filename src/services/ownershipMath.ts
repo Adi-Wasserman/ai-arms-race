@@ -227,3 +227,64 @@ export function computeManufacturerMix(
 
   return segments;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Raw "Owned H100e (Epoch)" — no denominator, no overrides.
+
+   Distinct from computePctOwned's `ownedH100e` field because:
+   1. No override fallthrough. OpenAI / Anthropic always return
+      0 — by design. They use the % Owned override because
+      Epoch attributes their chips to the hyperscalers, not to
+      the labs themselves.
+   2. Propagates the 5th/95th Monte Carlo range alongside the
+      median so the cell tooltip can surface it.
+   ───────────────────────────────────────────────────────────── */
+
+export interface OwnedH100eResult {
+  /** Sum of `h100e` medians from `selfOwned` Epoch owner rows. */
+  median: number;
+  /** Sum of 5th-percentile values (Monte Carlo lower bound). */
+  low: number;
+  /** Sum of 95th-percentile values (Monte Carlo upper bound). */
+  high: number;
+  /** True when at least one selfOwned row matched a snapshot. */
+  isDerivedFromEpoch: boolean;
+  /** Epoch owner names that contributed to the sum. */
+  sources: readonly string[];
+}
+
+export function computeOwnedH100e(
+  lab: Lab,
+  chipOwners: EpochChipOwnersData | null,
+): OwnedH100eResult {
+  const empty: OwnedH100eResult = {
+    median: 0,
+    low: 0,
+    high: 0,
+    isDerivedFromEpoch: false,
+    sources: [],
+  };
+  const config = LAB_OWNERSHIP_CONFIG[lab];
+  if (!config || !chipOwners || config.selfOwned.length === 0) return empty;
+
+  let median = 0;
+  let low = 0;
+  let high = 0;
+  const sources: string[] = [];
+  for (const name of config.selfOwned) {
+    const snap = chipOwners.latestByOwner.find((s) => s.owner === name);
+    if (snap) {
+      median += snap.h100e;
+      low += snap.h100eLow;
+      high += snap.h100eHigh;
+      sources.push(name);
+    }
+  }
+  return {
+    median,
+    low,
+    high,
+    isDerivedFromEpoch: median > 0,
+    sources,
+  };
+}

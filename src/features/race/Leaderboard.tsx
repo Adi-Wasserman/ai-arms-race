@@ -7,8 +7,10 @@ import { ANALYST_ESTIMATES } from '@/data/projections';
 import { formatH100, formatPower } from '@/services/format';
 import {
   computeManufacturerMix,
+  computeOwnedH100e,
   computePctOwned,
   type ManufacturerSegment,
+  type OwnedH100eResult,
   type PctOwnedResult,
 } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
@@ -35,6 +37,8 @@ interface Row {
   p: number;
   /** Hybrid % Owned result: Epoch-derived chip ownership ÷ effective fleet. */
   pctOwned: PctOwnedResult | null;
+  /** Raw Epoch median owned H100e — no denominator, no overrides. */
+  ownedH100eEpoch: OwnedH100eResult | null;
   /** Manufacturer-rollup chip mix — surfaced via the OWNED bar's hover
       tooltip only. The full bar lives in OwnershipTable / OwnershipSidePanel. */
   chipMix: ManufacturerSegment[] | null;
@@ -102,6 +106,7 @@ export function Leaderboard(): JSX.Element | null {
       pctOwned: fullPt
         ? computePctOwned(lab, fullPt[lab], chipOwners)
         : null,
+      ownedH100eEpoch: computeOwnedH100e(lab, chipOwners),
       chipMix: computeManufacturerMix(lab, chipOwners),
     })).filter((r) => r.h > 0 || r.p > 0);
 
@@ -223,6 +228,28 @@ export function Leaderboard(): JSX.Element | null {
                         {r.pctOwned.pct}%
                       </span>
                     </div>
+                    {/* Raw Epoch median — no overrides, no denominator.
+                        OpenAI/Anthropic read 0 by design (chips attributed
+                        to hyperscalers in Epoch's dataset). See footnote †. */}
+                    {r.ownedH100eEpoch && (
+                      <div
+                        className={styles.ownedEpochLine}
+                        title={
+                          r.ownedH100eEpoch.isDerivedFromEpoch
+                            ? `Epoch median: ${formatH100(r.ownedH100eEpoch.median)} H100e\n5th–95th percentile range: ${formatH100(r.ownedH100eEpoch.low)}–${formatH100(r.ownedH100eEpoch.high)} (Monte Carlo from Epoch)\nFull methodology: https://epoch.ai/data/ai-chip-owners`
+                            : 'No first-party chip ownership in Epoch\'s dataset — see footnote †'
+                        }
+                      >
+                        <span className={styles.ownedEpochLabel}>
+                          Epoch-owned
+                        </span>
+                        <span className={styles.ownedEpochValue}>
+                          {r.ownedH100eEpoch.isDerivedFromEpoch
+                            ? formatH100(r.ownedH100eEpoch.median)
+                            : '0 †'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -251,6 +278,13 @@ export function Leaderboard(): JSX.Element | null {
           (TPU fleet).
         </div>
       )}
+      <div className={styles.epochFootnote}>
+        † Owned H100e numbers are the raw median values directly from Epoch AI
+        Chip Owners ZIP (live). % Owned for OpenAI and Anthropic uses the
+        documented override because Epoch attributes those chips to the
+        hyperscalers, not the labs. All other values are 100% data-derived with
+        no manual adjustment.
+      </div>
     </div>
   );
 }

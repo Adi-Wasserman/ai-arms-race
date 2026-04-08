@@ -10,7 +10,9 @@ import { PROJ_2029_TARGETS } from '@/data/projections';
 import { useEpochChipOwners } from '@/hooks/useEpochChipOwners';
 import { formatH100 } from '@/services/format';
 import {
+  computeOwnedH100e,
   computePctOwned,
+  type OwnedH100eResult,
   type PctOwnedResult,
 } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
@@ -145,6 +147,13 @@ interface DerivedRow {
    * have no "effective fleet" concept in our data model.
    */
   pctOwned: PctOwnedResult | null;
+  /**
+   * Raw lab-level owned H100e pulled directly from the live
+   * Epoch ZIP via `selfOwned` in LAB_OWNERSHIP_CONFIG. Null on
+   * unmapped operator rows (Oracle / China / Other) — those
+   * aren't tracked labs.
+   */
+  ownedH100eEpoch: OwnedH100eResult | null;
   chipMix: ChipMixSegment[];
   proj2029: number | null;
   proj2029Growth: number | null;
@@ -235,6 +244,13 @@ function deriveRows(
         ? computePctOwned(mappedLab, fleetByLab[mappedLab] ?? 0, chipOwners)
         : null;
 
+    // Raw lab-level owned median (no denominator, no overrides) —
+    // direct sum of selfOwned snapshots from the live ZIP. Only
+    // meaningful for rows that map to a tracked lab.
+    const ownedH100eEpoch = mappedLab
+      ? computeOwnedH100e(mappedLab, chipOwners)
+      : null;
+
     return {
       rank: i + 1,
       owner: s.owner,
@@ -245,6 +261,7 @@ function deriveRows(
       powerGw: s.powerMw / 1000,
       pctGlobal: (s.h100e / totalH100e) * 100,
       pctOwned,
+      ownedH100eEpoch,
       chipMix: buildChipMix(s),
       proj2029,
       proj2029Growth,
@@ -351,6 +368,70 @@ function ChipMixTooltip({
             {segment.pct.toFixed(1)}%
           </span>
         </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   "Owned H100e (Epoch)" column — hover tooltip.
+
+   Mirrors the ChipMixTooltip portal pattern so it escapes the
+   table's `overflow-x: auto` clipping. `pointer-events: none`
+   (same as chip-mix) — the methodology link is inside the cell
+   itself (anchor tag), not inside the tooltip, so there's no
+   need to make the tooltip clickable.
+   ───────────────────────────────────────────────────────────── */
+
+interface HoveredOwned {
+  ownerName: string;
+  labName: Lab;
+  median: number;
+  low: number;
+  high: number;
+  anchorX: number;
+  anchorY: number;
+}
+
+function OwnedMedianTooltip({
+  segment,
+}: {
+  segment: HoveredOwned;
+}): JSX.Element {
+  return createPortal(
+    <div
+      className={styles.tooltip}
+      style={{
+        left: segment.anchorX,
+        top: segment.anchorY,
+      }}
+    >
+      <div className={styles.tooltipHeader}>
+        <span
+          className={styles.tooltipDot}
+          style={{ background: LAB_COLORS[segment.labName] }}
+        />
+        <span className={styles.tooltipChip}>{segment.labName}</span>
+      </div>
+      <div className={styles.tooltipBody} style={{ gridTemplateColumns: '1fr' }}>
+        <div>
+          <span className={styles.tooltipBodyLabel}>Epoch median</span>
+          <span className={styles.tooltipBodyValue}>
+            {formatH100(segment.median)} H100e
+          </span>
+        </div>
+        <div>
+          <span className={styles.tooltipBodyLabel}>
+            5th–95th percentile (Monte Carlo)
+          </span>
+          <span className={styles.tooltipBodyValue}>
+            {formatH100(segment.low)} – {formatH100(segment.high)}
+          </span>
+        </div>
+      </div>
+      <div className={styles.tooltipMeta} style={{ marginTop: 8 }}>
+        Click cell → <span className={styles.tooltipMetaLabel}>Full methodology</span>
       </div>
     </div>,
     document.body,
@@ -511,6 +592,9 @@ export function OwnershipTable(): JSX.Element {
    */
   const [hovered, setHovered] = useState<HoveredSegment | null>(null);
 
+  /** Hovered "Owned H100e (Epoch)" cell — separate from chip-mix hover. */
+  const [hoveredOwned, setHoveredOwned] = useState<HoveredOwned | null>(null);
+
   /**
    * Per-owner row refs — the highlight effect uses these to call
    * `scrollIntoView` on the right row when the user clicks a card
@@ -547,6 +631,18 @@ export function OwnershipTable(): JSX.Element {
       window.removeEventListener('resize', dismiss);
     };
   }, [hovered]);
+
+  // Same dismiss-on-scroll/resize behavior for the owned-median tooltip.
+  useEffect(() => {
+    if (!hoveredOwned) return;
+    const dismiss = (): void => setHoveredOwned(null);
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('resize', dismiss);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('resize', dismiss);
+    };
+  }, [hoveredOwned]);
 
   // ── Empty / loading / error states ──
   if (!data && loading) {
@@ -663,6 +759,12 @@ export function OwnershipTable(): JSX.Element {
             >
               % OWNED ⓘ
             </th>
+            <th
+              className={`${styles.th} ${styles.right}`}
+              title="Raw lab-level median H100e pulled directly from the live Epoch AI Chip Owners ZIP — no derivation, no denominator, no overrides. Only shown for rows that map to a tracked lab."
+            >
+              OWNED H100e (EPOCH)
+            </th>
             <th className={styles.th}>CHIP MIX</th>
             <th className={`${styles.th} ${styles.right}`}>2029 PROJECTION</th>
             <th className={`${styles.th} ${styles.right}`}>CONF</th>
@@ -761,6 +863,42 @@ export function OwnershipTable(): JSX.Element {
                     <span className={styles.projMuted}>—</span>
                   )}
                 </td>
+                <td className={`${styles.td} ${styles.right}`}>
+                  {row.ownedH100eEpoch && row.mappedLab ? (
+                    row.ownedH100eEpoch.isDerivedFromEpoch ? (
+                      <a
+                        className={styles.ownedEpochCell}
+                        href="https://epoch.ai/data/ai-chip-owners"
+                        target="_blank"
+                        rel="noreferrer"
+                        onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setHoveredOwned({
+                            ownerName: row.owner,
+                            labName: row.mappedLab as Lab,
+                            median: row.ownedH100eEpoch!.median,
+                            low: row.ownedH100eEpoch!.low,
+                            high: row.ownedH100eEpoch!.high,
+                            anchorX: rect.left + rect.width / 2,
+                            anchorY: rect.top,
+                          });
+                        }}
+                        onMouseLeave={() => setHoveredOwned(null)}
+                      >
+                        {formatH100(row.ownedH100eEpoch.median)}
+                      </a>
+                    ) : (
+                      <span
+                        className={styles.ownedEpochZero}
+                        title="No first-party chip ownership in Epoch's dataset — see footnote †"
+                      >
+                        0 <sup>†</sup>
+                      </span>
+                    )
+                  ) : (
+                    <span className={styles.projMuted}>—</span>
+                  )}
+                </td>
                 <td className={styles.td}>
                   <ChipMixCell
                     row={row}
@@ -803,7 +941,15 @@ export function OwnershipTable(): JSX.Element {
           background: 'rgba(255, 255, 255, 0.01)',
         }}
       >
-        <strong style={{ color: 'rgba(255,255,255,0.65)' }}>{TOOLTIP_TEXT}</strong>
+        <strong style={{ color: 'rgba(255,255,255,0.75)' }}>
+          † Owned H100e numbers are the raw median values directly from Epoch
+          AI Chip Owners ZIP (live). % Owned for OpenAI and Anthropic uses the
+          documented override because Epoch attributes those chips to the
+          hyperscalers, not the labs. All other values are 100% data-derived
+          with no manual adjustment.
+        </strong>
+        <br />
+        <span style={{ color: 'rgba(255,255,255,0.55)' }}>{TOOLTIP_TEXT}</span>
         <br />
         <span style={{ color: 'rgba(255,255,255,0.55)' }}>
           * {PCT_OWNED_FOOTNOTE}
@@ -817,9 +963,10 @@ export function OwnershipTable(): JSX.Element {
         workloads and "Amazon" includes general AWS, not just OpenAI / Anthropic.
       </div>
 
-      {/* Hover popover — portaled to document.body so it escapes the
-          table's overflow-x clipping. */}
+      {/* Hover popovers — portaled to document.body so they escape
+          the table's overflow-x clipping. */}
       {hovered && <ChipMixTooltip segment={hovered} />}
+      {hoveredOwned && <OwnedMedianTooltip segment={hoveredOwned} />}
     </div>
   );
 }
