@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import {
-  PCT_OWNED_FOOTNOTE,
-  PCT_OWNED_TOOLTIP,
-} from '@/config/labOwnershipMapping';
+import { PCT_OWNED_TOOLTIP } from '@/config/labOwnershipMapping';
 import { LAB_COLORS } from '@/config/labs';
 import { PROJ_2029_TARGETS } from '@/data/projections';
 import { useEpochChipOwners } from '@/hooks/useEpochChipOwners';
@@ -1022,37 +1019,26 @@ export function OwnershipTable(): JSX.Element {
         </tbody>
       </table>
 
-      {/* ─── Footnote ─── */}
-      <div
-        style={{
-          padding: '10px 16px',
-          fontSize: 'var(--font-size-base)',
-          color: 'var(--color-text-tertiary)',
-          lineHeight: 1.55,
-          borderTop: '1px solid var(--color-border)',
-          background: 'rgba(255, 255, 255, 0.01)',
-        }}
-      >
-        <strong style={{ color: 'rgba(255,255,255,0.75)' }}>
-          † Owned H100e numbers are the raw median values directly from Epoch
-          AI Chip Owners ZIP (live). % Owned for OpenAI and Anthropic uses the
-          documented override because Epoch attributes those chips to the
-          hyperscalers, not the labs. All other values are 100% data-derived
-          with no manual adjustment.
-        </strong>
-        <br />
-        <span style={{ color: 'rgba(255,255,255,0.55)' }}>{TOOLTIP_TEXT}</span>
-        <br />
-        <span style={{ color: 'rgba(255,255,255,0.55)' }}>
-          * {PCT_OWNED_FOOTNOTE}
-        </span>
-        <br />
-        Confidence bands derived from Epoch's Monte Carlo 5th/95th percentile spread.
-        2029 projection uses our power-constrained per-lab targets where the owner
-        maps cleanly to a tracked frontier lab; unmapped owners (Oracle, China, Other)
-        show no projection. Power is total chip-level TDP (not facility power).
-        Owner→Lab attribution is approximate — Epoch's "Microsoft" includes Bing/Office
-        workloads and "Amazon" includes general AWS, not just OpenAI / Anthropic.
+      {/* ─── Footer ───
+          Trimmed from a 4-paragraph wall of fine print to two
+          readable lines + one pointer to the Truth modal. The
+          methodology footnote, override caveat, and technical
+          caveats (confidence bands, projection logic, owner→lab
+          attribution) all live in About this data → Truth modal,
+          so repeating them inline was just clutter. */}
+      <div className={styles.footer}>
+        <p className={styles.footerLead}>
+          † <strong>Owned H100e</strong> numbers are raw medians directly from
+          the Epoch AI Chip Owners ZIP (live). <strong>% Owned</strong> for
+          OpenAI and Anthropic uses the documented override because Epoch
+          attributes those chips to the hyperscalers, not the labs — every
+          other value is 100% data-derived.
+        </p>
+        <p className={styles.footerNote}>{TOOLTIP_TEXT}</p>
+        <p className={styles.footerPointer}>
+          Full methodology, override surface area, and uncertainty bands →
+          click <strong>ⓘ ABOUT THIS DATA</strong> in the top status bar.
+        </p>
       </div>
 
       {/* Hover popovers — portaled to document.body so they escape
