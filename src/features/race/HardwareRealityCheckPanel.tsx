@@ -215,83 +215,90 @@ export function HardwareRealityCheckPanel(): JSX.Element {
       )}
 
       {data && (
-        <>
-          {/* ─── Top 5 owners bar chart ─── */}
-          <section className={styles.section}>
-            <h4 className={styles.sectionTitle}>
-              Top 5 owners <span className={styles.sectionMeta}>(median H100e)</span>
-            </h4>
-            <ol className={styles.barList}>
-              {bars.map((b) => (
-                <li key={b.owner} className={styles.barRow}>
-                  <span className={styles.barOwner}>{b.owner}</span>
-                  <div className={styles.barTrack}>
-                    <div
-                      className={styles.barFill}
-                      style={{ width: `${b.pct}%`, background: b.color }}
-                    />
+        <div className={styles.body}>
+          {/* ─── Column 1 — Top 5 owners bar chart ─── */}
+          <div className={styles.bodyCol}>
+            <section className={styles.section}>
+              <h4 className={styles.sectionTitle}>
+                Top 5 owners{' '}
+                <span className={styles.sectionMeta}>(median H100e)</span>
+              </h4>
+              <ol className={styles.barList}>
+                {bars.map((b) => (
+                  <li key={b.owner} className={styles.barRow}>
+                    <span className={styles.barOwner}>{b.owner}</span>
+                    <div className={styles.barTrack}>
+                      <div
+                        className={styles.barFill}
+                        style={{ width: `${b.pct}%`, background: b.color }}
+                      />
+                    </div>
+                    <span className={styles.barValue}>
+                      {formatH100(b.h100e)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </div>
+
+          {/* ─── Column 2 — Mini time-series since 2022 ─── */}
+          <div className={styles.bodyCol}>
+            <section className={styles.section}>
+              <h4 className={styles.sectionTitle}>
+                Total ownership growth{' '}
+                <span className={styles.sectionMeta}>since 2022</span>
+              </h4>
+              {sparkline ? (
+                <div className={styles.sparkBlock}>
+                  <Sparkline values={sparkline.values} />
+                  <div className={styles.sparkCaption}>
+                    <span>
+                      {sparkline.startLabel}{' '}
+                      <strong>{formatH100(sparkline.startValue)}</strong>
+                    </span>
+                    <span className={styles.sparkArrow}>→</span>
+                    <span>
+                      {sparkline.endLabel}{' '}
+                      <strong>{formatH100(sparkline.endValue)}</strong>
+                    </span>
                   </div>
-                  <span className={styles.barValue}>
-                    {formatH100(b.h100e)}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          {/* ─── Mini time-series since 2022 ─── */}
-          <section className={styles.section}>
-            <h4 className={styles.sectionTitle}>
-              Total ownership growth{' '}
-              <span className={styles.sectionMeta}>since 2022</span>
-            </h4>
-            {sparkline ? (
-              <div className={styles.sparkBlock}>
-                <Sparkline values={sparkline.values} />
-                <div className={styles.sparkCaption}>
-                  <span>
-                    {sparkline.startLabel}{' '}
-                    <strong>{formatH100(sparkline.startValue)}</strong>
-                  </span>
-                  <span className={styles.sparkArrow}>→</span>
-                  <span>
-                    {sparkline.endLabel}{' '}
-                    <strong>{formatH100(sparkline.endValue)}</strong>
-                  </span>
                 </div>
-              </div>
-            ) : (
-              <div className={styles.skeleton}>—</div>
-            )}
-          </section>
+              ) : (
+                <div className={styles.skeleton}>—</div>
+              )}
+            </section>
+          </div>
 
-          {/* ─── Bullet list — editorial takeaways ─── */}
-          <section className={styles.section}>
-            <h4 className={styles.sectionTitle}>What this means</h4>
-            <ul className={styles.bullets}>
-              <li>
-                <strong style={{ color: '#9a9a9a' }}>OpenAI</strong> owns{' '}
-                <strong>0%</strong> of its chips → fully cloud-dependent
-              </li>
-              <li>
-                <strong style={{ color: LAB_COLORS.Gemini }}>Gemini</strong>{' '}
-                owns the <strong>largest single fleet on Earth</strong> (TPUs)
-              </li>
-              <li>
-                <strong style={{ color: LAB_COLORS.Anthropic }}>
-                  Anthropic
-                </strong>{' '}
-                <strong>25% owned and rising</strong> (Trainium + Google
-                deal)
-              </li>
-            </ul>
-          </section>
+          {/* ─── Column 3 — Bullets + Footnote ─── */}
+          <div className={styles.bodyCol}>
+            <section className={styles.section}>
+              <h4 className={styles.sectionTitle}>What this means</h4>
+              <ul className={styles.bullets}>
+                <li>
+                  <strong style={{ color: '#9a9a9a' }}>OpenAI</strong> owns{' '}
+                  <strong>0%</strong> of its chips → fully cloud-dependent
+                </li>
+                <li>
+                  <strong style={{ color: LAB_COLORS.Gemini }}>Gemini</strong>{' '}
+                  owns the{' '}
+                  <strong>largest single fleet on Earth</strong> (TPUs)
+                </li>
+                <li>
+                  <strong style={{ color: LAB_COLORS.Anthropic }}>
+                    Anthropic
+                  </strong>{' '}
+                  <strong>25% owned and rising</strong> (Trainium + Google
+                  deal)
+                </li>
+              </ul>
+            </section>
 
-          {/* ─── Footnote ─── */}
-          <p className={styles.footnote}>
-            <span className={styles.footnoteMark}>†</span> {FOOTNOTE_TEXT}
-          </p>
-        </>
+            <p className={styles.footnote}>
+              <span className={styles.footnoteMark}>†</span> {FOOTNOTE_TEXT}
+            </p>
+          </div>
+        </div>
       )}
     </aside>
   );
