@@ -10,16 +10,13 @@ import { PROJ_2029_TARGETS } from '@/data/projections';
 import { useEpochChipOwners } from '@/hooks/useEpochChipOwners';
 import { formatH100 } from '@/services/format';
 import {
-  MFR_COLORS,
   computeOwnedH100e,
   computePctOwned,
-  type ManufacturerSegment,
   type OwnedH100eResult,
   type PctOwnedResult,
 } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
 import {
-  type ChipManufacturer,
   type EpochChipOwnersData,
   type Lab,
   OWNER_TO_LAB,
@@ -55,14 +52,15 @@ const TOOLTIP_TEXT =
   'entries — no re-attribution of hyperscaler totals. ' +
   'https://epoch.ai/data/ai_chip_owners.zip';
 
+/** Hover tooltip applied to every cell in the OWNED H100e column. */
+const OWNED_TOOLTIP =
+  'Raw median from Epoch AI Chip Owners ZIP (live). ' +
+  '5th–95th percentile range available at epoch.ai/data/ai-chip-owners';
+
 interface LabRow {
   lab: Lab;
   rank: number;
   owned: OwnedH100eResult;
-  /** Total power (MW) summed across the lab's selfOwned snapshots. */
-  powerMw: number;
-  /** Manufacturer-level chip mix for the lab's selfOwned snapshots. */
-  chipMix: ManufacturerSegment[] | null;
   pctGlobal: number;
   proj2029: number | null;
   proj2029Growth: number | null;
@@ -81,36 +79,6 @@ function buildLabRows(
 
   const rows: LabRow[] = LAB_NAMES.map((lab) => {
     const owned = computeOwnedH100e(lab, chipOwners);
-    const cfg = LAB_OWNERSHIP_CONFIG[lab];
-
-    // Aggregate power + manufacturer rollup across the lab's
-    // selfOwned snapshots only. For OpenAI and Anthropic (no
-    // selfOwned entries) this leaves powerMw=0 and chipMix=null
-    // — rendered as "—" in the table.
-    let powerMw = 0;
-    const mfrSums = new Map<string, number>();
-    let mfrTotal = 0;
-    for (const name of cfg.selfOwned) {
-      const snap = chipOwners.latestByOwner.find((s) => s.owner === name);
-      if (!snap) continue;
-      powerMw += snap.powerMw;
-      mfrTotal += snap.h100e;
-      for (const c of snap.byChipType) {
-        mfrSums.set(c.manufacturer, (mfrSums.get(c.manufacturer) ?? 0) + c.h100e);
-      }
-    }
-    const chipMix: ManufacturerSegment[] | null =
-      mfrTotal > 0
-        ? Array.from(mfrSums.entries())
-            .map(([mfr, h]) => ({
-              manufacturer: mfr,
-              pct: (h / mfrTotal) * 100,
-              h100e: h,
-              color:
-                MFR_COLORS[mfr as ChipManufacturer] ?? MFR_COLORS.Unknown,
-            }))
-            .sort((a, b) => b.pct - a.pct)
-        : null;
 
     const projTarget = PROJ_2029_TARGETS[lab];
     const proj2029 = projTarget ? projTarget.h : null;
@@ -126,8 +94,6 @@ function buildLabRows(
       lab,
       rank: 0, // set after sort
       owned,
-      powerMw,
-      chipMix,
       pctGlobal: (owned.median / globalTotal) * 100,
       proj2029,
       proj2029Growth,
@@ -148,55 +114,6 @@ function rankClass(rank: number): string {
   if (rank === 2) return styles.rankSilver;
   if (rank === 3) return styles.rankBronze;
   return styles.rankDefault;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Chip-mix cell — manufacturer-level stacked bar + rollup.
-
-   Simpler than the OwnershipTable chip-mix cell (no portal
-   tooltip, no per-chip-type legend) because at lab granularity
-   the manufacturer is the meaningful axis — chip-type detail
-   lives in the OwnershipSidePanel + original OwnershipTable.
-   ───────────────────────────────────────────────────────────── */
-function ChipMixCell({
-  segments,
-}: {
-  segments: ManufacturerSegment[] | null;
-}): JSX.Element {
-  if (!segments || segments.length === 0) {
-    return <span className={styles.projMuted}>—</span>;
-  }
-  return (
-    <div className={styles.chipMix}>
-      <div className={styles.chipMixBar}>
-        {segments.map((seg) => (
-          <div
-            key={seg.manufacturer}
-            className={styles.chipMixSegment}
-            style={{ width: `${seg.pct}%`, background: seg.color }}
-            title={`${seg.manufacturer}: ${formatH100(seg.h100e)} (${seg.pct.toFixed(0)}%)`}
-            aria-label={`${seg.manufacturer}: ${seg.pct.toFixed(1)}%`}
-          />
-        ))}
-      </div>
-      <div className={styles.chipMixMfrRollup}>
-        {segments.map((seg, i) => (
-          <span key={seg.manufacturer}>
-            {i > 0 && <span className={styles.chipMixMfrSep}> · </span>}
-            <span
-              className={styles.chipMixMfrName}
-              style={{ color: seg.color }}
-            >
-              {seg.manufacturer}
-            </span>{' '}
-            <span className={styles.chipMixMfrPct}>
-              {seg.pct.toFixed(0)}%
-            </span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -342,7 +259,13 @@ export function OwnershipLabTable(): JSX.Element {
         </button>
       </div>
 
-      {/* ─── Table ─── */}
+      {/* ─── Table ─── 6 columns: #, Lab, Owned H100e, % Global,
+                          2029 Projection, % Owned. The earlier
+                          POWER (GW) and CHIP MIX columns were
+                          dropped because they rendered as "—" for
+                          OpenAI / Anthropic — both labs have no
+                          selfOwned operator snapshot to source from.
+                          The detail still lives in the OwnershipSidePanel. */}
       <table className={styles.table}>
         <thead>
           <tr>
@@ -351,8 +274,6 @@ export function OwnershipLabTable(): JSX.Element {
             <th className={`${styles.th} ${styles.right}`}>
               OWNED H100e (EPOCH MEDIAN)
             </th>
-            <th className={`${styles.th} ${styles.right}`}>POWER (GW)</th>
-            <th className={styles.th}>CHIP MIX</th>
             <th className={`${styles.th} ${styles.right}`}>% OF GLOBAL</th>
             <th className={`${styles.th} ${styles.right}`}>2029 PROJECTION</th>
             <th
@@ -400,34 +321,18 @@ export function OwnershipLabTable(): JSX.Element {
                     </div>
                   )}
                 </td>
-                <td className={`${styles.td} ${styles.right}`}>
-                  {row.owned.isDerivedFromEpoch ? (
-                    <>
-                      <div className={styles.h100eMain}>
-                        {formatH100(row.owned.median)}
-                      </div>
-                      <div className={styles.h100eRange}>
-                        {formatH100(row.owned.low)} – {formatH100(row.owned.high)}
-                      </div>
-                    </>
-                  ) : (
-                    <span
-                      className={styles.projMuted}
-                      title="No first-party chip ownership in Epoch's dataset — see footnote †"
-                    >
-                      0 <sup>†</sup>
-                    </span>
-                  )}
-                </td>
-                <td className={`${styles.td} ${styles.right} ${styles.power}`}>
-                  {row.powerMw > 0 ? (
-                    `${(row.powerMw / 1000).toFixed(2)} GW`
-                  ) : (
-                    <span className={styles.projMuted}>—</span>
-                  )}
-                </td>
-                <td className={styles.td}>
-                  <ChipMixCell segments={row.chipMix} />
+                {/* Owned H100e — always renders the real number from
+                    the live Epoch ZIP via computeOwnedH100e (selfOwned
+                    sum). OpenAI is 0 because its selfOwned list is
+                    empty, by design. Tooltip surfaces the methodology
+                    + percentile-range link. */}
+                <td
+                  className={`${styles.td} ${styles.right}`}
+                  title={OWNED_TOOLTIP}
+                >
+                  <div className={styles.h100eMain}>
+                    {formatH100(row.owned.median)}
+                  </div>
                 </td>
                 <td className={`${styles.td} ${styles.right}`}>
                   <div className={styles.pctGlobalCell}>
