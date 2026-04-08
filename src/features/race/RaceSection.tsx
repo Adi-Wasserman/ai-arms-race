@@ -15,6 +15,7 @@ import type {
 
 import { FrontierOutlookCard } from './FrontierOutlookCard';
 import { HardwareRealityCheckPanel } from './HardwareRealityCheckPanel';
+import { KnownLeasesCard } from './KnownLeasesCard';
 import { Leaderboard } from './Leaderboard';
 import { OwnershipTable } from './OwnershipTable';
 import { ProjectionPanel } from './ProjectionPanel';
@@ -238,7 +239,15 @@ function RaceSectionInner(): JSX.Element {
           and the body has been subsumed by the master ACCESS /
           OWNERSHIP toggle at the top of the section. */}
       {isOwnership ? (
-        <OwnershipTable />
+        <>
+          <OwnershipTable />
+          {/* Editorial card explaining the public cloud→lab
+              relationships that the operator-row OwnershipTable
+              cannot show directly (Epoch reports operator totals,
+              not the per-tenant allocation). Collapsible —
+              preference persists in localStorage. */}
+          <KnownLeasesCard />
+        </>
       ) : (
         <div className={styles.chartRow}>
           <RaceChart ref={chartRef} />
