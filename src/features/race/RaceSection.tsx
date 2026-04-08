@@ -147,13 +147,12 @@ function RaceSectionInner(): JSX.Element {
         <strong>satellite-verified compute capacity</strong> across every major facility.
       </div>
 
-      {/* ─── Master ACCESS / OWNERSHIP toggle ───
-          Sits at the very top of the section so the two-story narrative
-          ("who can train today" vs "who controls the silicon for 2027+")
-          is the first thing the user sees. Syncs to URL hash via the
-          existing scope + raceMode slice actions. */}
+      {/* ─── LIVE: Option 1 — Terminal Tabs ───
+          Flat mono-caps tabs with an animated cyan→blue accent
+          underline on the active segment. Wired to the real
+          setScope + setRaceMode actions. */}
       <div
-        className={styles.accessModeRow}
+        className={styles.terminalTabs}
         role="radiogroup"
         aria-label="Race view: Access or Ownership"
       >
@@ -161,13 +160,16 @@ function RaceSectionInner(): JSX.Element {
           type="button"
           role="radio"
           aria-checked={accessMode === 'access'}
-          className={`${styles.accessModeBtn}${
-            accessMode === 'access' ? ` ${styles.accessModeBtnActive}` : ''
+          className={`${styles.terminalTab}${
+            accessMode === 'access' ? ` ${styles.terminalTabActive}` : ''
           }`}
           onClick={() => onAccessModeChange('access')}
         >
-          <span className={styles.accessModeTitle}>ACCESS</span>
-          <span className={styles.accessModeSub}>
+          <span className={styles.terminalTabLabel}>
+            <span className={styles.terminalTabPrefix}>01 /</span>
+            ACCESS
+          </span>
+          <span className={styles.terminalTabSub}>
             Effective Fleet — who can train today
           </span>
         </button>
@@ -175,18 +177,21 @@ function RaceSectionInner(): JSX.Element {
           type="button"
           role="radio"
           aria-checked={accessMode === 'ownership'}
-          className={`${styles.accessModeBtn}${
-            accessMode === 'ownership' ? ` ${styles.accessModeBtnActive}` : ''
+          className={`${styles.terminalTab}${
+            accessMode === 'ownership' ? ` ${styles.terminalTabActive}` : ''
           }`}
           onClick={() => onAccessModeChange('ownership')}
         >
-          <span className={styles.accessModeTitle}>OWNERSHIP</span>
-          <span className={styles.accessModeSub}>
+          <span className={styles.terminalTabLabel}>
+            <span className={styles.terminalTabPrefix}>02 /</span>
+            OWNERSHIP
+          </span>
+          <span className={styles.terminalTabSub}>
             Hardware — who controls the silicon for 2027+
           </span>
         </button>
         <span
-          className={styles.accessModeInfo}
+          className={styles.terminalTabsInfo}
           role="img"
           aria-label="info"
           title={ACCESS_MODE_TOOLTIP}
@@ -316,3 +321,5 @@ export function RaceSection(): JSX.Element {
     </SectionShell>
   );
 }
+
+
