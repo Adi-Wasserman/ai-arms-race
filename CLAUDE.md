@@ -13,6 +13,23 @@ A React + Vite dashboard tracking the AI infrastructure race — compute buildou
 The P1+P2 migration is **done**. All 4 sections ship and render from live
 Epoch AI data with fallback. Recent feature work (post-migration):
 
+- **Muse Spark replaces Llama 4 Maverick** (Models section, `src/data/models.ts`):
+  Meta Superintelligence Labs released Muse Spark on 2026-04-08 as
+  their new frontier flagship. The old Llama 4 Maverick row (which
+  had all-null benchmarks) is gone. Muse Spark has: `aaIndex: 52`
+  (independently measured by Artificial Analysis on release day),
+  `gpqa: 89.5`, `swebench: 77.4`, `swebenchPro: 52.4`,
+  `arcAgi2: 42.5`, `mmmuPro: 80.4`, `hle: 50.4` (With Tools).
+  The AA Index is the only independent score; per-benchmark numbers
+  are self-reported by Meta and flagged as such in the `notes` field.
+  `costIn/costOut: 0` (undisclosed), `context: 0` (undisclosed),
+  `speed: null`. The `notes` field includes a provenance sentence:
+  *"AA Intelligence Index (52) is independently measured by
+  Artificial Analysis; per-benchmark scores are self-reported by Meta
+  and pending independent re-runs from AA / Epoch."* When AA or Epoch
+  publish independent per-benchmark runs, update the fields and
+  remove the self-reported caveat.
+
 - **Hardware Ownership view** (Race section → scope=fleet → mode=ownership):
   new `OwnershipTable` sourced from `useEpochChipOwners` which fetches
   `https://epoch.ai/data/ai_chip_owners.zip`, parses via JSZip + PapaParse,
@@ -61,19 +78,27 @@ Epoch AI data with fallback. Recent feature work (post-migration):
   of 2026-04-07 it surfaces the Anthropic ↔ Google + Broadcom multi-GW
   TPU deal (announced 2026-04-06) with a link to anthropic.com.
 
-- **Master ACCESS / OWNERSHIP pill toggle**: prominent two-segment
-  pill switch (`border-radius: 999px`) directly under the section
-  intro, replacing the older secondary `modeRow` toggle. The active
-  segment fills with a strong blue gradient + lift shadow so the
-  selected lens is unmistakable. ACCESS = `scope='fleet' +
+- **Master ACCESS / OWNERSHIP terminal-tab toggle**: flat mono-caps
+  tab control (`max-width: 930px`, no border-radius) directly under
+  the section intro. Each tab has a `01 /` / `02 /` numeric prefix
+  in `--font-mono`, 15.5px / 0.23em letter-spacing label, and a
+  13px sans-serif subtitle. The active tab gets a 3px accent
+  underline (`linear-gradient(90deg, #00d4ff, #4d8eea)` +
+  `box-shadow: 0 0 16px`) that animates in via `scaleX` over 320ms
+  cubic-bezier, plus a faint cyan top-glow background. Inactive tab
+  is dim (`rgba(255,255,255,0.42)`) and brightens on hover. Mobile
+  (<768px) collapses to vertical with a 3px left-border accent in
+  place of the underline. ACCESS = `scope='fleet' +
   raceMode='effective'`, OWNERSHIP = `scope='fleet' +
   raceMode='ownership'`. Both selections force `scope=fleet` so the
   ownership lens presupposes the cloud-lease-adjusted fleet — the
   secondary scope toggle in `toggleRow` is still available for fine-
-  grained satellite-verified-only control. Mode-specific headline
-  *"Hardware Ownership — Who controls the silicon (Epoch AI live
-  data)"* with a live blue dot is rendered above `OwnershipTable` in
-  OWNERSHIP mode only.
+  grained satellite-verified-only control. CSS classes:
+  `.terminalTabs`, `.terminalTab`, `.terminalTabActive`,
+  `.terminalTabLabel`, `.terminalTabPrefix`, `.terminalTabSub`,
+  `.terminalTabsInfo`. Mode-specific headline *"Hardware Ownership —
+  Who controls the silicon (Epoch AI live data)"* with a live blue
+  dot is rendered above `OwnershipTable` in OWNERSHIP mode only.
 
 - **Operator/lab badges in OwnershipTable** (OWNERSHIP mode):
   three-category taxonomy as tiny mono-font pill chips in the
@@ -258,10 +283,10 @@ src/features/race/HardwareRealityCheckPanel.module.css
 src/features/race/KnownLeasesCard.tsx    # OWNERSHIP-only collapsible "Known Major
                                          # Leases" card (public info, not in Epoch ZIP)
 src/features/race/KnownLeasesCard.module.css
-src/features/race/RaceSection.tsx        # master ACCESS/OWNERSHIP pill toggle +
-                                         # mode-specific headline + body branch
-src/features/race/RaceSection.module.css # .accessModeRow pill + .modeHeadline +
-                                         # .accessModeBtn / .accessModeBtnActive
+src/features/race/RaceSection.tsx        # master ACCESS/OWNERSHIP terminal-tab
+                                         # toggle + mode-specific headline + body branch
+src/features/race/RaceSection.module.css # .terminalTabs / .terminalTab* +
+                                         # .modeHeadline + .modeHeadlineDot/Sub
 src/components/ui/OwnershipSidePanel.tsx # "Who Owns the AI Chips?" strip (NOT a sidebar)
 src/components/ui/OwnershipSidePanel.module.css  # color-mix(in oklab) per-card tints +
                                                  # readable summary footer (12.5px / 0.78)
@@ -550,27 +575,24 @@ on the bottom border. Don't revert the background to the previous
 translucent value — the page-content scroll-through will look
 broken.
 
-### Master ACCESS / OWNERSHIP pill toggle — both setters fire
+### Master ACCESS / OWNERSHIP terminal-tab toggle — both setters fire
 
 In `RaceSection.tsx`, the `onAccessModeChange` handler always
 calls `setScope('fleet')` followed by `setRaceMode(...)` — even
 if the current scope is already `'fleet'`. This is intentional
-because:
-
-1. The slice's `setScope` setter auto-resets `raceMode` to
-   `'effective'` when leaving fleet, but here we're always
-   *entering* fleet, so the order is safe.
-2. The mobile breakpoint at 768px collapses the pill from
-   `border-radius: 999px` to the rectangular `--radius-xl`
-   because a thin 999px pill is awkward to tap. If you change
-   the breakpoint, also re-check the corner-radius transition
-   for the active segment (`.accessModeBtnActive`).
+because the slice's `setScope` setter auto-resets `raceMode` to
+`'effective'` when leaving fleet, but here we're always *entering*
+fleet, so the order is safe. Mobile (<768px) collapses to vertical
+tabs with a 3px left-border accent (`.terminalTabActive` gets
+`border-left: 3px solid #00d4ff`) instead of the bottom underline.
 
 The toggle copy is editorial, not technical: titles `ACCESS` /
-`OWNERSHIP` (mono caps, weight 800, 0.14em letter-spacing), with
-a small subtitle below ("who can train frontier models today" /
-"who controls the silicon for 2027+"). Don't shorten the
-subtitles — the user explicitly requested those exact phrasings.
+`OWNERSHIP` (mono caps, `--font-mono`, 15.5px, weight 700,
+0.23em letter-spacing, with `01 /` and `02 /` numeric prefixes),
+with a 13px sans-serif subtitle below ("Effective Fleet — who can
+train today" / "Hardware — who controls the silicon for 2027+").
+Don't shorten the subtitles — the user explicitly requested those
+exact phrasings.
 
 ### LocalStorage preferences — read synchronously in useState init
 
@@ -662,9 +684,10 @@ when scope leaves `'fleet'`, so there's no reachable state where
 ```
 RaceSection (container)
 ├── intro paragraph
-├── accessModeRow  ← MASTER PILL TOGGLE [ ACCESS | OWNERSHIP ]
-│     Single fully-rounded container, max-width 760px centered.
-│     Active segment: blue gradient + lift shadow.
+├── terminalTabs  ← MASTER TERMINAL-TAB TOGGLE [ 01/ ACCESS | 02/ OWNERSHIP ]
+│     Flat mono-caps tabs, max-width 930px centered, no border-radius.
+│     Active tab: cyan→blue 3px underline + faint cyan top-glow.
+│     320ms cubic-bezier scaleX animation on the accent bar.
 │     Both selections force scope='fleet'.
 │     ACCESS    = scope='fleet', raceMode='effective'
 │     OWNERSHIP = scope='fleet', raceMode='ownership'
@@ -676,7 +699,7 @@ RaceSection (container)
 │     Lede paragraph + "Currently viewing" badge react to raceMode.
 ├── toggle row:   metric · scope · proj · velocity · ExportMenu
 │     (the secondary modeRow that used to live here is GONE — the
-│      master accessModeRow at the top has subsumed it)
+│      master terminalTabs at the top has subsumed it)
 ├── if !isOwnership (ACCESS):
 │     chartRow:
 │       ├── RaceChart (Chart.js line/projection)
@@ -713,7 +736,7 @@ RaceSection (container)
 `highlightedOwner` + their setters. `setScope` auto-resets `raceMode`
 when leaving fleet. `highlightedOwner` is set by OwnershipSidePanel
 cards and consumed by OwnershipTable's effect (cleared after 1.8s).
-The master pill toggle calls both `setScope('fleet')` and
+The master terminal-tab toggle calls both `setScope('fleet')` and
 `setRaceMode(...)` so URL hash sync (`?scope=fleet&mode=ownership`)
 just works through the existing `useHashState` plumbing.
 
@@ -812,7 +835,8 @@ ai-arms-race/
 │   │   ├── facilities.ts         # FACILITY_COORDS, LAB_MAP (handle→lab for 22 sites)
 │   │   ├── timeline.ts           # RAW_TIMELINE: 65 rows of hardcoded fallback timeline data
 │   │   ├── fleet.ts              # FLEET_ESTIMATES: cloud-lease capacity (EGC, EAI-AWS/GCP/AZR)
-│   │   ├── models.ts             # MODEL_SPECS: 5 frontier models with 10+ benchmark scores
+│   │   ├── models.ts             # MODEL_SPECS: 5 frontier models (GPT-5.4, Gemini 3.1 Pro,
+│   │   │                         #   Claude Opus 4.6, Grok 4, Muse Spark) with 11 benchmark fields
 │   │   ├── metr.ts               # METR_HORIZONS: 21 data points for METR TH1.1
 │   │   ├── projections.ts        # PROJ_2029_TARGETS, ANALYST_ESTIMATES per lab
 │   │   └── index.ts              # Re-exports everything
