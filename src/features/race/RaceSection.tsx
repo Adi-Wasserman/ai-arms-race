@@ -14,7 +14,6 @@ import type {
 } from '@/types';
 
 import { FrontierOutlookCard } from './FrontierOutlookCard';
-import { HardwareRealityCheckPanel } from './HardwareRealityCheckPanel';
 import { KnownLeasesCard } from './KnownLeasesCard';
 import { Leaderboard } from './Leaderboard';
 import { OwnershipTable } from './OwnershipTable';
@@ -278,12 +277,6 @@ function RaceSectionInner(): JSX.Element {
       <div className={styles.snapshotRow}>
         <OwnershipSidePanel />
       </div>
-
-      {/* Hardware Ownership Reality Check — right-anchored editorial
-          card with top-5 owners + sparkline + bullets. Dismissible
-          (preference persists in localStorage). On mobile collapses
-          to full-width below the chart row. */}
-      <HardwareRealityCheckPanel />
 
       <ProjectionPanel />
 

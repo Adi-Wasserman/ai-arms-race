@@ -315,6 +315,143 @@
   background: rgba(255, 170, 0, 0.05);
 }
 
+/* ─── Context row: sparkline + editorial (merged from HardwareRealityCheckPanel) ─── */
+
+.contextRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 24px;
+  padding: 16px 16px 14px;
+  border-top: 1px solid var(--color-border);
+  background: linear-gradient(
+    180deg,
+    rgba(77, 142, 234, 0.03) 0%,
+    transparent 100%
+  );
+}
+
+.contextCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.contextTitle {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.contextMeta {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: none;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.contextPlaceholder {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: var(--font-mono);
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* Sparkline */
+.sparkBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spark {
+  width: 100%;
+  height: 44px;
+  display: block;
+}
+
+.sparkCaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sparkCaption strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.sparkArrow {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Editorial bullets */
+.contextBullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contextBullets li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.contextBullets li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: rgba(77, 142, 234, 0.7);
+  font-size: 10px;
+  top: 1px;
+}
+
+.contextBullets li strong {
+  font-weight: 700;
+}
+
+/* Footnote */
+.contextFootnote {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid rgba(255, 170, 0, 0.45);
+  border-radius: 0 4px 4px 0;
+}
+
+.contextFootnoteMark {
+  color: rgba(255, 170, 0, 0.85);
+  font-weight: 700;
+  margin-right: 2px;
+}
+
+@media (max-width: 900px) {
+  .contextRow {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 /* ─── Inline summary footer ─── */
 /**
  * Editorial framing — explains that Epoch reports OPERATORS, not
