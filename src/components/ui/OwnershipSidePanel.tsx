@@ -7,7 +7,6 @@ import { formatH100 } from '@/services/format';
 import { LAB_TO_OWNER } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
 import type { Lab, OwnerSnapshot } from '@/types';
-import type { OwnerQuarterPoint } from '@/types/chipOwners';
 
 import styles from './OwnershipSidePanel.module.css';
 
@@ -77,104 +76,6 @@ function formatDate(iso: string): string {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Sparkline — total cumulative H100e across ALL owners since 2022.
-
-   Shows the shape of total ownership growth regardless of absolute
-   scale. Previously lived in HardwareRealityCheckPanel; merged here
-   to deduplicate (the old panel's top-5 bars were identical to the
-   5 operator cards above).
-   ───────────────────────────────────────────────────────────── */
-
-interface SparkSeries {
-  values: number[];
-  startLabel: string;
-  endLabel: string;
-  startValue: number;
-  endValue: number;
-}
-
-function buildTotalSparkline(
-  timeseries: readonly OwnerQuarterPoint[],
-): SparkSeries | null {
-  const since = timeseries.filter((p) => p.endDate >= '2022-01-01');
-  if (since.length < 2) return null;
-  const totals = since.map((p) =>
-    Object.values(p.byOwner).reduce((sum, v) => sum + (v ?? 0), 0),
-  );
-  const firstNonZero = totals.findIndex((v) => v > 0);
-  if (firstNonZero === -1) return null;
-  const values = totals.slice(firstNonZero);
-  const dates = since.slice(firstNonZero).map((p) => p.endDate);
-  return {
-    values,
-    startLabel: `'${dates[0].slice(2, 4)}`,
-    endLabel: `'${dates[dates.length - 1].slice(2, 4)}`,
-    startValue: values[0],
-    endValue: values[values.length - 1],
-  };
-}
-
-function Sparkline({ values }: { values: number[] }): JSX.Element {
-  const W = 280;
-  const H = 44;
-  const PAD_X = 4;
-  const PAD_Y = 6;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min || 1;
-  const stepX = (W - PAD_X * 2) / Math.max(1, values.length - 1);
-
-  const points = values
-    .map((v, i) => {
-      const x = PAD_X + i * stepX;
-      const y = H - PAD_Y - ((v - min) / span) * (H - PAD_Y * 2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-
-  const areaPath = `M ${points.split(' ').join(' L ')} L ${(W - PAD_X).toFixed(1)},${(H - PAD_Y).toFixed(1)} L ${PAD_X.toFixed(1)},${(H - PAD_Y).toFixed(1)} Z`;
-
-  const lastIdx = values.length - 1;
-  const lastX = PAD_X + lastIdx * stepX;
-  const lastY =
-    H - PAD_Y - ((values[lastIdx] - min) / span) * (H - PAD_Y * 2);
-
-  return (
-    <svg
-      className={styles.spark}
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="Total cumulative H100e ownership growth since 2022"
-    >
-      <defs>
-        <linearGradient id="os-spark-fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#4d8eea" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="#4d8eea" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill="url(#os-spark-fade)" />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#4d8eea"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx={lastX} cy={lastY} r="2.2" fill="#4d8eea" />
-    </svg>
-  );
-}
-
-const FOOTNOTE_TEXT =
-  'Owned H100e numbers are the raw median values directly from Epoch AI ' +
-  'Chip Owners ZIP (live). % Owned for OpenAI and Anthropic uses the ' +
-  'documented override because Epoch attributes those chips to the ' +
-  'hyperscalers, not the labs. All other values are 100% data-derived ' +
-  'with no manual adjustment.';
-
 export function OwnershipSidePanel(): JSX.Element | null {
   const { data, loading, error, lastUpdated, fromCache } = useEpochChipOwners();
 
@@ -207,11 +108,6 @@ export function OwnershipSidePanel(): JSX.Element | null {
       });
     },
     [setScope, setRaceMode, setHighlightedOwner],
-  );
-
-  const sparkline = useMemo<SparkSeries | null>(
-    () => (data ? buildTotalSparkline(data.timeseries) : null),
-    [data],
   );
 
   const derived = useMemo<DerivedStrip | null>(() => {
@@ -355,60 +251,6 @@ export function OwnershipSidePanel(): JSX.Element | null {
             </button>
           );
         })}
-      </div>
-
-      {/* ─── Context row: growth sparkline + editorial bullets ───
-           Previously in HardwareRealityCheckPanel — merged here to
-           deduplicate (the old panel's top-5 bars were identical to
-           the 5 operator cards above). */}
-      <div className={styles.contextRow}>
-        <div className={styles.contextCol}>
-          <h4 className={styles.contextTitle}>
-            Total ownership growth{' '}
-            <span className={styles.contextMeta}>since 2022</span>
-          </h4>
-          {sparkline ? (
-            <div className={styles.sparkBlock}>
-              <Sparkline values={sparkline.values} />
-              <div className={styles.sparkCaption}>
-                <span>
-                  {sparkline.startLabel}{' '}
-                  <strong>{formatH100(sparkline.startValue)}</strong>
-                </span>
-                <span className={styles.sparkArrow}>→</span>
-                <span>
-                  {sparkline.endLabel}{' '}
-                  <strong>{formatH100(sparkline.endValue)}</strong>
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.contextPlaceholder}>—</div>
-          )}
-        </div>
-        <div className={styles.contextCol}>
-          <h4 className={styles.contextTitle}>What this means</h4>
-          <ul className={styles.contextBullets}>
-            <li>
-              <strong style={{ color: '#9a9a9a' }}>OpenAI</strong> owns{' '}
-              <strong>0%</strong> of its chips → fully cloud-dependent
-            </li>
-            <li>
-              <strong style={{ color: LAB_COLORS.Gemini }}>Gemini</strong>{' '}
-              owns the <strong>largest single fleet on Earth</strong> (TPUs)
-            </li>
-            <li>
-              <strong style={{ color: LAB_COLORS.Anthropic }}>
-                Anthropic
-              </strong>{' '}
-              <strong>25% owned and rising</strong> (Trainium + Google deal)
-            </li>
-          </ul>
-          <p className={styles.contextFootnote}>
-            <span className={styles.contextFootnoteMark}>†</span>{' '}
-            {FOOTNOTE_TEXT}
-          </p>
-        </div>
       </div>
 
       {/* ─── Methodology footer ─── */}
