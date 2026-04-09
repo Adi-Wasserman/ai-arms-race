@@ -116,4 +116,27 @@ export const MODEL_SPECS: readonly Model[] = [
     notes:
       'First model from Meta Superintelligence Labs and the first in the Muse family. Natively multimodal reasoning model with tool-use, visual chain-of-thought, and multi-agent orchestration ("Thinking" mode). Leads frontier on multimodal reasoning (CharXiv 86.4, SimpleVQA 71.3) and HealthBench Hard (42.8). Rebuilt pretraining stack achieves comparable capabilities with >10× less compute than Llama 4 Maverick. Pricing, speed, and context window not yet disclosed. AA Intelligence Index (52) is independently measured by Artificial Analysis; per-benchmark scores are self-reported by Meta and pending independent re-runs from AA / Epoch.',
   },
+  {
+    name: 'Claude Mythos',
+    lab: 'Anthropic',
+    released: '2026-04-09',
+    aaIndex: null,
+    gpqa: 94.6,
+    swebench: 93.9,
+    swebenchPro: 77.8,
+    arcAgi2: null,
+    aime: null,
+    mmmuPro: null,
+    hle: 64.7,
+    gdpval: null,
+    osworld: 79.6,
+    browsecomp: 86.9,
+    speed: null,
+    costIn: 25,
+    costOut: 125,
+    context: 0,
+    notes:
+      'Unreleased frontier model — available only to approved partners via Project Glasswing. Not publicly accessible. Benchmarks are Anthropic-reported; no independent verification yet. Leads SWE-bench Verified by 13+ points over any public model.',
+    preview: true,
+  },
 ] as const;

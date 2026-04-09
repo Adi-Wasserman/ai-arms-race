@@ -61,6 +61,8 @@ export interface Model {
   /** Context window in thousand tokens. */
   context: number;
   notes: string;
+  /** True for unreleased models shown as a preview (e.g. Glasswing). */
+  preview?: boolean;
 }
 
 export interface DomainGroup {

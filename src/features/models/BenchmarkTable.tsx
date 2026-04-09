@@ -180,7 +180,7 @@ export function BenchmarkTable(): JSX.Element {
             <button
               key={m.name}
               type="button"
-              className={`${styles.chip}${sel ? ` ${styles.selected}` : ''}`}
+              className={`${styles.chip}${sel ? ` ${styles.selected}` : ''}${m.preview ? ` ${styles.chipPreview}` : ''}`}
               style={
                 sel
                   ? {
@@ -193,6 +193,7 @@ export function BenchmarkTable(): JSX.Element {
               onClick={() => toggleModel(m.name)}
             >
               {m.name}
+              {m.preview && <span className={styles.previewPill}>PREVIEW</span>}
             </button>
           );
         })}
@@ -281,6 +282,7 @@ export function BenchmarkTable(): JSX.Element {
                       {m.name}
                     </div>
                     <div className={styles.colLab}>{m.lab}</div>
+                    {m.preview && <span className={styles.previewBadge}>NOT PUBLIC</span>}
                   </th>
                 );
               })}
@@ -390,12 +392,13 @@ export function BenchmarkTable(): JSX.Element {
         {MODEL_SPECS.map((m) => {
           const color = LAB_COLORS[m.lab];
           return (
-            <div key={m.name} className={styles.noteCard}>
+            <div key={m.name} className={`${styles.noteCard}${m.preview ? ` ${styles.noteCardPreview}` : ''}`}>
               <div className={styles.noteName} style={{ color }}>
                 {m.name}
+                {m.preview && <span className={styles.previewPill}>PREVIEW</span>}
               </div>
               <div className={styles.noteSub}>
-                {m.lab} · Released {m.released}
+                {m.lab} · {m.preview ? 'Unreleased — Project Glasswing' : `Released ${m.released}`}
               </div>
               <div className={styles.noteBody}>{m.notes}</div>
             </div>
