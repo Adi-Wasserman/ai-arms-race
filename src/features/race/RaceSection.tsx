@@ -46,7 +46,7 @@ const VELOCITY_OPTS = [
  * scope=fleet + raceMode selectors into a single two-option pick:
  *
  *   ACCESS    = scope='fleet', raceMode='effective'
- *               ("who can train today" — effective fleet w/ cloud-lease)
+ *               ("who can train today" — total capacity w/ cloud-lease)
  *   OWNERSHIP = scope='fleet', raceMode='ownership'
  *               ("who controls the silicon for 2027+" — Epoch lab view)
  *
@@ -64,7 +64,7 @@ type AccessMode = 'access' | 'ownership';
 
 const ACCESS_MODE_TOOLTIP =
   'Ownership = who bought the chips (Epoch live data, lab view). ' +
-  'Access = who can train today (effective fleet incl. cloud-lease).';
+  'Access = total capacity available to train today.';
 
 function RaceSectionInner(): JSX.Element {
   const metric = useDashboard((s) => s.metric);
@@ -169,7 +169,7 @@ function RaceSectionInner(): JSX.Element {
             ACCESS
           </span>
           <span className={styles.terminalTabSub}>
-            Effective Fleet — who can train today
+            Total Capacity — who can train today
           </span>
         </button>
         <button
@@ -256,12 +256,6 @@ function RaceSectionInner(): JSX.Element {
             </span>
           </h2>
           <OwnershipTable />
-          {/* Editorial card explaining the public cloud→lab
-              relationships that the operator-row OwnershipTable
-              cannot show directly (Epoch reports operator totals,
-              not the per-tenant allocation). Collapsible —
-              preference persists in localStorage. */}
-          <KnownLeasesCard />
         </>
       ) : (
         <div className={styles.chartRow}>
@@ -271,6 +265,7 @@ function RaceSectionInner(): JSX.Element {
       )}
 
       <ComputeBreakdownCard />
+      <KnownLeasesCard />
 
       <ProjectionPanel />
 

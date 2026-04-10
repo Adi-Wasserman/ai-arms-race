@@ -49,13 +49,12 @@ const BULLETS: readonly LeaseBullet[] = [
       'overflow on the Stargate buildout.',
   },
   {
-    operator: 'Google TPU fleet',
+    operator: 'Google (owns TPUs, used internally)',
     lab: 'Gemini',
     labColor: LAB_COLORS.Gemini,
     detail:
-      'Operator IS the lab. All of Alphabet\'s TPU silicon is direct ' +
-      "ownership — Gemini's training capacity is fully under Google's " +
-      'own control.',
+      'Google designs the TPUs and uses them internally to train Gemini. ' +
+      "Self-operated — no intermediary. 100% owned.",
   },
   {
     operator: 'AWS Trainium + EC2',
@@ -67,28 +66,13 @@ const BULLETS: readonly LeaseBullet[] = [
       "Trainium2 procurement directly through the AWS deal.",
   },
   {
-    operator: 'Google Cloud + Broadcom (multi-GW TPU)',
+    operator: 'Google (TPUs rented via Google Cloud + Broadcom)',
     lab: 'Anthropic',
     labColor: LAB_COLORS.Anthropic,
     detail:
-      'Announced Apr 2026 — multi-GW TPU agreement for 2027+ delivery, ' +
-      'in addition to the AWS partnership. Rented capacity, not owned.',
-  },
-  {
-    operator: 'Meta (Hyperion + Prometheus)',
-    lab: 'Meta',
-    labColor: LAB_COLORS.Meta,
-    detail:
-      'Self-operated. Meta owns its data centers and the Nvidia silicon ' +
-      'inside them — no hyperscaler intermediary.',
-  },
-  {
-    operator: 'xAI (Colossus 1 + Colossus 2)',
-    lab: 'xAI',
-    labColor: LAB_COLORS.xAI,
-    detail:
-      'Self-built and self-operated. Most vertically integrated of the ' +
-      'pure-play frontier labs.',
+      'Same Google-designed TPUs, but Anthropic rents capacity via a ' +
+      'commercial cloud partnership. Multi-GW deal announced Apr 2026 ' +
+      'for 2027+ delivery. Not owned.',
   },
 ];
 
@@ -139,10 +123,10 @@ export function KnownLeasesCard(): JSX.Element {
           {open ? '▾' : '▸'}
         </span>
         <h3 id="known-leases-title" className={styles.title}>
-          Known Major Leases
+          Who Trains on Whose Chips
         </h3>
         <span className={styles.subtitle}>
-          public information only — not in Epoch data
+          cloud → lab relationships behind the numbers
         </span>
       </button>
 
