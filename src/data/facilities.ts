@@ -113,5 +113,5 @@ export const FACILITY_COORDS: FacilityCoordsMap = {
   // Users column attributes them to tracked labs (Microsoft/OpenAI and
   // Anthropic respectively), so they appear on the map.
   'Coreweave Helios': [33.77, -100.87],
-  'Fluidstack Lake Mariner': [43.3739, -78.706], // Somerset, NY (AES site)
+  'Fluidstack Lake Mariner': [43.358, -78.604], // Somerset, NY (former Kintigh/AES site)
 };
