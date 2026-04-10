@@ -12,6 +12,7 @@ import type {
   VelocityMode,
 } from '@/types';
 
+import { ComputeBreakdownCard } from './ComputeBreakdownCard';
 import { FrontierOutlookCard } from './FrontierOutlookCard';
 import { KnownLeasesCard } from './KnownLeasesCard';
 import { Leaderboard } from './Leaderboard';
@@ -27,8 +28,8 @@ const METRIC_OPTS = [
   { value: 'power' as const, label: 'POWER' },
 ];
 const SCOPE_OPTS = [
-  { value: 'tracked' as const, label: 'SATELLITE-VERIFIED' },
-  { value: 'fleet' as const, label: '+ CLOUD-LEASE ADJ. ⚠' },
+  { value: 'fleet' as const, label: 'TOTAL CAPACITY' },
+  { value: 'tracked' as const, label: 'SATELLITE ONLY' },
 ];
 const PROJ_OPTS = [
   { value: 'current' as const, label: 'CURRENT' },
@@ -268,6 +269,8 @@ function RaceSectionInner(): JSX.Element {
           <Leaderboard />
         </div>
       )}
+
+      <ComputeBreakdownCard />
 
       <ProjectionPanel />
 

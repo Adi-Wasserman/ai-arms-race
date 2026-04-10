@@ -27,8 +27,8 @@ import styles from './Leaderboard.module.css';
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 const SCOPE_OPTIONS = [
-  { value: 'tracked' as const, label: 'SAT-VERIFIED' },
-  { value: 'fleet' as const, label: '+ CLOUD-LEASE' },
+  { value: 'fleet' as const, label: 'TOTAL CAPACITY' },
+  { value: 'tracked' as const, label: 'SATELLITE ONLY' },
 ];
 
 interface Row {
@@ -228,28 +228,6 @@ export function Leaderboard(): JSX.Element | null {
                         {r.pctOwned.pct}%
                       </span>
                     </div>
-                    {/* Raw Epoch median — no overrides, no denominator.
-                        OpenAI/Anthropic read 0 by design (chips attributed
-                        to hyperscalers in Epoch's dataset). See footnote †. */}
-                    {r.ownedH100eEpoch && (
-                      <div
-                        className={styles.ownedEpochLine}
-                        title={
-                          r.ownedH100eEpoch.isDerivedFromEpoch
-                            ? `Epoch median: ${formatH100(r.ownedH100eEpoch.median)} H100e\n5th–95th percentile range: ${formatH100(r.ownedH100eEpoch.low)}–${formatH100(r.ownedH100eEpoch.high)} (Monte Carlo from Epoch)\nFull methodology: https://epoch.ai/data/ai-chip-owners`
-                            : 'No first-party chip ownership in Epoch\'s dataset — see footnote †'
-                        }
-                      >
-                        <span className={styles.ownedEpochLabel}>
-                          Epoch-owned
-                        </span>
-                        <span className={styles.ownedEpochValue}>
-                          {r.ownedH100eEpoch.isDerivedFromEpoch
-                            ? formatH100(r.ownedH100eEpoch.median)
-                            : '0 †'}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -274,17 +252,9 @@ export function Leaderboard(): JSX.Element | null {
       )}
       {scope === 'fleet' && (
         <div className={styles.disclaimer}>
-          ⚠ Includes cloud-lease estimates for Anthropic (AWS + GCP + Azure) and Gemini
-          (TPU fleet).
+          ⚠ Includes cloud-lease estimates. See calculations below.
         </div>
       )}
-      <div className={styles.epochFootnote}>
-        † Owned H100e numbers are the raw median values directly from Epoch AI
-        Chip Owners ZIP (live). % Owned for OpenAI and Anthropic uses the
-        documented override because Epoch attributes those chips to the
-        hyperscalers, not the labs. All other values are 100% data-derived with
-        no manual adjustment.
-      </div>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export const createRaceSlice: StateCreator<
   RaceSlice
 > = (set) => ({
   metric: 'h100e',
-  scope: 'tracked',
+  scope: 'fleet',
   projMode: 'current',
   velocityMode: 'absolute',
   hoveredLab: null,
