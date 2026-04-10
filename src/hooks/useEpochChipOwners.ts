@@ -111,6 +111,14 @@ export function useEpochChipOwners(): UseEpochChipOwnersResult {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-refresh every 30 minutes so live data stays current.
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      void runLoad(true);
+    }, 30 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [runLoad]);
+
   const refresh = useCallback(async (): Promise<void> => {
     // `forceRefresh: true` bypasses the TTL check and always hits network.
     await runLoad(true);

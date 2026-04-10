@@ -41,9 +41,11 @@ const PROOF_LINES: Readonly<Record<Lab, string>> = {
   Meta: 'full control of Hyperion + Prometheus — own data centers, own Nvidia chips',
   xAI: 'most vertically integrated pure-play lab — built and operates Colossus 1+2',
   Anthropic:
-    'all-3-hyperscaler tenant — AWS Trainium + multi-GW Google/Broadcom TPU agreement for 2027+',
+    'all-3-hyperscaler tenant — AWS Trainium + multi-GW Google/Broadcom TPU agreement for 2027+ · cloud-dependent',
   OpenAI: 'fully cloud-dependent (Microsoft Stargate / Azure + Oracle)',
 };
+
+const CLOUD_DEPENDENT_LABS = new Set<Lab>(['OpenAI', 'Anthropic']);
 
 /**
  * Which Epoch chip-owner row to source the sparkline from.
@@ -273,26 +275,12 @@ export function FrontierOutlookCard(): JSX.Element | null {
                       <strong>{r.pct}%</strong>
                       <span className={styles.pctLabel}>owned{star}</span>
                     </span>
-                    <span className={styles.proof}>→ {r.proof}</span>
-                    <span className={styles.sparkSlot}>
-                      {r.sparkline ? (
-                        <span className={styles.sparkContainer}>
-                          <Sparkline
-                            values={r.sparkline.values}
-                            color={labColor}
-                          />
-                          <span className={styles.sparkCaption}>
-                            &apos;
-                            {String(r.sparkline.startYear).slice(2)} →{' '}
-                            {formatH100(r.sparkline.endValue)} H100e
-                          </span>
-                        </span>
-                      ) : (
-                        <span
-                          className={styles.sparkNa}
-                          title="No direct ownership trend — Epoch tracks the operator (Microsoft / Amazon), not the lab"
-                        >
-                          N/A — cloud-dependent
+                    <span className={styles.proof}>
+                      → {r.proof}
+                      {r.sparkline && !CLOUD_DEPENDENT_LABS.has(r.lab) && (
+                        <span className={styles.proofGrowth}>
+                          {' · '}
+                          &apos;{String(r.sparkline.startYear).slice(2)} → {formatH100(r.sparkline.endValue)} H100e
                         </span>
                       )}
                     </span>

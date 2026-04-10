@@ -163,6 +163,16 @@ const CLOUD_PROVIDER_OPERATORS = new Set<string>([
 ]);
 const MAJOR_TENANT_LABS = new Set<Lab>(['OpenAI', 'Anthropic']);
 
+/** Self-operated = operator IS the lab. Shared = lab rents from a hyperscaler. */
+const SELF_OPERATED_OWNERS = new Set<string>(['Meta', 'xAI']);
+const SHARED_HOST_OWNERS = new Set<string>(['Google', 'Alphabet', 'Microsoft', 'Amazon']);
+
+function operatorIntegration(owner: string): 'self' | 'shared' | null {
+  if (SELF_OPERATED_OWNERS.has(owner)) return 'self';
+  if (SHARED_HOST_OWNERS.has(owner)) return 'shared';
+  return null;
+}
+
 function operatorBadge(owner: string): BadgeKind | null {
   if (PURE_OWNER_OPERATORS.has(owner)) return 'pureOwner';
   if (CLOUD_PROVIDER_OPERATORS.has(owner)) return 'cloudProvider';
@@ -519,11 +529,14 @@ function OwnedMedianTooltip({
 function ChipMixCell({
   row,
   ownerName,
+  scalePct,
   hovered,
   setHovered,
 }: {
   row: DerivedRow;
   ownerName: string;
+  /** Bar width as a percentage of the cell (0–100), relative to the largest owner. */
+  scalePct: number;
   hovered: HoveredSegment | null;
   setHovered: (s: HoveredSegment | null) => void;
 }): JSX.Element {
@@ -546,7 +559,7 @@ function ChipMixCell({
   return (
     <div className={styles.chipMix}>
       {/* ─── Stacked bar — one segment per chip type ─── */}
-      <div className={styles.chipMixBar}>
+      <div className={styles.chipMixBar} style={{ width: `${scalePct}%` }}>
         {sorted.map((seg, i) => {
           const isHovered =
             hovered != null &&
@@ -662,6 +675,11 @@ export function OwnershipTable(): JSX.Element {
     return deriveRows(ordered, fleetByLab, data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dataVersion]);
+
+  const maxH100e = useMemo(
+    () => rows.reduce((max, r) => Math.max(max, r.h100e), 1),
+    [rows],
+  );
 
   /**
    * Currently-hovered chip-mix segment. Tracks the segment + its
@@ -820,32 +838,40 @@ export function OwnershipTable(): JSX.Element {
         </button>
       </div>
 
+      {/* ─── Editorial lede ─── */}
+      <div className={styles.lede}>
+        <p className={styles.ledeText}>
+          5 hyperscalers buy the chips — but only{' '}
+          <strong>2 of 5 frontier labs</strong> actually operate them.
+          The other 3 are tenants on shared infrastructure.
+        </p>
+        <div className={styles.ledePills}>
+          <span className={`${styles.ledePill} ${styles.ledePillSelf}`}>
+            SELF-OPERATED
+          </span>
+          <span className={styles.ledePillDesc}>
+            Operator is the lab (Meta, xAI)
+          </span>
+          <span className={`${styles.ledePill} ${styles.ledePillShared}`}>
+            SHARED HOST
+          </span>
+          <span className={styles.ledePillDesc}>
+            Lab rents capacity (OpenAI, Gemini, Anthropic)
+          </span>
+        </div>
+      </div>
+
       {/* ─── Table ─── */}
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.th}>#</th>
-            <th className={styles.th}>OWNER / LAB</th>
-            <th className={`${styles.th} ${styles.right}`}>
-              OWNED H100e (median ± 5–95)
-            </th>
-            <th className={`${styles.th} ${styles.right}`}>OWNED POWER</th>
-            <th className={`${styles.th} ${styles.right}`}>% OF GLOBAL</th>
-            <th
-              className={`${styles.th} ${styles.right}`}
-              title={PCT_OWNED_TOOLTIP}
-            >
-              % OWNED ⓘ
-            </th>
-            <th
-              className={`${styles.th} ${styles.right}`}
-              title="Raw lab-level median H100e pulled directly from the live Epoch AI Chip Owners ZIP — no derivation, no denominator, no overrides. Only shown for rows that map to a tracked lab."
-            >
-              OWNED H100e (EPOCH)
-            </th>
-            <th className={styles.th}>CHIP MIX</th>
-            <th className={`${styles.th} ${styles.right}`}>2029 PROJECTION</th>
-            <th className={`${styles.th} ${styles.right}`}>CONF</th>
+            <th className={styles.th} style={{ width: '14%' }}>OWNER / LAB</th>
+            <th className={`${styles.th} ${styles.right}`} style={{ width: '8%' }}>H100e MEDIAN</th>
+            <th className={`${styles.th} ${styles.right}`} style={{ width: '8%' }}>POWER</th>
+            <th className={`${styles.th} ${styles.right}`} style={{ width: '8%' }}>% OF GLOBAL</th>
+            <th className={`${styles.th} ${styles.chipMixTh}`} style={{ width: '26%' }}>CHIP MIX</th>
+            <th className={`${styles.th} ${styles.right}`} style={{ width: '13%' }}>2029 TARGET</th>
+            <th className={`${styles.th} ${styles.right}`} style={{ width: '7%' }}>CONF</th>
           </tr>
         </thead>
         <tbody>
@@ -859,6 +885,7 @@ export function OwnershipTable(): JSX.Element {
             // via .rowMajorTenant.
             const opBadge = operatorBadge(row.owner);
             const tenantRow = isMajorTenantLab(row.mappedLab);
+            const integration = operatorIntegration(row.owner);
             return (
               <tr
                 key={row.owner}
@@ -867,34 +894,32 @@ export function OwnershipTable(): JSX.Element {
                   else rowRefs.current.delete(row.owner);
                 }}
                 className={`${styles.row}${isHighlighted ? ` ${styles.rowHighlight}` : ''}${tenantRow ? ` ${styles.rowMajorTenant}` : ''}`}
+                style={{ '--row-color': labColor } as React.CSSProperties}
               >
                 <td className={styles.td}>
-                  <div className={`${styles.rank} ${rankClass(row.rank)}`}>
-                    {row.rank}
-                  </div>
-                </td>
-                <td className={styles.td}>
-                  <div className={styles.ownerName}>
+                  <div className={styles.ownerName} style={{ color: labColor }}>
                     {row.owner}
-                    {opBadge && <LabBadge kind={opBadge} />}
+                    {row.mappedLab && (
+                      <span className={styles.ownerLab}>
+                        → {row.mappedLab}
+                      </span>
+                    )}
+                    {!row.mappedLab && (
+                      <span className={styles.ownerSub}>(no lab attribution)</span>
+                    )}
                   </div>
-                  {row.mappedLab && (
-                    <div className={styles.ownerLab} style={{ color: labColor }}>
-                      → {row.mappedLab}
-                      {tenantRow && <LabBadge kind="majorTenant" />}
-                    </div>
-                  )}
-                  {!row.mappedLab && (
-                    <div className={styles.ownerSub}>(no lab attribution)</div>
+                  {integration && (
+                    <span
+                      className={`${styles.integrationPill} ${integration === 'self' ? styles.integrationSelf : styles.integrationShared}`}
+                    >
+                      {integration === 'self' ? 'SELF-OPERATED' : 'SHARED HOST'}
+                    </span>
                   )}
                 </td>
                 <td className={`${styles.td} ${styles.right}`}>
-                  <div className={styles.h100eMain}>{formatH100(row.h100e)}</div>
-                  <div className={styles.h100eRange}>
-                    {formatH100(row.h100eLow)} – {formatH100(row.h100eHigh)}
-                  </div>
+                  <div className={styles.h100eMain} style={{ color: labColor }}>{formatH100(row.h100e)}</div>
                 </td>
-                <td className={`${styles.td} ${styles.right} ${styles.power}`}>
+                <td className={`${styles.td} ${styles.right} ${styles.power}`} style={{ color: labColor }}>
                   {row.powerGw.toFixed(2)} GW
                 </td>
                 <td className={`${styles.td} ${styles.right}`}>
@@ -913,85 +938,11 @@ export function OwnershipTable(): JSX.Element {
                     </div>
                   </div>
                 </td>
-                <td
-                  className={`${styles.td} ${styles.right}`}
-                  title={
-                    row.pctOwned != null
-                      ? (row.pctOwned.footnote ?? PCT_OWNED_TOOLTIP)
-                      : 'Unmapped owner — no effective-fleet data to compare against'
-                  }
-                >
-                  {row.pctOwned != null ? (
-                    <div className={styles.pctOwnedCell}>
-                      <span className={styles.pctOwnedValue}>
-                        {row.pctOwned.pct}%
-                        {!row.pctOwned.isDerivedFromEpoch && (
-                          <span
-                            style={{
-                              marginLeft: 4,
-                              fontSize: 9,
-                              color: 'var(--color-text-tertiary)',
-                              fontWeight: 400,
-                            }}
-                          >
-                            *
-                          </span>
-                        )}
-                      </span>
-                      <div className={styles.pctOwnedBarTrack}>
-                        <div
-                          className={styles.pctOwnedBarFill}
-                          style={{
-                            width: `${row.pctOwned.pct}%`,
-                            background: row.mappedLab ? labColor : '#666',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <span className={styles.projMuted}>—</span>
-                  )}
-                </td>
-                <td className={`${styles.td} ${styles.right}`}>
-                  {row.ownedH100eEpoch && row.mappedLab ? (
-                    row.ownedH100eEpoch.isDerivedFromEpoch ? (
-                      <a
-                        className={styles.ownedEpochCell}
-                        href="https://epoch.ai/data/ai-chip-owners"
-                        target="_blank"
-                        rel="noreferrer"
-                        onMouseEnter={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setHoveredOwned({
-                            ownerName: row.owner,
-                            labName: row.mappedLab as Lab,
-                            median: row.ownedH100eEpoch!.median,
-                            low: row.ownedH100eEpoch!.low,
-                            high: row.ownedH100eEpoch!.high,
-                            anchorX: rect.left + rect.width / 2,
-                            anchorY: rect.top,
-                          });
-                        }}
-                        onMouseLeave={() => setHoveredOwned(null)}
-                      >
-                        {formatH100(row.ownedH100eEpoch.median)}
-                      </a>
-                    ) : (
-                      <span
-                        className={styles.ownedEpochZero}
-                        title="No first-party chip ownership in Epoch's dataset — see footnote †"
-                      >
-                        0 <sup>†</sup>
-                      </span>
-                    )
-                  ) : (
-                    <span className={styles.projMuted}>—</span>
-                  )}
-                </td>
-                <td className={styles.td}>
+                <td className={`${styles.td} ${styles.chipMixTd}`}>
                   <ChipMixCell
                     row={row}
                     ownerName={row.owner}
+                    scalePct={Math.max(8, (row.h100e / maxH100e) * 100)}
                     hovered={hovered}
                     setHovered={setHovered}
                   />

@@ -99,12 +99,92 @@
   opacity: 0.5;
 }
 
+/* ─── Editorial lede between banner and table ─── */
+
+.lede {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ledeText {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.ledeText strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.ledePills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ledePill {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.ledePillSelf {
+  background: rgba(0, 255, 135, 0.12);
+  color: #00d68f;
+  border: 1px solid rgba(0, 255, 135, 0.3);
+}
+
+.ledePillShared {
+  background: rgba(255, 170, 0, 0.1);
+  color: #e8a830;
+  border: 1px solid rgba(255, 170, 0, 0.25);
+  margin-left: 8px;
+}
+
+.ledePillDesc {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ─── Integration pills in OWNER / LAB column ─── */
+
+.integrationPill {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.8px;
+  padding: 1.5px 6px;
+  border-radius: 3px;
+  margin-top: 5px;
+}
+
+.integrationSelf {
+  background: rgba(0, 255, 135, 0.12);
+  color: #00d68f;
+  border: 1px solid rgba(0, 255, 135, 0.3);
+}
+
+.integrationShared {
+  background: rgba(255, 170, 0, 0.1);
+  color: #e8a830;
+  border: 1px solid rgba(255, 170, 0, 0.25);
+}
+
 /* ─── Table ──────────────────────────────────────── */
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 880px;
+  min-width: 780px;
+  table-layout: fixed;
 }
 
 .th {
@@ -115,7 +195,7 @@
   padding: 10px 12px;
   font-size: 9px;
   letter-spacing: var(--letter-spacing-wide);
-  color: var(--color-text-tertiary);
+  color: rgba(255, 255, 255, 0.55);
   font-weight: 700;
   text-align: left;
   border-bottom: 1px solid var(--color-border);
@@ -126,13 +206,30 @@
   text-align: right;
 }
 
+.th.chipMixTh,
+.td.chipMixTd {
+  padding-left: 40px;
+}
+
 .row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-left: 3px solid color-mix(in oklab, var(--row-color, transparent) 50%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--row-color, transparent) 5%, transparent) 0%,
+    color-mix(in oklab, var(--row-color, transparent) 1.5%, transparent) 40%,
+    transparent 100%
+  );
   transition: background var(--transition-fast);
 }
 
 .row:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--row-color, transparent) 9%, transparent) 0%,
+    color-mix(in oklab, var(--row-color, transparent) 3%, transparent) 40%,
+    transparent 100%
+  );
 }
 
 /**
@@ -163,9 +260,9 @@
 }
 
 .td {
-  padding: 12px;
+  padding: 10px 12px;
   vertical-align: middle;
-  font-size: var(--font-size-md);
+  font-size: 14px;
 }
 
 .td.right {
@@ -209,23 +306,22 @@
 /* Owner column */
 .ownerName {
   font-weight: 700;
-  font-size: var(--font-size-md);
+  font-size: 15px;
   color: var(--color-text-primary);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   flex-wrap: wrap;
+  letter-spacing: -0.01em;
 }
 
 .ownerLab {
-  font-size: 9px;
-  letter-spacing: 0.5px;
-  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  display: inline;
+  opacity: 0.7;
 }
 
 .ownerSub {
@@ -238,22 +334,14 @@
 /* H100e column */
 .h100eMain {
   font-family: var(--font-mono);
-  font-size: var(--font-size-md);
+  font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.h100eRange {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--color-text-tertiary);
-  margin-top: 2px;
 }
 
 /* Power column */
 .power {
   font-family: var(--font-mono);
-  font-size: var(--font-size-md);
+  font-size: 14px;
   color: var(--color-text-primary);
 }
 
@@ -267,7 +355,7 @@
 
 .pctGlobalValue {
   font-family: var(--font-mono);
-  font-size: var(--font-size-md);
+  font-size: 14px;
   color: var(--color-text-primary);
   font-weight: 600;
 }
@@ -356,14 +444,13 @@
 
 /* Chip mix column */
 .chipMix {
-  /* Wider so the per-chip-type legend has room to wrap cleanly. */
-  min-width: 260px;
-  max-width: 340px;
+  min-width: 140px;
+  max-width: 100%;
 }
 
 .chipMixBar {
   display: flex;
-  height: 18px;
+  height: 12px;
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
@@ -396,12 +483,12 @@
    list. Quick "Nvidia 67% · Google 33%" summary so the user has a
    one-glance answer without parsing the per-chip list below. */
 .chipMixMfrRollup {
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 10px;
   font-family: var(--font-mono);
   letter-spacing: 0.3px;
   color: var(--color-text-tertiary);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .chipMixMfrName {
@@ -419,16 +506,9 @@
   margin: 0 2px;
 }
 
-/* Per-chip-type legend — always visible, no hover required. */
+/* Per-chip-type legend — hidden; detail available via hover tooltip. */
 .chipMixLegend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  margin-top: 6px;
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--color-text-secondary);
-  line-height: 1.4;
+  display: none;
 }
 
 .chipMixLegendItem {
@@ -457,7 +537,7 @@
 /* 2029 projection column */
 .proj {
   font-family: var(--font-mono);
-  font-size: var(--font-size-md);
+  font-size: 14px;
   color: rgba(255, 170, 0, 0.85);
   font-weight: 600;
 }
