@@ -8,6 +8,7 @@ import { useDashboard } from '@/store';
 import type { ScatterView } from '@/types';
 
 import { BenchmarkTable } from './BenchmarkTable';
+import FirstPrinciples from './FirstPrinciples';
 import { MetrChart } from './MetrChart';
 import styles from './ModelsSection.module.css';
 import { ScatterPlot } from './ScatterPlot';
@@ -88,6 +89,9 @@ function ModelsSectionInner(): JSX.Element {
           quality, and architecture drive outcomes as much as compute.
         </div>
       </div>
+
+      {/* ═══ First Principles explainer ═══ */}
+      <FirstPrinciples />
 
       {/* ═══ Benchmark comparison table ═══ */}
       <BenchmarkTable />
