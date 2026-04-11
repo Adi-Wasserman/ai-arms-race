@@ -22,11 +22,28 @@ function ModelsSectionInner(): JSX.Element {
 
   return (
     <>
-      <div className={styles.intro}>
-        No single model dominates. <strong>GPT-5.4, Gemini 3.1 Pro, and Claude
-        Opus 4.6</strong> trade the lead across different benchmark categories —
-        reasoning, coding, science, and multimodal. The frontier is a three-way
-        contest, not a one-horse race.
+      <div className={styles.takeaways}>
+        <h3 className={styles.takeawaysTitle}>KEY TAKEAWAYS — APRIL 2026</h3>
+        <ul className={styles.takeawaysList}>
+          <li>
+            <strong>No single model dominates.</strong> GPT-5.4, Gemini 3.1 Pro,
+            and Claude Opus 4.6 trade leads across benchmarks.
+          </li>
+          <li>
+            <strong>More compute still produces better frontier models.</strong>{' '}
+            Training compute has grown ~5× per year since 2020 — and scaling laws
+            (Kaplan 2020, Chinchilla 2022) keep delivering inside every lab's
+            lineage.
+          </li>
+          <li>
+            The charts below show the proof: exponential compute growth + clear
+            within-family performance jumps.
+          </li>
+          <li>
+            Efficiency, data quality, and iteration speed create real gaps —
+            that's why the race is so intense.
+          </li>
+        </ul>
       </div>
 
       {/* ═══ Training compute growth ═══ */}
@@ -85,6 +102,12 @@ function ModelsSectionInner(): JSX.Element {
 
       {/* ═══ First Principles explainer ═══ */}
       <FirstPrinciples />
+
+      {/* ═══ Transition to benchmarks ═══ */}
+      <div className={styles.transition}>
+        <strong>The charts above show why labs are in a compute arms race.</strong>{' '}
+        Now let's see how the current frontier actually performs head-to-head.
+      </div>
 
       {/* ═══ Benchmark comparison table ═══ */}
       <BenchmarkTable />
