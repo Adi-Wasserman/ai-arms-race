@@ -10,25 +10,36 @@ import styles from './ComputeBreakdownCard.module.css';
 
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
-const FLEET_LEG_INFO: Record<string, { label: string; source: string; conversion: string }> = {
+const FLEET_LEG_INFO: Record<
+  string,
+  { label: string; source: string; sourceUrl: string; conversion: string }
+> = {
   'EAI-AWS': {
     label: 'AWS Trainium2 (Project Rainier)',
-    source: 'aboutamazon.com — Oct 2025',
+    source: 'Amazon — Project Rainier',
+    sourceUrl:
+      'https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster',
     conversion: 'Trn2 ≈ 0.93 H100e',
   },
   'EAI-GCP': {
     label: 'Google Cloud TPU',
-    source: 'anthropic.com — GCP TPU expansion',
+    source: 'Anthropic — GCP TPU expansion',
+    sourceUrl:
+      'https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services',
     conversion: 'Blended ~1.4 H100e/chip',
   },
   'EAI-AZR': {
     label: 'Azure / NVIDIA Grace Blackwell',
-    source: 'blogs.nvidia.com — MSFT-NVDA-Anthropic',
+    source: 'NVIDIA — MSFT-NVDA-Anthropic',
+    sourceUrl:
+      'https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/',
     conversion: 'GB200 ≈ 2.5 H100e',
   },
   EGC: {
     label: 'Internal TPU fleet (est.)',
-    source: 'SemiAnalysis, Fubon, Google Ironwood blog',
+    source: 'SemiAnalysis · Fubon · Google Ironwood',
+    sourceUrl:
+      'https://cloud.google.com/blog/products/ai-machine-learning/ironwood-tpu-age-of-inference',
     conversion: 'Blended ~1.2 H100e/chip',
   },
 };
@@ -51,6 +62,7 @@ interface FleetLeg {
   handle: string;
   label: string;
   source: string;
+  sourceUrl: string;
   conversion: string;
   currentH100e: number;
   steps: FleetStep[];
@@ -127,7 +139,7 @@ export function ComputeBreakdownCard(): JSX.Element | null {
         }));
         const pastEntries = allEntries.filter((e) => e[0] <= TODAY_ISO);
         const latest = pastEntries.length > 0 ? pastEntries[pastEntries.length - 1] : null;
-        const info = FLEET_LEG_INFO[handle] ?? { label: handle, source: '', conversion: '' };
+        const info = FLEET_LEG_INFO[handle] ?? { label: handle, source: '', sourceUrl: '', conversion: '' };
         return { handle, ...info, currentH100e: latest ? latest[2] : 0, steps };
       });
       return {
@@ -225,7 +237,18 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                         <span className={`${styles.confBadge} ${styles.confEst}`}>EST</span>
                       </div>
                       <div className={styles.calcMeta}>
-                        <strong>{leg.source}</strong>
+                        {leg.sourceUrl ? (
+                          <a
+                            className={styles.calcSourceLink}
+                            href={leg.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {leg.source}
+                          </a>
+                        ) : (
+                          <strong>{leg.source}</strong>
+                        )}
                         <span className={styles.metaSep}>·</span>
                         <strong>{leg.conversion}</strong>
                       </div>
@@ -270,11 +293,71 @@ export function ComputeBreakdownCard(): JSX.Element | null {
           })()}
 
           <p className={styles.footnote}>
-            Satellite-verified numbers update live from Epoch AI.
-            Cloud-lease H100e are converted from announced chip counts / power budgets
-            using the ratios shown above. Ramp schedules are interpolated from announcement
-            endpoints. H100e ≈ 989 BF16 TFLOPS.
+            Satellite data updates live from Epoch AI. Cloud-lease H100e are
+            derived from announced chip counts / power targets using the
+            conversion ratios shown above — none are directly stated in
+            announcements. H100e ≈ 989 BF16 TFLOPS.
           </p>
+
+          <div className={styles.sourceBar}>
+            <div className={styles.sourceBarRow}>
+              <span className={styles.sourceBarLabel}>Sources:</span>
+              <a href="https://epoch.ai/data/ai-chip-owners" target="_blank" rel="noreferrer">
+                Epoch AI
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Amazon
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Anthropic
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                NVIDIA
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://semianalysis.com/2024/09/13/google-multi-datacenter-training/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                SemiAnalysis
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://cloud.google.com/blog/products/ai-machine-learning/ironwood-tpu-age-of-inference"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google Cloud
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <span className={styles.sourceBarStatic}>Fubon Research</span>
+            </div>
+            <div className={styles.sourceBarRow}>
+              <span className={styles.sourceBarLabel}>Ramp method:</span>
+              <span className={styles.sourceBarStatic}>
+                Each announcement gives a start date + chip count and a target date +
+                chip count. We linearly interpolate between those endpoints to produce
+                quarterly H100e milestones. Solid pills = announced capacity already
+                online. Dashed pills = future capacity not yet delivered.
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </section>

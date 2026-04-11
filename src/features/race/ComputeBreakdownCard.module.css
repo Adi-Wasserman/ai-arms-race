@@ -351,6 +351,67 @@
   padding: 4px 0;
 }
 
+/* ─── Inline source link (per calc row) ─── */
+
+.calcSourceLink {
+  color: rgba(120, 180, 255, 0.8);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.calcSourceLink:hover {
+  color: rgba(140, 200, 255, 1);
+  text-decoration: underline;
+}
+
+/* ─── Source bar (compact footer) ─── */
+
+.sourceBar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.018);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-subtle);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.sourceBarRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sourceBarLabel {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.03em;
+}
+
+.sourceBar a {
+  color: rgba(120, 180, 255, 0.75);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.sourceBar a:hover {
+  color: rgba(140, 200, 255, 1);
+  text-decoration: underline;
+}
+
+.sourceBarSep {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.sourceBarStatic {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 /* ─── Footnote ─── */
 
 .footnote {
