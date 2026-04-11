@@ -296,6 +296,39 @@
   color: #fff;
 }
 
+/* ─── Bridge to Models ─── */
+
+.bridge {
+  margin: var(--space-xl) 0 0;
+  padding: 14px 18px;
+  border-left: 3px solid rgba(0, 255, 135, 0.3);
+  background: rgba(0, 255, 135, 0.03);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  font-size: 13px;
+  line-height: var(--line-height-base);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.bridge strong {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.bridge em {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bridge a {
+  color: rgba(120, 180, 255, 0.8);
+  text-decoration: none;
+}
+
+.bridge a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
   .chartRow {
     flex-direction: column;

@@ -307,6 +307,18 @@ function RaceSectionInner(): JSX.Element {
         + sourced cloud-lease fleet, ±20% uncertainty bands · Solid=observed ·
         Dashed=projected
       </div>
+
+      {/* ─── Bridge to Models section ─── */}
+      <div className={styles.bridge}>
+        <strong>Why all this compute matters</strong>
+        <br />
+        Labs are pouring billions into these facilities because scaling laws
+        (Kaplan 2020, Chinchilla 2022, Epoch AI) still hold: more training
+        FLOPs → predictably better models <em>within each lab's lineage</em>.
+        Scroll to the{' '}
+        <a href="#models">Models section</a> for the visual proof — and to see
+        the current three-way frontier contest.
+      </div>
     </>
   );
 }
