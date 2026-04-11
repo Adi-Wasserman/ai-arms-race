@@ -3,30 +3,20 @@ import { useRef } from 'react';
 
 import { ExportMenu } from '@/components/ui/ExportMenu';
 import { SectionShell } from '@/components/ui/SectionShell';
-import { Toggle } from '@/components/ui/Toggle';
-import { useDashboard } from '@/store';
-import type { ScatterView } from '@/types';
 
 import { BenchmarkTable } from './BenchmarkTable';
 import FirstPrinciples from './FirstPrinciples';
 import { MetrChart } from './MetrChart';
 import styles from './ModelsSection.module.css';
-import { ScatterPlot } from './ScatterPlot';
+import { TrainingComputeChart } from './TrainingComputeChart';
 import { useModelsExport } from './useModelsExport';
-
-const SCATTER_VIEW_OPTS = [
-  { value: 'observed' as const, label: 'OBSERVED · APR 2026' },
-  { value: 'projected' as const, label: 'PROJECTED · JAN 2029' },
-];
+import { WithinLabScaling } from './WithinLabScaling';
 
 function ModelsSectionInner(): JSX.Element {
-  const scatterView = useDashboard((s) => s.scatterView);
-  const setScatterView = useDashboard((s) => s.setScatterView);
-
-  const scatterRef = useRef<ChartJS<'scatter'> | null>(null);
+  const computeRef = useRef<ChartJS<'scatter'> | null>(null);
   const metrRef = useRef<ChartJS<'scatter'> | null>(null);
-  const { exportBenchmarksCSV, exportScatterPNG, exportMetrPNG } = useModelsExport(
-    scatterRef,
+  const { exportBenchmarksCSV, exportComputePNG, exportMetrPNG } = useModelsExport(
+    computeRef,
     metrRef,
   );
 
@@ -39,20 +29,14 @@ function ModelsSectionInner(): JSX.Element {
         contest, not a one-horse race.
       </div>
 
-      {/* ═══ Compute vs Performance scatter ═══ */}
+      {/* ═══ Training compute growth ═══ */}
       <div>
-        <div className={styles.subheading}>COMPUTE vs PERFORMANCE</div>
+        <div className={styles.subheading}>FRONTIER TRAINING COMPUTE HAS GROWN ~5× PER YEAR (2020–2026)</div>
         <div className={styles.subsubheading}>
-          DOES MORE COMPUTE = BETTER AI? · H100e CAPACITY vs AA INTELLIGENCE INDEX
+          MORE COMPUTE = BETTER MODELS · LABS SCALE BECAUSE SCALING LAWS WORK
         </div>
 
         <div className={styles.controls}>
-          <Toggle<ScatterView>
-            value={scatterView}
-            options={SCATTER_VIEW_OPTS}
-            onChange={setScatterView}
-            ariaLabel="Scatter view"
-          />
           <span className={styles.spacer} />
           <ExportMenu
             items={[
@@ -63,10 +47,10 @@ function ModelsSectionInner(): JSX.Element {
                 onClick: exportBenchmarksCSV,
               },
               {
-                key: 'scatter',
-                label: 'SCATTER PNG',
+                key: 'compute',
+                label: 'COMPUTE CHART PNG',
                 icon: '📸',
-                onClick: () => void exportScatterPNG(),
+                onClick: () => void exportComputePNG(),
               },
               {
                 key: 'metr',
@@ -78,17 +62,26 @@ function ModelsSectionInner(): JSX.Element {
           />
         </div>
 
-        <ScatterPlot ref={scatterRef} />
+        <TrainingComputeChart ref={computeRef} />
 
         <div className={styles.fn}>
-          X-axis: total H100-equivalent compute per lab · Y-axis: AA Intelligence
-          Index v4.0 (composite of 10 evals) · Bubble size: power footprint (GW) ·
-          Trend line: OLS linear regression · Labs with no AA Index score (Meta,
-          xAI) plotted at estimated positions based on analyst consensus.{' '}
-          <strong>Correlation ≠ causation</strong> — algorithmic efficiency, data
-          quality, and architecture drive outcomes as much as compute.
+          X-axis: model release date · Y-axis: estimated training FLOPs (log
+          scale) · Dashed line: ~5× per year exponential trend · ● = published
+          training compute · ▲ = analyst estimate.{' '}
+          <strong>
+            DATA:{' '}
+            <a href="https://epoch.ai/data/notable-ai-models" target="_blank" rel="noreferrer">
+              Epoch AI Notable Models
+            </a>
+          </strong>
+          {' '}+ provider system cards + SemiAnalysis estimates. Training FLOPs
+          for 2024–2026 models are largely estimated — labs no longer publish
+          exact figures.
         </div>
       </div>
+
+      {/* ═══ Within-lab scaling ═══ */}
+      <WithinLabScaling />
 
       {/* ═══ First Principles explainer ═══ */}
       <FirstPrinciples />

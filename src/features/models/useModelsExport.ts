@@ -11,7 +11,7 @@ const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 export interface UseModelsExportResult {
   exportBenchmarksCSV: () => void;
-  exportScatterPNG: () => Promise<void>;
+  exportComputePNG: () => Promise<void>;
   exportMetrPNG: () => Promise<void>;
 }
 
@@ -72,11 +72,11 @@ export function useModelsExport(
     downloadCSV(rows, `ai-arms-race-models-${TODAY_ISO}.csv`, cols);
   }, []);
 
-  const exportScatterPNG = useCallback(async (): Promise<void> => {
+  const exportComputePNG = useCallback(async (): Promise<void> => {
     await exportChart(scatterRef.current, {
-      title: 'COMPUTE vs PERFORMANCE',
-      subtitle: `${TODAY_ISO} · H100e capacity vs AA Intelligence Index`,
-      filename: `ai-arms-race-scatter-${TODAY_ISO}.png`,
+      title: 'FRONTIER TRAINING COMPUTE GROWTH',
+      subtitle: `${TODAY_ISO} · ~5× per year since 2020 (Epoch AI)`,
+      filename: `ai-arms-race-training-compute-${TODAY_ISO}.png`,
     });
   }, [scatterRef, exportChart]);
 
@@ -88,5 +88,5 @@ export function useModelsExport(
     });
   }, [metrRef, exportChart]);
 
-  return { exportBenchmarksCSV, exportScatterPNG, exportMetrPNG };
+  return { exportBenchmarksCSV, exportComputePNG, exportMetrPNG };
 }
