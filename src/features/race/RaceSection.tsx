@@ -139,11 +139,30 @@ function RaceSectionInner(): JSX.Element {
 
   return (
     <>
-      <div className={styles.intro}>
-        Five labs are racing to build the largest AI data centers in history. The lead
-        has changed hands multiple times since 2023 — and the gap between first and
-        second place is narrowing. This chart tracks{' '}
-        <strong>satellite-verified compute capacity</strong> across every major facility.
+      <div className={styles.insights}>
+        <h2 className={styles.insightsTitle}>KEY INSIGHTS — APRIL 2026</h2>
+        <div className={styles.insightsGrid}>
+          <div>
+            <strong>Anthropic leads compute today</strong> (2.0M H100e, 18%
+            ahead) — but the gap is narrowing fast.
+          </div>
+          <div>
+            <strong>Compute still rules</strong> — frontier training FLOPs grow
+            ~5× per year and scaling laws keep delivering (see{' '}
+            <a href="#models">models charts</a>).
+          </div>
+          <div>
+            <strong>Ownership moat matters for 2027+</strong> — Gemini/Meta/xAI
+            own their silicon; OpenAI/Anthropic are cloud tenants.
+          </div>
+          <div>
+            <strong>No single model dominates</strong> — GPT-5.4, Gemini 3.1
+            Pro, and Claude Opus 4.6 trade leads across benchmarks.
+          </div>
+        </div>
+        <div className={styles.insightsMeta}>
+          Satellite-verified · Epoch AI · 7 lead changes since 2023 · 3 more projected
+        </div>
       </div>
 
       {/* ─── LIVE: Option 1 — Terminal Tabs ───
