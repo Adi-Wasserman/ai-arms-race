@@ -346,7 +346,13 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                 Google Cloud
               </a>
               <span className={styles.sourceBarSep}>&middot;</span>
-              <span className={styles.sourceBarStatic}>Fubon Research</span>
+              <a
+                href="https://www.investing.com/news/stock-market-news/2026-tpu-server-outlook-google-takes-swing-at-the-king-4423670"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Fubon Research
+              </a>
             </div>
             <div className={styles.sourceBarRow}>
               <span className={styles.sourceBarLabel}>Ramp method:</span>
