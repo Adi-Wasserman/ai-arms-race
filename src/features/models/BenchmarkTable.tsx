@@ -140,16 +140,18 @@ export function BenchmarkTable(): JSX.Element {
     [selectedModels, selectedModelObjs],
   );
 
-  // Gold counts per model for the key finding.
+  // Gold counts per model for the key finding (public models only —
+  // preview models have internally-reported scores, not third-party verified).
   const goldCounts = useMemo(() => {
+    const publicModels = MODEL_SPECS.filter((m) => !m.preview);
     const counts: Record<string, number> = {};
     for (const bk of ALL_BENCHMARK_KEYS) {
-      const scores = MODEL_SPECS.map((m) => m[bk]).filter(
+      const scores = publicModels.map((m) => m[bk]).filter(
         (v): v is number => v != null,
       );
       if (scores.length === 0) continue;
       const maxVal = Math.max(...scores);
-      for (const m of MODEL_SPECS) {
+      for (const m of publicModels) {
         if (m[bk] === maxVal) counts[m.name] = (counts[m.name] ?? 0) + 1;
       }
     }

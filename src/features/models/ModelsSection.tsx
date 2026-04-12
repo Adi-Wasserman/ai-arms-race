@@ -26,8 +26,9 @@ function ModelsSectionInner(): JSX.Element {
         <h3 className={styles.takeawaysTitle}>KEY TAKEAWAYS — APRIL 2026</h3>
         <ul className={styles.takeawaysList}>
           <li>
-            <strong>No single model dominates.</strong> GPT-5.4, Gemini 3.1 Pro,
-            and Claude Opus 4.6 trade leads across benchmarks.
+            <strong>No single model dominates.</strong> Among public models,
+            GPT-5.4 and Claude Opus 4.6 each lead 4 benchmarks, Gemini 3.1
+            Pro leads 2.
           </li>
           <li>
             <strong>More compute still produces better frontier models.</strong>{' '}

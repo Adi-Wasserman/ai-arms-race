@@ -149,8 +149,9 @@ function RaceSectionInner(): JSX.Element {
             own their silicon; OpenAI/Anthropic are cloud tenants.
           </div>
           <div>
-            <strong>No single model dominates</strong> — GPT-5.4, Gemini 3.1
-            Pro, and Claude Opus 4.6 trade leads across benchmarks.
+            <strong>No single model dominates</strong> — among public models,
+            GPT-5.4 and Claude Opus 4.6 each lead 4 benchmarks, Gemini 3.1
+            Pro leads 2.
           </div>
         </div>
         <div className={styles.insightsMeta}>
