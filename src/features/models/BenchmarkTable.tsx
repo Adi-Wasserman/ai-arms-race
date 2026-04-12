@@ -409,9 +409,47 @@ export function BenchmarkTable(): JSX.Element {
       </div>
 
       <div className={styles.dataSources}>
-        DATA: Artificial Analysis v4.0 (Intelligence Index, speed, pricing) · GPQA
-        Diamond · SWE-bench Verified · ARC-AGI-2 · HLE · OSWorld + provider system
-        cards. Scores are a snapshot — updated per new model release.
+        DATA:{' '}
+        <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noreferrer">
+          Artificial Analysis v4.0
+        </a>{' '}
+        (Intelligence Index, speed, pricing) ·{' '}
+        <a href="https://gpqa-diamond.github.io" target="_blank" rel="noreferrer">
+          GPQA Diamond
+        </a>{' '}
+        ·{' '}
+        <a href="https://www.swebench.com" target="_blank" rel="noreferrer">
+          SWE-bench Verified
+        </a>{' '}
+        ·{' '}
+        <a href="https://arcprize.org" target="_blank" rel="noreferrer">
+          ARC-AGI-2
+        </a>{' '}
+        ·{' '}
+        <a href="https://artofproblemsolving.com/wiki/index.php/2025_AIME" target="_blank" rel="noreferrer">
+          AIME &apos;25
+        </a>{' '}
+        ·{' '}
+        <a href="https://mmmu-benchmark.github.io" target="_blank" rel="noreferrer">
+          MMMU-Pro
+        </a>{' '}
+        ·{' '}
+        <a href="https://last-exam.ai" target="_blank" rel="noreferrer">
+          HLE
+        </a>{' '}
+        ·{' '}
+        <a href="https://openai.com/index/gdpval" target="_blank" rel="noreferrer">
+          GDPval
+        </a>{' '}
+        ·{' '}
+        <a href="https://osworld.github.io" target="_blank" rel="noreferrer">
+          OSWorld
+        </a>{' '}
+        ·{' '}
+        <a href="https://openai.com/index/browsecomp" target="_blank" rel="noreferrer">
+          BrowseComp
+        </a>{' '}
+        + provider system cards. Scores are a snapshot — updated per new model release.
       </div>
     </div>
   );

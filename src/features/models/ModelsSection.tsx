@@ -125,37 +125,6 @@ function ModelsSectionInner(): JSX.Element {
         </div>
       </div>
 
-      <div className={styles.fn}>
-        DATA:{' '}
-        <a
-          href="https://artificialanalysis.ai/leaderboards/models"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Artificial Analysis v4.0
-        </a>{' '}
-        (Intelligence Index, speed, pricing) ·{' '}
-        <a href="https://gpqa-diamond.github.io" target="_blank" rel="noreferrer">
-          GPQA Diamond
-        </a>{' '}
-        ·{' '}
-        <a href="https://www.swebench.com" target="_blank" rel="noreferrer">
-          SWE-bench Verified
-        </a>{' '}
-        ·{' '}
-        <a href="https://arcprize.org" target="_blank" rel="noreferrer">
-          ARC-AGI-2
-        </a>{' '}
-        ·{' '}
-        <a href="https://last-exam.ai" target="_blank" rel="noreferrer">
-          HLE
-        </a>{' '}
-        ·{' '}
-        <a href="https://osworld.github.io" target="_blank" rel="noreferrer">
-          OSWorld
-        </a>{' '}
-        + provider system cards. Scores are a snapshot — update per new model release.
-      </div>
     </>
   );
 }

@@ -413,6 +413,16 @@
   line-height: 1.5;
 }
 
+.dataSources a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dataSources a:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .noteCard {
   padding: 14px;
   border-radius: var(--radius-lg);

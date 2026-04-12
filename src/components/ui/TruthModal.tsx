@@ -198,6 +198,7 @@ const SECTION_SOURCES: readonly SectionSources[] = [
       },
       {
         name: 'GPQA Diamond',
+        url: 'https://gpqa-diamond.github.io',
         desc: 'PhD-level science questions. Human expert accuracy ~65%. Verified by Epoch AI + AA.',
         priority: 2,
       },
@@ -209,6 +210,7 @@ const SECTION_SOURCES: readonly SectionSources[] = [
       },
       {
         name: "AIME '25",
+        url: 'https://artofproblemsolving.com/wiki/index.php/2025_AIME',
         desc: 'Competition math (45 problems, answers 0–999). AMC/MAA, independently evaluated by AA.',
         priority: 2,
       },
@@ -232,11 +234,13 @@ const SECTION_SOURCES: readonly SectionSources[] = [
       },
       {
         name: 'BrowseComp',
+        url: 'https://openai.com/index/browsecomp',
         desc: 'Web browsing and information retrieval evaluation. OpenAI.',
         priority: 3,
       },
       {
         name: 'GDPval',
+        url: 'https://openai.com/index/gdpval',
         desc: 'Real-world knowledge work across 44 occupations. OpenAI + AA independent verification.',
         priority: 3,
       },
