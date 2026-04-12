@@ -9,7 +9,6 @@ import type {
   MetricMode,
   ProjMode,
   ScopeMode,
-  VelocityMode,
 } from '@/types';
 
 import { ComputeBreakdownCard } from './ComputeBreakdownCard';
@@ -34,10 +33,6 @@ const SCOPE_OPTS = [
 const PROJ_OPTS = [
   { value: 'current' as const, label: 'CURRENT' },
   { value: '2029' as const, label: '2029 PROJECTION ⚡' },
-];
-const VELOCITY_OPTS = [
-  { value: 'absolute' as const, label: 'ABSOLUTE' },
-  { value: 'velocity' as const, label: 'GROWTH VELOCITY 📈' },
 ];
 
 /**
@@ -70,13 +65,11 @@ function RaceSectionInner(): JSX.Element {
   const metric = useDashboard((s) => s.metric);
   const scope = useDashboard((s) => s.scope);
   const projMode = useDashboard((s) => s.projMode);
-  const velocityMode = useDashboard((s) => s.velocityMode);
   const raceMode = useDashboard((s) => s.raceMode);
 
   const setMetric = useDashboard((s) => s.setMetric);
   const setScope = useDashboard((s) => s.setScope);
   const setProjMode = useDashboard((s) => s.setProjMode);
-  const setVelocityMode = useDashboard((s) => s.setVelocityMode);
   const setRaceMode = useDashboard((s) => s.setRaceMode);
 
   const chartRef = useRef<ChartJS<'line'> | null>(null);
@@ -161,7 +154,7 @@ function RaceSectionInner(): JSX.Element {
           </div>
         </div>
         <div className={styles.insightsMeta}>
-          Satellite-verified · Epoch AI · 7 lead changes since 2023 · 3 more projected
+          Satellite-verified · Epoch AI · 7 lead changes since 2024 · 3 more projected
         </div>
       </div>
 
@@ -246,13 +239,6 @@ function RaceSectionInner(): JSX.Element {
           onChange={setProjMode}
           ariaLabel="Projection mode"
         />
-        <div className={styles.sep} />
-        <Toggle<VelocityMode>
-          value={velocityMode}
-          options={VELOCITY_OPTS}
-          onChange={setVelocityMode}
-          ariaLabel="Velocity mode"
-        />
         <div className={styles.spacer} />
         <ExportMenu items={exportItems} />
       </div>
@@ -328,7 +314,7 @@ export function RaceSection(): JSX.Element {
     <SectionShell
       id="race"
       title="THE AI ARMS RACE"
-      subtitle="WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT ERA (2023–)"
+      subtitle="WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT ERA (2024–)"
     >
       <RaceSectionInner />
     </SectionShell>

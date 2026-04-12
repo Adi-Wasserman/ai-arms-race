@@ -123,10 +123,12 @@ export default function FirstPrinciples(): JSX.Element {
       {open && (
         <div id="first-principles-body" className={styles.body}>
           <p className={styles.lede}>
-            That's why the <strong>low R²</strong> on the chart above makes
-            sense — compute is dominant, but data quality, post-training
-            sophistication, architecture, and iteration speed are the real
-            differentiators. The best frontier models emerge from{' '}
+            The charts above show training FLOPs growing ~5× per year —
+            and within each lab, more compute consistently yields better
+            models. But compute alone doesn't explain who wins. Data
+            quality, post-training sophistication, architecture, and
+            iteration speed are the real differentiators. The best
+            frontier models emerge from{' '}
             <strong>six interlocking truths</strong>:
           </p>
 

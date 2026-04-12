@@ -4,7 +4,6 @@ import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { PROJ_2029_TARGETS } from '@/data/projections';
 import { formatH100, formatPower } from '@/services/format';
 import { detectLeadChanges } from '@/services/timeseries';
-import { buildVelocitySeries } from '@/services/velocity';
 import { useDashboard } from '@/store';
 import {
   activeProj,
@@ -82,7 +81,6 @@ export function StatCards(): JSX.Element | null {
   const metric = useDashboard((s) => s.metric);
   const scope = useDashboard((s) => s.scope);
   const projMode = useDashboard((s) => s.projMode);
-  const velocityMode = useDashboard((s) => s.velocityMode);
   const dataVersion = useDashboard((s) => s.dataVersion);
 
   const stats = useMemo(
@@ -141,34 +139,6 @@ export function StatCards(): JSX.Element | null {
       );
     }
 
-    if (velocityMode === 'velocity') {
-      const past = activeSeries(state).filter((x) => x.date <= TODAY_ISO);
-      const velocity = buildVelocitySeries(past, LAB_NAMES);
-      const recent = velocity.length > 0 ? velocity[velocity.length - 1] : null;
-      if (!recent) return null;
-      const rates = LAB_NAMES.map((lab) => {
-        const key = metric === 'power' ? (`${lab}_pw` as const) : lab;
-        return { lab, rate: recent[key] ?? 0 };
-      })
-        .filter((r) => r.rate > 0)
-        .sort((a, b) => b.rate - a.rate);
-      if (rates.length < 2) return null;
-      return (
-        <>
-          📈 <strong>GROWTH VELOCITY:</strong>{' '}
-          <strong style={{ color: LAB_COLORS[rates[0].lab] }}>{rates[0].lab}</strong> is
-          growing fastest at <strong>{rates[0].rate.toFixed(1)}×/yr</strong>, followed
-          by{' '}
-          <strong style={{ color: LAB_COLORS[rates[1].lab] }}>{rates[1].lab}</strong> at{' '}
-          {rates[1].rate.toFixed(1)}×/yr.{' '}
-          <span className={styles.muted}>
-            Growth rates are annualized from trailing 12-month data. Sustained rates
-            above 4×/yr require massive new facility buildout.
-          </span>
-        </>
-      );
-    }
-
     const unit = metric === 'power' ? 'MW' : 'H100e';
     const gap =
       stats.maxVal > 0 && stats.secondVal > 0
@@ -189,11 +159,11 @@ export function StatCards(): JSX.Element | null {
             </strong>
           </>
         )}
-        . The lead has changed <strong>{stats.pastLeadChanges} times</strong> since 2023
+        . The lead has changed <strong>{stats.pastLeadChanges} times</strong> since 2024
         — and {stats.futureLeadChanges} more projected shifts are ahead.
       </>
     );
-  }, [stats, metric, projMode, velocityMode]);
+  }, [stats, metric, projMode]);
 
   if (!stats.current || !stats.leader) return null;
 
@@ -228,15 +198,6 @@ export function StatCards(): JSX.Element | null {
           <div className={styles.statValue}>
             {formatPower(stats.current.tP)}
             <span className={styles.statSub}>all labs</span>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statLabel}>LEAD CHANGES</div>
-          <div className={styles.statValue}>
-            {stats.pastLeadChanges}
-            <span className={styles.statSub}>
-              obs +{stats.futureLeadChanges} proj
-            </span>
           </div>
         </div>
       </div>

@@ -1,16 +1,16 @@
 .container {
-  width: 300px;
+  width: 320px;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: 14px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
 }
 
 .heading {
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: var(--letter-spacing-wider);
   color: rgba(255, 255, 255, 0.7);
   font-weight: 700;
@@ -40,19 +40,19 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 0;
+  gap: 10px;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .rank {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   font-family: var(--font-mono);
   flex-shrink: 0;
@@ -81,21 +81,31 @@
 }
 
 .labName {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
 .metrics {
-  font-size: 11px;
+  font-size: 12px;
   font-family: var(--font-mono);
   color: rgba(255, 255, 255, 0.75);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .metrics strong {
   color: var(--color-text-primary);
   font-weight: 700;
+}
+
+.metricLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.03em;
+}
+
+.ownedInline {
+  cursor: help;
 }
 
 .projLine {
@@ -117,10 +127,10 @@
 }
 
 .bar {
-  height: 3px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 2px;
-  margin-top: 3px;
+  margin-top: 5px;
   overflow: hidden;
 }
 
@@ -187,12 +197,12 @@
 
 
 .total {
-  margin-top: 6px;
-  padding-top: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 

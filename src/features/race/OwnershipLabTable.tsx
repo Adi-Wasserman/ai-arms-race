@@ -121,7 +121,7 @@ function rankClass(rank: number): string {
    ───────────────────────────────────────────────────────────── */
 
 export function OwnershipLabTable(): JSX.Element {
-  const { data, loading, error, lastUpdated, fromCache, refresh } =
+  const { data, loading, error, lastUpdated, fromCache } =
     useEpochChipOwners();
 
   const seriesFull = useDashboard((s) => s.seriesFull);
@@ -248,15 +248,9 @@ export function OwnershipLabTable(): JSX.Element {
             ai_chip_owners.zip
           </a>
         </span>
-        <button
-          type="button"
-          className={styles.refreshBtn}
-          onClick={() => void refresh()}
-          disabled={loading}
-          title="Force-refresh from Epoch (bypasses 24h cache)"
-        >
-          {loading ? '…' : '↻ REFRESH'}
-        </button>
+        {loading && (
+          <span className={styles.metaUpdating}>UPDATING…</span>
+        )}
       </div>
 
       {/* ─── Table ─── 6 columns: #, Lab, Owned H100e, % Global,

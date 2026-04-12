@@ -633,7 +633,7 @@ function ChipMixCell({
    ───────────────────────────────────────────────────────────── */
 
 export function OwnershipTable(): JSX.Element {
-  const { data, loading, error, lastUpdated, fromCache, refresh } =
+  const { data, loading, error, lastUpdated, fromCache } =
     useEpochChipOwners();
 
   // Pull the full fleet series so deriveRows has a per-lab denominator
@@ -827,15 +827,9 @@ export function OwnershipTable(): JSX.Element {
             ai_chip_owners.zip
           </a>
         </span>
-        <button
-          type="button"
-          className={styles.refreshBtn}
-          onClick={() => void refresh()}
-          disabled={loading}
-          title="Force-refresh from Epoch (bypasses 24h cache)"
-        >
-          {loading ? '…' : '↻ REFRESH'}
-        </button>
+        {loading && (
+          <span className={styles.metaUpdating}>UPDATING…</span>
+        )}
       </div>
 
       {/* ─── Editorial lede ─── */}

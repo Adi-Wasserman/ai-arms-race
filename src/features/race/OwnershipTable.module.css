@@ -75,28 +75,18 @@
   color: var(--color-text-primary);
 }
 
-.refreshBtn {
-  padding: 3px 10px;
+.metaUpdating {
   font-size: var(--font-size-sm);
   letter-spacing: 0.5px;
   font-weight: 600;
   font-family: var(--font-mono);
-  border: 1px solid rgba(0, 255, 135, 0.2);
-  border-radius: var(--radius-sm);
-  background: rgba(0, 255, 135, 0.06);
-  color: rgba(0, 255, 135, 0.8);
-  cursor: pointer;
-  transition: background var(--transition-base), color var(--transition-base);
+  color: rgba(77, 142, 234, 0.8);
+  animation: pulse 1.2s ease-in-out infinite;
 }
 
-.refreshBtn:hover {
-  background: rgba(0, 255, 135, 0.12);
-  color: var(--color-lab-openai);
-}
-
-.refreshBtn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* ─── Editorial lede between banner and table ─── */

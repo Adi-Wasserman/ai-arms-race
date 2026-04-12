@@ -35,6 +35,215 @@ const EPOCH_CHIPOWNERS_URL =
   'https://epoch.ai/blog/introducing-the-ai-chip-owners-explorer';
 const EPOCH_CHIPOWNERS_ZIP = 'https://epoch.ai/data/ai_chip_owners.zip';
 
+/* ── Per-section data source listings ── */
+
+interface SectionSource {
+  name: string;
+  url?: string;
+  desc: string;
+  priority: number; // 1 = primary, 2 = secondary, 3 = supplementary
+}
+
+interface SectionSources {
+  section: string;
+  anchor: string;
+  sources: readonly SectionSource[];
+}
+
+const SECTION_SOURCES: readonly SectionSources[] = [
+  {
+    section: 'The Race',
+    anchor: '#race',
+    sources: [
+      {
+        name: 'Epoch AI · Frontier Data Centers CSV',
+        url: 'https://epoch.ai/data/data_centers/data_centers.csv',
+        desc: 'Satellite-verified facility capacity (H100e, power MW, status). Fetched live on every page load.',
+        priority: 1,
+      },
+      {
+        name: 'Epoch AI · Data Center Timelines CSV',
+        url: 'https://epoch.ai/data/data_centers/data_center_timelines.csv',
+        desc: 'Historical capacity ramp per facility over time.',
+        priority: 1,
+      },
+      {
+        name: 'Epoch AI · Chip Owners ZIP',
+        url: 'https://epoch.ai/data/ai_chip_owners.zip',
+        desc: 'Three CSVs: cumulative by designer, cumulative by chip type, quarters by chip type. H100e medians + Monte Carlo 5th/95th. Cached 24h.',
+        priority: 1,
+      },
+      {
+        name: 'Amazon — Project Rainier (AWS Trainium2)',
+        url: 'https://www.aboutamazon.com/news/aws/aws-project-rainier-ai-trainium-chips-compute-cluster',
+        desc: 'Anthropic cloud-lease leg on AWS. ~500K Trn2 chips live Oct 2025, scaling to >1M. Trn2 ≈ 0.93 H100e.',
+        priority: 2,
+      },
+      {
+        name: 'Anthropic — Google Cloud TPU expansion',
+        url: 'https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services',
+        desc: 'Anthropic cloud-lease leg on GCP. Up to 1M TPUs, "well over a gigawatt" online 2026. Blended ~1.4 H100e/chip.',
+        priority: 2,
+      },
+      {
+        name: 'NVIDIA — Microsoft–NVIDIA–Anthropic partnership',
+        url: 'https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/',
+        desc: 'Anthropic cloud-lease leg on Azure. $30B commitment, up to 1GW with Grace Blackwell + Vera Rubin. GB200 ≈ 2.5 H100e.',
+        priority: 2,
+      },
+      {
+        name: 'Google Cloud — Ironwood TPU',
+        url: 'https://cloud.google.com/blog/products/ai-machine-learning/ironwood-tpu-age-of-inference',
+        desc: 'Gemini internal TPU fleet estimate. Ironwood ~2.3 H100e/chip. Used for EGC (Estimated Gemini Compute) leg.',
+        priority: 2,
+      },
+      {
+        name: 'SemiAnalysis — Multi-Datacenter Training',
+        url: 'https://semianalysis.com/2024/09/13/google-multi-datacenter-training/',
+        desc: 'Google TPU fleet size + multi-site training analysis. Basis for estimating Gemini-dedicated fraction.',
+        priority: 2,
+      },
+      {
+        name: 'Fubon Securities — TPU production forecast (Jan 2026)',
+        url: 'https://www.investing.com/news/stock-market-news/2026-tpu-server-outlook-google-takes-swing-at-the-king-4423670',
+        desc: 'Arthur Liao (Fubon Research): 3.1–3.2M TPU production in 2026, constrained by TSMC CoWoS capacity. Cross-checks Gemini fleet ramp.',
+        priority: 2,
+      },
+      {
+        name: '2029 projection targets',
+        desc: 'Per-lab power-constrained H100e + power targets derived from Epoch satellite ramps and announced cloud-lease growth. Ease-out interpolation with ±8% base + 6%/yr uncertainty.',
+        priority: 3,
+      },
+    ],
+  },
+  {
+    section: 'Geo Map',
+    anchor: '#geomap',
+    sources: [
+      {
+        name: 'Epoch AI · Frontier Data Centers',
+        url: 'https://epoch.ai/data/data-centers',
+        desc: 'Facility locations, ownership, construction status, and satellite-verified metadata.',
+        priority: 1,
+      },
+      {
+        name: 'ESRI World Imagery',
+        url: 'https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9',
+        desc: 'Satellite imagery basemap tiles for facility location visualization.',
+        priority: 2,
+      },
+      {
+        name: 'CARTO Voyager Labels',
+        url: 'https://basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png',
+        desc: 'Label overlay (city names, roads) rendered on top of satellite imagery.',
+        priority: 3,
+      },
+      {
+        name: 'Facility coordinate overrides',
+        desc: 'Hardcoded lat/lon corrections for facilities where Epoch-published coordinates are inaccurate (e.g. Fluidstack Lake Mariner).',
+        priority: 3,
+      },
+    ],
+  },
+  {
+    section: 'Intel',
+    anchor: '#sites',
+    sources: [
+      {
+        name: 'Epoch AI · Frontier Data Centers',
+        url: 'https://epoch.ai/data/data-centers',
+        desc: 'Full facility metadata: construction status, satellite-verified observations, capacity estimates, timeline signals.',
+        priority: 1,
+      },
+      {
+        name: 'Epoch AI · Data Center Timelines CSV',
+        url: 'https://epoch.ai/data/data_centers/data_center_timelines.csv',
+        desc: 'Per-facility capacity ramp over time for timeline drawer visualization.',
+        priority: 1,
+      },
+      {
+        name: 'Lab-to-facility mapping',
+        desc: 'Hardcoded handle-to-lab associations linking Epoch facility handles to the 5 frontier labs.',
+        priority: 3,
+      },
+    ],
+  },
+  {
+    section: 'Models',
+    anchor: '#models',
+    sources: [
+      {
+        name: 'Epoch AI · Notable AI Models',
+        url: 'https://epoch.ai/data/notable-ai-models',
+        desc: 'Training compute (FLOPs) for frontier models — powers the Training Compute Growth and Within-Lab Scaling charts.',
+        priority: 1,
+      },
+      {
+        name: 'Artificial Analysis · Intelligence Index v4.0',
+        url: 'https://artificialanalysis.ai/leaderboards/models',
+        desc: 'Composite ranking across 10 evaluations. Independent third-party measurement.',
+        priority: 1,
+      },
+      {
+        name: 'METR · Time Horizons',
+        url: 'https://metr.org/time-horizons/',
+        desc: '50% task-completion time horizon per model. Some data from secondary write-ups (LessWrong, OfficeChai).',
+        priority: 1,
+      },
+      {
+        name: 'SWE-bench Verified + Pro',
+        url: 'https://www.swebench.com',
+        desc: 'Real-world GitHub bug fixes (500 issues). Princeton NLP.',
+        priority: 2,
+      },
+      {
+        name: 'GPQA Diamond',
+        desc: 'PhD-level science questions. Human expert accuracy ~65%. Verified by Epoch AI + AA.',
+        priority: 2,
+      },
+      {
+        name: 'ARC-AGI-2',
+        url: 'https://arcprize.org',
+        desc: 'Abstract visual reasoning, resists memorization. ARC Prize Foundation.',
+        priority: 2,
+      },
+      {
+        name: "AIME '25",
+        desc: 'Competition math (45 problems, answers 0–999). AMC/MAA, independently evaluated by AA.',
+        priority: 2,
+      },
+      {
+        name: "Humanity's Last Exam (HLE)",
+        url: 'https://last-exam.ai',
+        desc: '2,500 expert questions — intended as final academic eval. CAIS (Dan Hendrycks).',
+        priority: 2,
+      },
+      {
+        name: 'MMMU-Pro',
+        url: 'https://mmmu-benchmark.github.io',
+        desc: 'Expert-level multimodal visual reasoning.',
+        priority: 2,
+      },
+      {
+        name: 'OSWorld',
+        url: 'https://os-world.github.io',
+        desc: 'Desktop computer-use evaluation. Human baseline 72.4%.',
+        priority: 3,
+      },
+      {
+        name: 'BrowseComp',
+        desc: 'Web browsing and information retrieval evaluation. OpenAI.',
+        priority: 3,
+      },
+      {
+        name: 'GDPval',
+        desc: 'Real-world knowledge work across 44 occupations. OpenAI + AA independent verification.',
+        priority: 3,
+      },
+    ],
+  },
+];
+
 interface UncertaintyNote {
   metric: string;
   band: string;
@@ -315,6 +524,57 @@ export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | nu
                 </li>
               ))}
             </ul>
+          </section>
+
+          {/* ─── Data sources by section ─── */}
+          <section className={styles.section}>
+            <h3 className={styles.sectionTitle}>4 · Data Sources by Section</h3>
+            {SECTION_SOURCES.map((s) => (
+              <div key={s.anchor} className={styles.sectionBlock}>
+                <h4 className={styles.sectionBlockTitle}>
+                  <a href={s.anchor} onClick={onClose}>
+                    {s.section}
+                  </a>
+                </h4>
+                <ol className={styles.priorityList}>
+                  {s.sources.map((src) => (
+                    <li key={src.name} className={styles.priorityItem}>
+                      <div className={styles.priorityRow}>
+                        <span
+                          className={
+                            src.priority === 1
+                              ? styles.priorityBadgePrimary
+                              : src.priority === 2
+                                ? styles.priorityBadgeSecondary
+                                : styles.priorityBadgeSupp
+                          }
+                        >
+                          {src.priority === 1
+                            ? 'PRIMARY'
+                            : src.priority === 2
+                              ? 'SECONDARY'
+                              : 'SUPPLEMENTARY'}
+                        </span>
+                        <span className={styles.priorityName}>
+                          {src.url ? (
+                            <a
+                              href={src.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {src.name}
+                            </a>
+                          ) : (
+                            src.name
+                          )}
+                        </span>
+                      </div>
+                      <div className={styles.priorityDesc}>{src.desc}</div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
           </section>
 
           {/* ─── Closing summary ─── */}

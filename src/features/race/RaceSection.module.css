@@ -81,6 +81,7 @@
   gap: 16px;
   margin-bottom: 12px;
   align-items: stretch;
+  min-height: max(560px, 65vh);
 }
 
 /**
@@ -332,6 +333,7 @@
 @media (max-width: 900px) {
   .chartRow {
     flex-direction: column;
+    min-height: auto;
   }
   .chartRow > :last-child {
     width: 100%;

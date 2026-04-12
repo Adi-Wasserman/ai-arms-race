@@ -10,7 +10,6 @@ import type {
   RaceMode,
   ScatterView,
   ScopeMode,
-  VelocityMode,
 } from '@/types';
 
 /* ─────────────────────────────────────────────────────────────
@@ -20,7 +19,6 @@ import type {
              &scope=tracked|fleet
              &proj=current|2029
              &scatter=observed|projected
-             &velocity=absolute|velocity
              &lab=<lab name>|ALL
 
    Only non-default values are serialized. The section prefix
@@ -36,7 +34,6 @@ const DEFAULTS = {
   scope: 'tracked' as ScopeMode,
   projMode: 'current' as ProjMode,
   scatterView: 'observed' as ScatterView,
-  velocityMode: 'absolute' as VelocityMode,
   labFilter: 'ALL' as LabFilter,
   raceMode: 'effective' as RaceMode,
 } as const;
@@ -47,7 +44,6 @@ interface HashPatch {
   scope?: ScopeMode;
   projMode?: ProjMode;
   scatterView?: ScatterView;
-  velocityMode?: VelocityMode;
   labFilter?: LabFilter;
   raceMode?: RaceMode;
 }
@@ -102,9 +98,6 @@ export function parseHash(): ParsedHash {
   if (params.scatter === 'observed' || params.scatter === 'projected') {
     patch.scatterView = params.scatter;
   }
-  if (params.velocity === 'absolute' || params.velocity === 'velocity') {
-    patch.velocityMode = params.velocity;
-  }
   if (params.lab) {
     if (params.lab === 'ALL' || isLab(params.lab)) patch.labFilter = params.lab;
   }
@@ -134,9 +127,6 @@ export function buildHash(state: Required<HashPatch>): string {
   if (state.scatterView !== DEFAULTS.scatterView) {
     params.push(`scatter=${state.scatterView}`);
   }
-  if (state.velocityMode !== DEFAULTS.velocityMode) {
-    params.push(`velocity=${state.velocityMode}`);
-  }
   if (state.labFilter !== DEFAULTS.labFilter) {
     params.push(`lab=${encodeURIComponent(state.labFilter)}`);
   }
@@ -162,7 +152,6 @@ export function useHashState(): void {
   const setScope = useDashboard((s) => s.setScope);
   const setProjMode = useDashboard((s) => s.setProjMode);
   const setScatterView = useDashboard((s) => s.setScatterView);
-  const setVelocityMode = useDashboard((s) => s.setVelocityMode);
   const setLabFilter = useDashboard((s) => s.setLabFilter);
   const setRaceMode = useDashboard((s) => s.setRaceMode);
 
@@ -174,7 +163,6 @@ export function useHashState(): void {
     if (patch.scope) setScope(patch.scope);
     if (patch.projMode) setProjMode(patch.projMode);
     if (patch.scatterView) setScatterView(patch.scatterView);
-    if (patch.velocityMode) setVelocityMode(patch.velocityMode);
     if (patch.labFilter) setLabFilter(patch.labFilter);
     if (patch.raceMode) setRaceMode(patch.raceMode);
   };
@@ -222,7 +210,6 @@ export function useHashState(): void {
         state.scope === prev.scope &&
         state.projMode === prev.projMode &&
         state.scatterView === prev.scatterView &&
-        state.velocityMode === prev.velocityMode &&
         state.labFilter === prev.labFilter &&
         state.raceMode === prev.raceMode
       ) {
@@ -235,7 +222,6 @@ export function useHashState(): void {
         scope: state.scope,
         projMode: state.projMode,
         scatterView: state.scatterView,
-        velocityMode: state.velocityMode,
         labFilter: state.labFilter,
         raceMode: state.raceMode,
       });

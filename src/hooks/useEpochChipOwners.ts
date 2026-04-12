@@ -18,11 +18,6 @@ export interface UseEpochChipOwnersResult {
    * either fresh (< 24h) or stale (network failed and we fell back).
    */
   fromCache: boolean;
-  /**
-   * Force-refresh the dataset from the network, bypassing the cache TTL.
-   * Resolves once the new data is in the store, or rejects on full failure.
-   */
-  refresh: () => Promise<void>;
 }
 
 /**
@@ -104,28 +99,23 @@ export function useEpochChipOwners(): UseEpochChipOwnersResult {
       setChipOwners(cached.data, cached.stale ? 'cache-stale-fallback' : 'cache-fresh');
     }
 
-    // Even if we hydrated from a fresh cache, kick off `runLoad` —
-    // the orchestration in services/chipOwners will short-circuit on
-    // a fresh cache and noop. If the cache was stale, it'll re-fetch.
-    void runLoad(false);
+    // Always fetch live data on mount — the cache hydration above
+    // gives the UI something to render while we get the freshest copy.
+    void runLoad(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-refresh every 30 minutes so live data stays current.
+  // Auto-refresh every 5 minutes so live data stays current
+  // without any manual intervention.
   useEffect(() => {
     const interval = window.setInterval(() => {
       void runLoad(true);
-    }, 30 * 60 * 1000);
+    }, 5 * 60 * 1000);
     return () => window.clearInterval(interval);
-  }, [runLoad]);
-
-  const refresh = useCallback(async (): Promise<void> => {
-    // `forceRefresh: true` bypasses the TTL check and always hits network.
-    await runLoad(true);
   }, [runLoad]);
 
   const fromCache =
     source === 'cache-fresh' || source === 'cache-stale-fallback';
 
-  return { data, loading, error, lastUpdated, fromCache, refresh };
+  return { data, loading, error, lastUpdated, fromCache };
 }

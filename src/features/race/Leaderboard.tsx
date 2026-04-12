@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { Toggle } from '@/components/ui/Toggle';
 import { PCT_OWNED_TOOLTIP } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
-import { ANALYST_ESTIMATES } from '@/data/projections';
 import { formatH100, formatPower } from '@/services/format';
 import {
   computeManufacturerMix,
@@ -161,13 +160,6 @@ export function Leaderboard(): JSX.Element | null {
           const projVal = metric === 'power' ? pP : pH;
           const growth = nowVal > 0 ? Math.round(projVal / nowVal) : 0;
 
-          const ae = ANALYST_ESTIMATES[r.lab];
-          const analystParts: string[] = [];
-          if (metric !== 'power' && ae) {
-            if (ae.semi) analystParts.push(`SA: ${formatH100(ae.semi)}`);
-            if (ae.aa) analystParts.push(`AA: ${formatH100(ae.aa)}`);
-          }
-
           return (
             <div key={r.lab} className={styles.row}>
               <div className={`${styles.rank} ${rankClass(i)}`}>{i + 1}</div>
@@ -176,18 +168,27 @@ export function Leaderboard(): JSX.Element | null {
                   {r.lab}
                 </div>
                 <div className={styles.metrics}>
-                  <strong>{formatH100(r.h)}</strong> ·{' '}
+                  <strong>{formatH100(r.h)}</strong>
+                  <span className={styles.metricLabel}> H100e</span>
+                  {' · '}
                   <strong>{formatPower(r.p)}</strong>
+                  {r.pctOwned != null && (
+                    <>
+                      {' · '}
+                      <span
+                        className={styles.ownedInline}
+                        title={buildOwnedTitle(r.pctOwned, r.chipMix)}
+                      >
+                        <strong>{r.pctOwned.pct}%</strong>
+                        <span className={styles.metricLabel}> owned</span>
+                      </span>
+                    </>
+                  )}
                 </div>
                 {proj2029Pt && (
                   <div className={styles.projLine}>
                     ⚡ 2029: <strong>{formatH100(pH)}</strong> · {formatPower(pP)} ·{' '}
                     <strong>{growth}×</strong>
-                  </div>
-                )}
-                {analystParts.length > 0 && (
-                  <div className={styles.analystLine} title={ae?.note ?? ''}>
-                    ⊕ {analystParts.join(' · ')}
                   </div>
                 )}
                 <div className={styles.bar}>
@@ -196,40 +197,6 @@ export function Leaderboard(): JSX.Element | null {
                     style={{ width: `${barW}%`, background: color }}
                   />
                 </div>
-
-                {/* ─── % Owned progress bar ───
-                    The chip-mix bar that used to sit below this was
-                    visually redundant: 4 of 5 labs are ~100% Nvidia,
-                    so it rendered as a uniform green strip with zero
-                    additional signal — and its similarity to the OWNED
-                    bar above made the whole block read as duplicate.
-                    The full chip-mix breakdown still lives in the
-                    OwnershipTable + OwnershipSidePanel, which have
-                    space for it. The chip-mix data is surfaced here
-                    only as enriched hover-tooltip text on the OWNED
-                    bar so it's still discoverable. */}
-                {r.pctOwned != null && (
-                  <div className={styles.ownership}>
-                    <div
-                      className={styles.ownedRow}
-                      title={buildOwnedTitle(r.pctOwned, r.chipMix)}
-                    >
-                      <span className={styles.ownershipLabel}>OWNED</span>
-                      <div className={styles.ownedTrack}>
-                        <div
-                          className={styles.ownedFill}
-                          style={{
-                            width: `${r.pctOwned.pct}%`,
-                            background: color,
-                          }}
-                        />
-                      </div>
-                      <span className={styles.ownedPct}>
-                        {r.pctOwned.pct}%
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           );

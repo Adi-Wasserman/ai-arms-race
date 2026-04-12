@@ -22,9 +22,3 @@ export interface LeadChange {
   prev: Lab | null;
 }
 
-/** Per-lab annualized velocity snapshot at a given date. */
-export type VelocityPoint = {
-  date: string;
-} & { [K in Lab]: number | null } & { [K in LabPwKey]: number | null };
-
-export type VelocitySeries = VelocityPoint[];

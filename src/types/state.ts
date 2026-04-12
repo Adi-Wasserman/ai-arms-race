@@ -7,7 +7,6 @@ import type { Lab } from './lab';
 export type MetricMode = 'h100e' | 'power';
 export type ScopeMode = 'tracked' | 'fleet';
 export type ProjMode = 'current' | '2029';
-export type VelocityMode = 'absolute' | 'velocity';
 
 /**
  * Race section view mode.

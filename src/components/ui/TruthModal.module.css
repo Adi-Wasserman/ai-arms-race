@@ -392,6 +392,113 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* ─── Data sources by section ──────────────────── */
+.sectionBlock {
+  margin-bottom: 16px;
+}
+
+.sectionBlock:last-child {
+  margin-bottom: 0;
+}
+
+.sectionBlockTitle {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgba(77, 142, 234, 0.95);
+}
+
+.sectionBlockTitle a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sectionBlockTitle a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.priorityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.priorityItem {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.priorityRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.priorityBadgePrimary,
+.priorityBadgeSecondary,
+.priorityBadgeSupp {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.priorityBadgePrimary {
+  color: rgba(0, 255, 135, 0.95);
+  background: rgba(0, 255, 135, 0.08);
+  border: 1px solid rgba(0, 255, 135, 0.28);
+}
+
+.priorityBadgeSecondary {
+  color: rgba(77, 142, 234, 0.95);
+  background: rgba(77, 142, 234, 0.08);
+  border: 1px solid rgba(77, 142, 234, 0.28);
+}
+
+.priorityBadgeSupp {
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.priorityName {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.priorityName a {
+  color: rgba(77, 142, 234, 0.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(77, 142, 234, 0.35);
+  text-underline-offset: 2px;
+}
+
+.priorityName a:hover {
+  color: #ffffff;
+}
+
+.priorityDesc {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+  padding-left: 0;
+}
+
 /* ─── Closing line ──────────────────────────────── */
 .closing {
   margin: 0;

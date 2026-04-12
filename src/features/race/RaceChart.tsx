@@ -9,7 +9,6 @@ import { forwardRef, useMemo, useRef, type ForwardedRef, type RefObject } from '
 import { BaseChart } from '@/components/charts/BaseChart';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { PROJ_END } from '@/config/projections';
-import { buildVelocitySeries } from '@/services/velocity';
 import { formatAxis, formatH100, formatPower } from '@/services/format';
 import { activeProj, activeSeries, activeSeriesWithProj } from '@/store/selectors';
 import { useDashboard } from '@/store';
@@ -40,18 +39,6 @@ function segX(p: { parsed: { x: number | null } }): number {
 }
 
 /**
- * Format one tooltip row's value based on the current chart mode.
- */
-function formatTooltipValue(
-  v: number,
-  mode: 'absolute' | 'velocity',
-  isPower: boolean,
-): string {
-  if (mode === 'velocity') return `${v.toFixed(1)}×/yr`;
-  return isPower ? formatPower(v) : `${formatH100(v)} H100e`;
-}
-
-/**
  * External tooltip handler — ported from the legacy `chartTooltip`
  * (ai-arms-race.html lines 1866-1928), adapted to pin the box at a
  * fixed position inside the chart area instead of following the cursor.
@@ -70,7 +57,6 @@ function formatTooltipValue(
  */
 function buildExternalTooltip(
   divRef: RefObject<HTMLDivElement>,
-  mode: 'absolute' | 'velocity',
   isPower: boolean,
 ): NonNullable<NonNullable<LineChartOptions['plugins']>['tooltip']>['external'] {
   return (context) => {
@@ -115,7 +101,7 @@ function buildExternalTooltip(
     // 3. Build per-lab rows from LAB_NAMES, filter to non-zero, sort by
     //    RAW numeric value (not formatted-string parseFloat which drops
     //    the M/K suffix and corrupts the order).
-    const isPwSort = mode === 'absolute' && isPower;
+    const isPwSort = isPower;
     const rows = LAB_NAMES.map((c) => ({
       lab: c,
       h: pt[c],
@@ -133,10 +119,8 @@ function buildExternalTooltip(
     const rowsHtml = rows
       .map((r) => {
         const valueCell =
-          mode === 'velocity'
-            ? `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.9);font-size:13px">${formatTooltipValue(isPower ? r.p : r.h, mode, isPower)}</span>`
-            : `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.9);font-size:13px">${formatH100(r.h)} H100e</span>` +
-              `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.55);font-size:12px;min-width:64px;text-align:right">${formatPower(r.p)}</span>`;
+          `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.9);font-size:13px">${formatH100(r.h)} H100e</span>` +
+          `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.55);font-size:12px;min-width:64px;text-align:right">${formatPower(r.p)}</span>`;
 
         return (
           `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:14px">` +
@@ -147,15 +131,12 @@ function buildExternalTooltip(
       })
       .join('');
 
-    // Total row (only in absolute mode — velocity has no meaningful total).
     const totalHtml =
-      mode === 'absolute'
-        ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;margin-top:5px;border-top:1px solid rgba(255,255,255,0.1);gap:14px">` +
-          `<span style="color:rgba(255,255,255,0.55);font-weight:600;font-size:12px;letter-spacing:0.5px;flex:1">TOTAL</span>` +
-          `<span style="font-family:'SF Mono',Menlo,monospace;color:#fff;font-size:13px;font-weight:700">${formatH100(pt.tH)} H100e</span>` +
-          `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.7);font-size:12px;min-width:64px;text-align:right">${formatPower(pt.tP)}</span>` +
-          `</div>`
-        : '';
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;margin-top:5px;border-top:1px solid rgba(255,255,255,0.1);gap:14px">` +
+      `<span style="color:rgba(255,255,255,0.55);font-weight:600;font-size:12px;letter-spacing:0.5px;flex:1">TOTAL</span>` +
+      `<span style="font-family:'SF Mono',Menlo,monospace;color:#fff;font-size:13px;font-weight:700">${formatH100(pt.tH)} H100e</span>` +
+      `<span style="font-family:'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.7);font-size:12px;min-width:64px;text-align:right">${formatPower(pt.tP)}</span>` +
+      `</div>`;
 
     div.innerHTML =
       `<div style="color:#fff;font-size:14px;font-weight:700;letter-spacing:0.5px;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.12)">${dateStr}</div>` +
@@ -265,40 +246,6 @@ function buildProjectionDatasets(
   return datasets;
 }
 
-/** Velocity mode: annualized growth-rate lines with reference markers. */
-function buildVelocityData(
-  d: TimeSeriesPoint[],
-  activeLabs: readonly Lab[],
-  isPower: boolean,
-  todayMs: number,
-): LineDataset[] {
-  const velocity = buildVelocitySeries(d, LAB_NAMES);
-  if (velocity.length === 0) return [];
-
-  return activeLabs.map((c) => {
-    const key = isPower ? (`${c}_pw` as const) : c;
-    return {
-      label: c,
-      data: velocity
-        .filter((v) => v[key] !== null)
-        .map((v) => ({
-          x: v.date,
-          y: v[key] !== null ? Math.round((v[key] as number) * 100) / 100 : null,
-        })) as unknown[],
-      borderColor: LAB_COLORS[c],
-      backgroundColor: 'transparent',
-      borderWidth: 1.8,
-      pointRadius: 0,
-      pointHitRadius: 8,
-      fill: false,
-      tension: 0.3,
-      segment: {
-        borderDash: (ctx) => (segX(ctx.p0) >= todayMs ? [6, 4] : []),
-      },
-    };
-  });
-}
-
 // eslint-disable-next-line @typescript-eslint/ban-types
 type RaceChartProps = {};
 
@@ -309,7 +256,6 @@ function RaceChartInner(
   const metric = useDashboard((s) => s.metric);
   const scope = useDashboard((s) => s.scope);
   const projMode = useDashboard((s) => s.projMode);
-  const velocityMode = useDashboard((s) => s.velocityMode);
   const dataVersion = useDashboard((s) => s.dataVersion);
 
   /** Stable ref to the pinned-tooltip DOM element. */
@@ -325,7 +271,7 @@ function RaceChartInner(
     const todayMs = new Date(`${TODAY_ISO}T00:00:00`).getTime();
 
     const full = is2029 ? activeSeriesWithProj(state) : activeSeries(state);
-    const d = full.filter((x) => x.date >= '2023-01-01');
+    const d = full.filter((x) => x.date >= '2024-01-01');
 
     if (d.length === 0) {
       return { data: { datasets: [] }, options: {} };
@@ -341,98 +287,6 @@ function RaceChartInner(
     const activeLabs = LAB_NAMES.filter((c) =>
       d.some((x) => (isPower ? x[`${c}_pw`] : x[c]) > 0),
     );
-
-    // ── VELOCITY MODE ────────────────────────────────────────
-    if (velocityMode === 'velocity') {
-      const vDatasets = buildVelocityData(d, activeLabs, isPower, todayMs);
-      const vOptions: LineChartOptions = {
-        interaction: { mode: 'index', intersect: false },
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'quarter',
-              displayFormats: { quarter: 'MMM yy' },
-            },
-            ticks: { maxTicksLimit: 12 },
-          },
-          y: {
-            min: 0,
-            suggestedMax: 8,
-            ticks: {
-              callback: (v) => `${Number(v).toFixed(1)}×`,
-            },
-            title: {
-              display: true,
-              text: 'Annualized Growth (×/yr)',
-              color: 'rgba(255, 255, 255, 0.2)',
-              font: { size: 10 },
-            },
-          },
-        },
-        plugins: {
-          tooltip: {
-            enabled: false,
-            external: buildExternalTooltip(tooltipDivRef, 'velocity', isPower),
-          },
-          annotation: {
-            annotations: {
-              today: {
-                type: 'line',
-                scaleID: 'x',
-                value: TODAY_ISO,
-                borderColor: 'rgba(255, 255, 255, 0.4)',
-                borderWidth: 1.5,
-                borderDash: [5, 4],
-                label: {
-                  display: true,
-                  content: 'TODAY',
-                  position: 'start',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  font: { size: 10, weight: 'bold' },
-                  backgroundColor: 'rgba(5, 5, 16, 0.85)',
-                  padding: 4,
-                  borderRadius: 4,
-                },
-              },
-              baseline: {
-                type: 'line',
-                yMin: 1,
-                yMax: 1,
-                borderColor: 'rgba(255, 255, 255, 0.15)',
-                borderWidth: 1,
-                borderDash: [4, 4],
-                label: {
-                  display: true,
-                  content: '1× (no growth)',
-                  position: 'end',
-                  color: 'rgba(255, 255, 255, 0.25)',
-                  font: { size: 9 },
-                  backgroundColor: 'transparent',
-                },
-              },
-              fast: {
-                type: 'line',
-                yMin: 4,
-                yMax: 4,
-                borderColor: 'rgba(255, 170, 0, 0.1)',
-                borderWidth: 1,
-                borderDash: [2, 4],
-                label: {
-                  display: true,
-                  content: '4×/yr',
-                  position: 'end',
-                  color: 'rgba(255, 170, 0, 0.25)',
-                  font: { size: 9 },
-                  backgroundColor: 'transparent',
-                },
-              },
-            },
-          },
-        },
-      };
-      return { data: { datasets: vDatasets }, options: vOptions };
-    }
 
     // ── ABSOLUTE / 2029 MODE ─────────────────────────────────
     const datasets = is2029
@@ -475,7 +329,7 @@ function RaceChartInner(
       plugins: {
         tooltip: {
           enabled: false,
-          external: buildExternalTooltip(tooltipDivRef, 'absolute', isPower),
+          external: buildExternalTooltip(tooltipDivRef, isPower),
         },
         annotation: {
           annotations: {
@@ -548,7 +402,7 @@ function RaceChartInner(
 
     return { data: { datasets }, options: absOptions };
     // dataVersion drives recompute when the store swaps in fresh Epoch data.
-  }, [metric, scope, projMode, velocityMode, dataVersion]);
+  }, [metric, scope, projMode, dataVersion]);
 
   return (
     <div className={styles.wrapper}>
