@@ -110,6 +110,12 @@ const SECTION_SOURCES: readonly SectionSources[] = [
         priority: 2,
       },
       {
+        name: 'Anthropic — Google + Broadcom TPU deal (Apr 2026)',
+        url: 'https://www.anthropic.com/news/google-broadcom-partnership-compute',
+        desc: 'Multi-GW TPU deal (~3.5 GW per Broadcom filing) for 2027+ delivery. Rented capacity — does not change ownership ratios.',
+        priority: 2,
+      },
+      {
         name: '2029 projection targets',
         desc: 'Per-lab power-constrained H100e + power targets derived from Epoch satellite ramps and announced cloud-lease growth. Ease-out interpolation with ±8% base + 6%/yr uncertainty.',
         priority: 3,

@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useMemo, useState } from 'react';
 
-import { PCT_OWNED_FOOTNOTE } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { formatH100 } from '@/services/format';
 import { computePctOwned, type PctOwnedResult } from '@/services/ownershipMath';
@@ -291,30 +290,18 @@ export function FrontierOutlookCard(): JSX.Element | null {
           )}
 
           <p className={styles.footnote}>
-            <strong>*</strong> OpenAI and Anthropic values use the documented
-            override because they rent from hyperscalers (Epoch explicitly
-            states they own almost none of the chips they use). Compute
-            remains the dominant scaling driver (4–5×/year per Epoch), but
-            algorithms, data, and talent also matter — see the{' '}
-            <a href="#models">Models view</a> for latest releases.
-            <span className={styles.footnoteMuted}>{PCT_OWNED_FOOTNOTE}</span>
-            <span className={styles.footnoteCallout}>
-              <strong className={styles.footnoteCalloutTag}>
-                Announced Apr 6 2026
-              </strong>
-              Anthropic ↔ Google + Broadcom multi-GW TPU deal (~3.5 GW per
-              Broadcom filing) for 2027+ delivery — further evidence that
-              even access leaders must rely on hyperscaler custom silicon
-              for sustained scaling. The deal is rented capacity, so the
-              ownership-moat thesis above still holds.{' '}
-              <a
-                href="https://www.anthropic.com/news/google-broadcom-partnership-compute"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Anthropic announcement →
-              </a>
-            </span>
+            <strong>*</strong> OpenAI and Anthropic % Owned uses documented
+            overrides — Epoch attributes their chips to the hyperscalers, not the
+            labs. All other values are data-derived from the live Epoch AI Chip
+            Owners ZIP. Anthropic's recent{' '}
+            <a
+              href="https://www.anthropic.com/news/google-broadcom-partnership-compute"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Google + Broadcom TPU deal
+            </a>{' '}
+            (~3.5 GW, 2027+) is rented capacity — the ownership-moat gap holds.
           </p>
         </div>
       )}

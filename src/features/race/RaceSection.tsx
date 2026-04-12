@@ -154,9 +154,6 @@ function RaceSectionInner(): JSX.Element {
             Pro leads 2.
           </div>
         </div>
-        <div className={styles.insightsMeta}>
-          Satellite-verified · Epoch AI · 7 lead changes since 2024 · 3 more projected
-        </div>
       </div>
 
       {/* ─── LIVE: Option 1 — Terminal Tabs ───
@@ -217,7 +214,7 @@ function RaceSectionInner(): JSX.Element {
       {/* Frontier Leadership Outlook — only relevant when the fleet
           (cloud-lease adjusted) view is active, since the entire
           ownership question presupposes the +cloud-lease scope. */}
-      {scope === 'fleet' && <FrontierOutlookCard />}
+      {isOwnership && <FrontierOutlookCard />}
 
       <div className={styles.toggleRow}>
         <Toggle<MetricMode>
@@ -315,7 +312,7 @@ export function RaceSection(): JSX.Element {
     <SectionShell
       id="race"
       title="THE AI ARMS RACE"
-      subtitle="WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT ERA (2024–)"
+      subtitle="WHO HAS THE MOST COMPUTE & POWER TO WIN AI · POST-CHATGPT MOMENT (2024–)"
     >
       <RaceSectionInner />
     </SectionShell>
