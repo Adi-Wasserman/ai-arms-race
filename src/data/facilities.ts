@@ -26,7 +26,7 @@ export const LAB_MAP: LabMap = {
   'xAI Colossus 1 Memphis Tennessee': 'xAI',
   'xAI Colossus 2 Memphis Tennessee': 'xAI',
   'Alibaba Zhangbei Zhangjiakou Hebei': 'Other',
-  'Coreweave Helios Afton Texas': 'Other',
+  'Coreweave Helios Afton Texas': 'OpenAI',
   'QTS Cedar Rapids Iowa': 'Other',
   EGC: 'Gemini',
   EAI: 'Anthropic',

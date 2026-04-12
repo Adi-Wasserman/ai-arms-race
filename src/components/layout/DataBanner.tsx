@@ -33,7 +33,7 @@ export function DataBanner(): JSX.Element {
   const loading = useDashboard((s) => s.loading);
   const error = useDashboard((s) => s.error);
   const dataSource = useDashboard((s) => s.dataSource);
-  const dataCenters = useDashboard((s) => s.dataCenters.length);
+  const dataCenters = useDashboard((s) => s.dataCenters.filter((dc) => dc.co !== 'Other').length);
   const lastUpdated = useDashboard((s) => s.lastUpdated);
 
   const { status, text } = deriveStatus(loading, error, dataSource, dataCenters);
