@@ -276,12 +276,6 @@ export function FrontierOutlookCard(): JSX.Element | null {
                     </span>
                     <span className={styles.proof}>
                       → {r.proof}
-                      {r.sparkline && !CLOUD_DEPENDENT_LABS.has(r.lab) && (
-                        <span className={styles.proofGrowth}>
-                          {' · '}
-                          &apos;{String(r.sparkline.startYear).slice(2)} → {formatH100(r.sparkline.endValue)} H100e
-                        </span>
-                      )}
                     </span>
                   </div>
                 );

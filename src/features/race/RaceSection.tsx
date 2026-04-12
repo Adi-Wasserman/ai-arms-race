@@ -289,7 +289,25 @@ function RaceSectionInner(): JSX.Element {
         · + Cloud-Lease Adj. = adds Anthropic's 3-cloud capacity + Gemini TPU fleet
         est. · 2029 Projection = power-constrained targets from Epoch satellite ramps
         + sourced cloud-lease fleet, ±20% uncertainty bands · Solid=observed ·
-        Dashed=projected
+        Dashed=projected · Cloud-lease sources:{' '}
+        <a href="https://aws.amazon.com/blogs/aws/amazon-to-invest-another-4-billion-in-anthropic/" target="_blank" rel="noreferrer">
+          Amazon
+        </a>{' · '}
+        <a href="https://www.anthropic.com/news/google-broadcom-partnership-compute" target="_blank" rel="noreferrer">
+          Anthropic
+        </a>{' · '}
+        <a href="https://blogs.nvidia.com/blog/microsoft-anthropic-nvidia/" target="_blank" rel="noreferrer">
+          NVIDIA
+        </a>{' · '}
+        <a href="https://semianalysis.com/2024/09/13/google-multi-datacenter-training/" target="_blank" rel="noreferrer">
+          SemiAnalysis
+        </a>{' · '}
+        <a href="https://cloud.google.com/blog/products/ai-machine-learning/ironwood-tpu-age-of-inference" target="_blank" rel="noreferrer">
+          Google Cloud
+        </a>{' · '}
+        <a href="https://www.investing.com/news/stock-market-news/2026-tpu-server-outlook-google-takes-swing-at-the-king-4423670" target="_blank" rel="noreferrer">
+          Fubon Research
+        </a>
       </div>
 
       {/* ─── Bridge to Models section ─── */}

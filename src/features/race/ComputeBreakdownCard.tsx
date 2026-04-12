@@ -93,7 +93,7 @@ function fmtDate(iso: string): string {
 }
 
 export function ComputeBreakdownCard(): JSX.Element | null {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const seriesEpoch = useDashboard((s) => s.seriesEpoch);
   const seriesFull = useDashboard((s) => s.seriesFull);
