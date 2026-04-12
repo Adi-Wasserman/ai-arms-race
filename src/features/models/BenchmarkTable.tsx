@@ -389,18 +389,36 @@ export function BenchmarkTable(): JSX.Element {
         </div>
       )}
 
-      {/* ─── Model notes ─── */}
+      {/* ─── Model notes: verified ─── */}
       <div className={styles.notesGrid}>
-        {MODEL_SPECS.map((m) => {
+        {MODEL_SPECS.filter((m) => !m.preview).map((m) => {
           const color = LAB_COLORS[m.lab];
           return (
-            <div key={m.name} className={`${styles.noteCard}${m.preview ? ` ${styles.noteCardPreview}` : ''}`}>
+            <div key={m.name} className={styles.noteCard}>
               <div className={styles.noteName} style={{ color }}>
                 {m.name}
-                {m.preview && <span className={styles.previewPill}>PREVIEW</span>}
               </div>
               <div className={styles.noteSub}>
-                {m.lab} · {m.preview ? 'Unreleased — Project Glasswing' : `Released ${m.released}`}
+                {m.lab} · Released {m.released}
+              </div>
+              <div className={styles.noteBody}>{m.notes}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ─── Model notes: preview / self-reported ─── */}
+      <div className={styles.notesGridPreview}>
+        {MODEL_SPECS.filter((m) => m.preview).map((m) => {
+          const color = LAB_COLORS[m.lab];
+          return (
+            <div key={m.name} className={`${styles.noteCard} ${styles.noteCardPreview}`}>
+              <div className={styles.noteName} style={{ color }}>
+                {m.name}
+                <span className={styles.previewPill}>PREVIEW</span>
+              </div>
+              <div className={styles.noteSub}>
+                {m.lab} · {m.name === 'Claude Mythos' ? 'Unreleased — Project Glasswing' : `Released ${m.released} — scores self-reported`}
               </div>
               <div className={styles.noteBody}>{m.notes}</div>
             </div>

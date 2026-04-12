@@ -405,6 +405,13 @@
   gap: 12px;
 }
 
+.notesGridPreview {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
 .dataSources {
   margin-top: var(--space-md);
   font-size: 11px;

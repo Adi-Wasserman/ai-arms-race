@@ -48,7 +48,7 @@ export const MODEL_SPECS: readonly Model[] = [
     costOut: 12.0,
     context: 2000,
     notes:
-      'Leads on 13 of 16 major benchmarks. Highest GPQA Diamond score of any model. Best price-performance ratio among frontier models. Only model with native video + audio input.',
+      'Highest GPQA Diamond score (94.3%) and top ARC-AGI-2 (77.1%) among public models. Best price-performance ratio among frontier models. Only model with native video + audio input. 2M token context — largest of any frontier model.',
   },
   {
     name: 'Claude Opus 4.6',
@@ -114,7 +114,8 @@ export const MODEL_SPECS: readonly Model[] = [
     costOut: 0,
     context: 0,
     notes:
-      'First model from Meta Superintelligence Labs and the first in the Muse family. Natively multimodal reasoning model with tool-use, visual chain-of-thought, and multi-agent orchestration ("Thinking" mode). Leads frontier on multimodal reasoning (CharXiv 86.4, SimpleVQA 71.3) and HealthBench Hard (42.8). Rebuilt pretraining stack achieves comparable capabilities with >10× less compute than Llama 4 Maverick. Pricing, speed, and context window not yet disclosed. AA Intelligence Index (52) is independently measured by Artificial Analysis; per-benchmark scores are self-reported by Meta and pending independent re-runs from AA / Epoch.',
+      'First model from Meta Superintelligence Labs. Natively multimodal with visual chain-of-thought and multi-agent orchestration. Leads frontier on multimodal reasoning (CharXiv 86.4, SimpleVQA 71.3). AA Index (52) independently measured; per-benchmark scores are self-reported, pending independent verification.',
+    preview: true,
   },
   {
     name: 'Claude Mythos',
