@@ -165,9 +165,6 @@ export function ComputeBreakdownCard(): JSX.Element | null {
           <span className={styles.chevron}>{open ? '▾' : '▸'}</span>
           <h3 className={styles.title}>How We Calculate Each Lab's H100e</h3>
         </button>
-        <span className={styles.headerBadge}>
-          Viewing: <strong>{isFleet ? '+ CLOUD-LEASE' : 'SAT-VERIFIED'}</strong>
-        </span>
       </header>
 
       {open && (

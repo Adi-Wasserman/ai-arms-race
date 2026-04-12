@@ -66,6 +66,14 @@ const BULLETS: readonly LeaseBullet[] = [
       "Trainium2 procurement directly through the AWS deal.",
   },
   {
+    operator: 'Microsoft Azure + NVIDIA',
+    lab: 'Anthropic',
+    labColor: LAB_COLORS.Anthropic,
+    detail:
+      '$30B commitment with GB200 (Grace Blackwell + Vera Rubin) capacity, ' +
+      'up to 1 GW. GB200 ≈ 2.5 H100e.',
+  },
+  {
     operator: 'Google (TPUs rented via Google Cloud + Broadcom)',
     lab: 'Anthropic',
     labColor: LAB_COLORS.Anthropic,

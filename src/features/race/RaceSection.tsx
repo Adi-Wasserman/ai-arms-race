@@ -293,8 +293,11 @@ function RaceSectionInner(): JSX.Element {
         <a href="https://aws.amazon.com/blogs/aws/amazon-to-invest-another-4-billion-in-anthropic/" target="_blank" rel="noreferrer">
           Amazon
         </a>{' · '}
+        <a href="https://www.anthropic.com/news/expanding-our-use-of-google-cloud-tpus-and-services" target="_blank" rel="noreferrer">
+          Anthropic (GCP TPU)
+        </a>{' · '}
         <a href="https://www.anthropic.com/news/google-broadcom-partnership-compute" target="_blank" rel="noreferrer">
-          Anthropic
+          Anthropic (Broadcom)
         </a>{' · '}
         <a href="https://blogs.nvidia.com/blog/microsoft-anthropic-nvidia/" target="_blank" rel="noreferrer">
           NVIDIA

@@ -164,8 +164,8 @@ const CLOUD_PROVIDER_OPERATORS = new Set<string>([
 const MAJOR_TENANT_LABS = new Set<Lab>(['OpenAI', 'Anthropic']);
 
 /** Self-operated = operator IS the lab. Shared = lab rents from a hyperscaler. */
-const SELF_OPERATED_OWNERS = new Set<string>(['Meta', 'xAI']);
-const SHARED_HOST_OWNERS = new Set<string>(['Google', 'Alphabet', 'Microsoft', 'Amazon']);
+const SELF_OPERATED_OWNERS = new Set<string>(['Meta', 'xAI', 'Google', 'Alphabet']);
+const SHARED_HOST_OWNERS = new Set<string>(['Microsoft', 'Amazon']);
 
 function operatorIntegration(owner: string): 'self' | 'shared' | null {
   if (SELF_OPERATED_OWNERS.has(owner)) return 'self';
@@ -836,21 +836,21 @@ export function OwnershipTable(): JSX.Element {
       <div className={styles.lede}>
         <p className={styles.ledeText}>
           5 hyperscalers buy the chips — but only{' '}
-          <strong>2 of 5 frontier labs</strong> actually operate them.
-          The other 3 are tenants on shared infrastructure.
+          <strong>3 of 5 frontier labs</strong> actually operate them.
+          The other 2 are tenants on shared infrastructure.
         </p>
         <div className={styles.ledePills}>
           <span className={`${styles.ledePill} ${styles.ledePillSelf}`}>
             SELF-OPERATED
           </span>
           <span className={styles.ledePillDesc}>
-            Operator is the lab (Meta, xAI)
+            Operator is the lab (Google, Meta, xAI)
           </span>
           <span className={`${styles.ledePill} ${styles.ledePillShared}`}>
             SHARED HOST
           </span>
           <span className={styles.ledePillDesc}>
-            Lab rents capacity (OpenAI, Gemini, Anthropic)
+            Lab rents capacity (OpenAI, Anthropic)
           </span>
         </div>
       </div>
