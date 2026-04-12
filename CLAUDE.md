@@ -14,52 +14,110 @@ All 4 sections ship and render from live Epoch AI data with fallback.
 
 ### Recent feature work
 
-- **Muse Spark replaces Llama 4 Maverick** (`src/data/models.ts`):
-  Meta's new frontier flagship (2026-04-08). `aaIndex: 52` is independently measured by Artificial Analysis; per-benchmark scores are self-reported by Meta (flagged in `notes`). When AA/Epoch publish independent runs, update fields and remove the self-reported caveat.
+- **Default view is now TOTAL CAPACITY** (was Satellite Only). Scope toggle renamed: `TOTAL CAPACITY | SATELLITE ONLY`. Default `scope: 'fleet'` in `raceSlice.ts`. The ACCESS terminal-tab subtitle reads "Total Capacity — who can train today".
 
-- **Hardware Ownership view** (Race → scope=fleet → mode=ownership):
-  `OwnershipTable` sourced from `useEpochChipOwners` (fetches Epoch ZIP, JSZip + PapaParse, localStorage cache 24h TTL `epochChipOwnersCache_v1`).
+- **ComputeBreakdownCard** (`src/features/race/ComputeBreakdownCard.tsx`): collapsible card below the chart showing per-lab H100e calculation breakdown. 3+2 card layout (top row: Anthropic/Gemini/OpenAI with cloud-lease legs; bottom row: Meta/xAI satellite-only). Each card shows satellite-verified facilities + cloud-lease legs with sources, H100e conversion ratios, and future ramp timelines (solid pills = past, dashed = future). Always visible in both ACCESS and OWNERSHIP modes.
 
-- **% Owned column**: `LAB_OWNERSHIP_CONFIG` in `src/config/labOwnershipMapping.ts` with `selfOwned` names + optional `overridePct`. Calculation in `src/services/ownershipMath.ts`. Expected: Gemini/Meta 100%, xAI ~99%, Anthropic 25% (override), OpenAI 0% (override).
+- **"Who Trains on Whose Chips"** (renamed from "Known Major Leases"): `KnownLeasesCard.tsx`. Now shown in ALL modes (was OWNERSHIP-only). 4 bullets: Microsoft Azure→OpenAI, Google (owns TPUs, used internally)→Gemini, AWS Trainium→Anthropic, Google (TPUs rented via Google Cloud + Broadcom)→Anthropic. Meta/xAI bullets removed (self-operated, redundant with calculations card). localStorage: `knownLeasesCardCollapsed_v1`.
 
-- **"Who Owns the AI Chips?" panel** (`OwnershipSidePanel.tsx`): full-width 5-card strip (NOT a sidebar despite filename). Cards click-through to OwnershipTable with row highlight.
+- **Claude Mythos preview** (`src/data/models.ts`): unreleased Anthropic model from Project Glasswing. `preview: true` flag on `Model` type triggers dashed borders, amber "PREVIEW" / "NOT PUBLIC" badges in `BenchmarkTable.tsx`. No `aaIndex`, excluded from scatter plot.
 
-- **FrontierOutlookCard**: collapsible "2027+" summary, ranks 5 labs by % Owned, sparklines for self-operated labs. OpenAI row is gray (#7a7a7a), not green. Dated callout block for breaking news (Anthropic-Google TPU deal 2026-04-06).
+- **Muse Spark replaces Llama 4 Maverick** (`src/data/models.ts`): Meta's frontier flagship (2026-04-08). `aaIndex: 52` independently measured; per-benchmark scores self-reported (flagged in `notes`).
 
-- **Master ACCESS / OWNERSHIP terminal-tab toggle**: flat mono-caps tabs in `RaceSection.tsx`. ACCESS = `scope='fleet', raceMode='effective'`, OWNERSHIP = `scope='fleet', raceMode='ownership'`. Both force `scope=fleet`. Tab subtitles are editorial — don't change without asking.
+- **Hardware Ownership view** (Race → scope=fleet → mode=ownership): `OwnershipTable` sourced from `useEpochChipOwners` (Epoch ZIP, JSZip + PapaParse, localStorage 24h TTL). **Auto-refreshes every 5 minutes** (force-refreshes on mount, no manual button).
 
-- **LabBadge taxonomy** in `OwnershipTable.tsx`: `Pure Owner` (green: Meta, xAI, Google), `Cloud Provider` (blue: Microsoft, Oracle, Amazon), `Major Tenant` (gray: OpenAI, Anthropic).
+- **OwnershipTable consolidated design**: editorial lede + SELF-OPERATED/SHARED HOST pills in header and per-row. Lab-colored rows (`--row-color` + `color-mix`). Lab-colored H100e and Power values. Column "H100e MEDIAN" (range removed). Chip mix bars scaled proportionally to `maxH100e`, 12px height, per-chip legend hidden (hover only). `table-layout: fixed`. Pulsing "UPDATING…" indicator replaces old refresh button.
 
-- **HardwareRealityCheckPanel**: full-width 3-col editorial card, localStorage-dismissible (`hardwareRealityCheckDismissed_v1`).
+- **OwnershipSidePanel removed from RaceSection** — file exists but not rendered. Don't delete without checking.
 
-- **KnownLeasesCard**: OWNERSHIP-only collapsible card, 6 cloud→lab bullets. localStorage: `knownLeasesCardCollapsed_v1`.
+- **FrontierOutlookCard**: sparklines kept, growth data inline in proof text. OpenAI row gray (#7a7a7a). No YoY badges (removed — satellite data structurally undercounts cloud tenants, making per-lab YoY unreliable).
 
-- **TruthModal** in `DataBanner.tsx` (not Nav): methodology/sources/overrides/uncertainty modal. Trigger is `ⓘ ABOUT THIS DATA` button. DataBanner is `position: sticky; top: 48px; z-index: 900`.
+- **Leaderboard redesigned**: single metrics line per lab: `2.0M H100e · 1.91 GW · 25% owned`. Labels ("H100e", "owned") inline so readers understand each number. No separate OWNED progress bar (folded into metrics line). No analyst estimates (SemiAnalysis/ArtAnalysis removed — stale snapshots that added noise). Wider (320px), larger fonts (lab name 15px, metrics 12px), more row padding (10px). Chart height now hero-sized: `min-height: max(560px, 65vh)`.
 
-- **`OwnershipLabTable.tsx`**: exists but NOT rendered — kept for possible reuse. Don't delete without checking.
+- **Velocity toggle removed entirely**: deleted `src/services/velocity.ts`, `VelocityMode` type, `VelocityPoint`/`VelocitySeries` types, all store/hash/UI references. The absolute chart is the only view now. The velocity mode was confusing and rarely used.
+
+- **YoY growth feature removed**: investigated per-lab YoY accuracy and found satellite data structurally undercounts cloud tenants (OpenAI showed 28× from a 58K H100e base in April 2025 — Microsoft's vast Azure fleet is invisible to satellite tracking; Meta/Anthropic showed "NEW" because facilities weren't online yet). Not reliable enough to surface. The LEAD CHANGES stat card was also removed.
+
+- **Analyst estimates removed from Leaderboard**: SemiAnalysis/ArtAnalysis cross-checks were stale Q1 2026 snapshots. When they agreed with our numbers they were redundant; when they disagreed they were confusing. The `ANALYST_ESTIMATES` data in `projections.ts` still exists but is no longer imported by the Leaderboard.
+
+- **Chart starts 2024** (was 2023). The 2023 period had only one lab (OpenAI/Microsoft Goodyear at 29K H100e) — not really a "race". The multi-lab buildout begins mid-2024 when Google and xAI come online. Updated subtitle: "POST-CHATGPT ERA (2024–)".
+
+- **Master ACCESS / OWNERSHIP terminal-tab toggle**: ACCESS = `scope='fleet', raceMode='effective'`, OWNERSHIP = `scope='fleet', raceMode='ownership'`. Both force `scope=fleet`. Tab subtitles editorial — don't change without asking.
+
+- **FirstPrinciples explainer** (`src/features/models/FirstPrinciples.tsx`): collapsible editorial card explaining 6 drivers of frontier model quality. Lede references Training Compute Growth and Within-Lab Scaling charts (not the removed R² scatter). No max-width on lede — matches principle rows width. localStorage: `firstPrinciplesCollapsed_v1`.
+
+- **Training Compute Growth chart** (`src/features/models/TrainingComputeChart.tsx`): replaces old lab-positioning scatter (H100e vs AA Index, which had n=5 and R²=0.10). Now plots 21 model releases across 5 labs by year vs training FLOPs (log scale) with ~5×/year exponential trend. Old `ScatterPlot.tsx` still exists but is not imported.
+
+- **Within-Lab Scaling chart** (`src/features/models/WithinLabScaling.tsx`): dual-axis line chart below the training compute scatter. Shows GPT and Claude families each using more FLOPs and scoring higher across 4 generations. Left Y = FLOPs (log), Right Y = performance score.
+
+- **Key Insights card** at top of Race section (`RaceSection.tsx`): 2×2 grid card with green accent border. Covers compute leadership, scaling laws, ownership moat, benchmark parity.
+
+- **Key Takeaways card** at top of Models section (`ModelsSection.tsx`): 4-point summary card. Green title, em-dash bullets.
+
+- **Bridge paragraph** at bottom of Race section: green-accented callout linking infrastructure story to #models with scaling-laws thesis.
+
+- **Truth & Data Limitations modal** (`TruthModal.tsx`): Section 4 "Data Sources by Section" lists all sources by priority (PRIMARY/SECONDARY/SUPPLEMENTARY) for The Race, Geo Map, Intel, and Models. Cloud-lease sources broken into 6 individually linked announcements (Amazon Project Rainier, Anthropic GCP TPU, NVIDIA Azure partnership, Google Ironwood, SemiAnalysis multi-DC training, Fubon Securities via Investing.com). Each source has clickable link where available + one-line description.
+
+- **ComputeBreakdownCard source bar**: inline clickable links per cloud-lease calc row + compact footer with Sources (7 links) + Ramp method explanation. Replaced large data sources section.
+
+- **Old Compute vs Performance scatter removed from ModelsSection** — `ScatterPlot.tsx` file kept but unimported. `scatterView`/`ScatterView` store state still exists (used by the file). The observed/projected toggle was removed from ModelsSection.
 
 ### Editorial framing — operator vs lab (DO NOT REVERT)
 
-Epoch reports **operators**, not labs. The panel matches Epoch 1:1 on operator labels with integration pills for the structural difference. Only Meta and xAI are operator=consumer (`self`). The other 3 are anchor tenants (`shared`). Don't add invented self-owned percentages or framing that treats `Microsoft H100e` as `OpenAI H100e`.
+Epoch reports **operators**, not labs. Only Meta and xAI are operator=consumer (`self`). The other 3 are anchor tenants (`shared`). Don't treat `Microsoft H100e` as `OpenAI H100e`.
 
-### Key files for ownership work
+### Satellite data limitations for cloud tenants (DO NOT add per-lab YoY)
+
+Epoch tracks purpose-built AI data centers visible from satellite imagery. This structurally undercounts cloud tenants:
+- **OpenAI** had ~58K satellite-visible H100e in April 2025 but was training GPT-4o on hundreds of thousands of Azure GPUs across general-purpose data centers invisible to satellite tracking.
+- **Anthropic** had 0 satellite-visible compute until June 2025 (Amazon facilities) despite training Claude 3.5 on AWS Trainium + Google Cloud TPUs.
+- **Meta** had 0 satellite-visible H100e until Feb 2026 despite operating Prometheus since 2023 (Epoch's timeline shows 0 operational capacity until late 2025).
+
+There is no public dataset for historical cloud-lease compute. Announcements giving hard numbers only started in late 2025 (Project Rainier, Google/Broadcom TPU deal). Do not attempt to compute per-lab YoY growth — it will produce misleading figures.
+
+### Key files
 
 ```
-src/config/labOwnershipMapping.ts     # LAB_OWNERSHIP_CONFIG + tooltip/footnote
-src/services/ownershipMath.ts         # computePctOwned, computeOwnedH100e, LAB_TO_OWNER
-src/services/chipOwners.ts            # ZIP fetch + parse + cache + buildTimeseries
-src/store/slices/chipOwnersSlice.ts   # chipOwners, version, lastUpdated
-src/store/slices/raceSlice.ts         # + highlightedOwner for panel→table jumps
-src/hooks/useEpochChipOwners.ts       # StrictMode-safe fetch, refresh()
-src/features/race/OwnershipTable.tsx  # operator rows + LabBadge + highlight effect
-src/features/race/FrontierOutlookCard.tsx
-src/features/race/HardwareRealityCheckPanel.tsx
-src/features/race/KnownLeasesCard.tsx
-src/features/race/RaceSection.tsx     # master toggle + mode branching
-src/components/ui/OwnershipSidePanel.tsx
-src/components/ui/TruthModal.tsx
-src/components/layout/DataBanner.tsx  # sticky bar + TruthModal mount
+src/features/race/ComputeBreakdownCard.tsx    # per-lab H100e calculation breakdown (3+2 cards)
+src/features/race/ComputeBreakdownCard.module.css
+src/features/race/KnownLeasesCard.tsx         # "Who Trains on Whose Chips" (all modes)
+src/features/race/OwnershipTable.tsx          # consolidated ownership view
+src/features/race/FrontierOutlookCard.tsx     # "2027+" summary (sparklines, no YoY)
+src/features/race/Leaderboard.tsx             # single-line per lab, no analyst estimates
+src/features/race/RaceSection.tsx             # master toggle + scope default
+src/features/race/RaceChart.tsx               # hero-sized chart, starts 2024
+src/features/race/StatCards.tsx               # 3 cards: leader, compute, power
+src/features/models/TrainingComputeChart.tsx  # 21-model FLOPs scatter (replaces old ScatterPlot)
+src/features/models/WithinLabScaling.tsx      # dual-axis GPT/Claude scaling chart
+src/features/models/FirstPrinciples.tsx       # 6 first-principles explainer (collapsible)
+src/features/models/ScatterPlot.tsx           # OLD — exists but NOT imported
+src/features/models/BenchmarkTable.tsx        # preview model support (Mythos)
+src/data/models.ts                            # MODEL_SPECS incl. Mythos preview
+src/data/fleet.ts                             # cloud-lease estimates with ramp schedules
+src/data/facilities.ts                        # FACILITY_COORDS (coordinate fixes applied)
+src/store/slices/raceSlice.ts                 # default scope='fleet', no velocityMode
+src/hooks/useEpochChipOwners.ts               # 5min auto-refresh, force-refresh on mount
+src/services/ownershipMath.ts                 # computePctOwned, computeOwnedH100e
+src/config/labOwnershipMapping.ts             # LAB_OWNERSHIP_CONFIG
+src/types/benchmark.ts                        # Model type + preview?: boolean
+src/components/ui/OwnershipSidePanel.tsx       # EXISTS but NOT rendered
+src/components/ui/TruthModal.tsx              # 4 sections incl. Data Sources by Section
+src/components/layout/DataBanner.tsx           # sticky bar + TruthModal mount
 ```
+
+### Cloud-lease calculation transparency
+
+The `ComputeBreakdownCard` shows how each lab's total H100e is computed:
+- **Satellite-verified** = Epoch AI live CSV (high confidence)
+- **Cloud-lease legs** = our estimates from public announcements with H100e conversion ratios (estimated confidence)
+
+Cloud-lease legs in `src/data/fleet.ts`:
+- `EAI-AWS`: Anthropic on AWS Trainium2 (0.93 H100e/Trn2)
+- `EAI-GCP`: Anthropic on Google Cloud TPUs (blended ~1.4 H100e/chip)
+- `EAI-AZR`: Anthropic on Azure/NVIDIA (GB200 ≈ 2.5 H100e)
+- `EGC`: Estimated Gemini internal TPU fleet (~1.2 H100e/chip)
+
+**None of these H100e numbers are directly stated in announcements.** Announcements give chip counts, TPU counts, dollar amounts, or power targets. We convert using estimated ratios and interpolate ramp schedules. The calculations card makes this transparent.
 
 ---
 
@@ -75,7 +133,7 @@ src/components/layout/DataBanner.tsx  # sticky bar + TruthModal mount
 4. `cp` changed files → `/tmp/ai-arms-race-deploy/src/...`
 5. `cd /tmp/ai-arms-race-deploy && git add ... && git commit && git push`
 
-**Known footgun:** Skipping the `diff` check has broken CI multiple times (missed `ManufacturerMixBar.tsx`, `ownershipMath.ts`, CSS modules). Always diff before committing.
+**Known footgun:** Skipping the `diff` check has broken CI multiple times. Always diff before committing.
 
 ---
 
@@ -84,83 +142,77 @@ src/components/layout/DataBanner.tsx  # sticky bar + TruthModal mount
 Source: `https://epoch.ai/data/ai_chip_owners.zip` (CORS proxy fallback via `corsproxy.io`).
 Parsed by filename suffix (not hard-coded names).
 
-**3 CSV files:** `cumulative_by_designer.csv` (H100e per owner), `cumulative_by_chip_type.csv` (per owner+chip), `quarters_by_chip_type.csv` (quarterly deliveries).
+**3 CSV files:** `cumulative_by_designer.csv`, `cumulative_by_chip_type.csv`, `quarters_by_chip_type.csv`.
 
 **8 owners:** Microsoft, Meta, Amazon, Google, Oracle, xAI, China, Other.
 **5 manufacturers:** Nvidia, Google, Amazon, AMD, Huawei. ~24 chip types.
 
-**`OWNER_TO_LAB`** (in `src/types/chipOwners.ts`):
-Microsoft→OpenAI, Amazon→Anthropic, Google→Gemini, Meta→Meta, xAI→xAI (approximate — includes non-lab workloads).
+**`OWNER_TO_LAB`** (in `src/types/chipOwners.ts`): Microsoft→OpenAI, Amazon→Anthropic, Google→Gemini, Meta→Meta, xAI→xAI (approximate).
 
-**`EpochChipOwnersData`** shape: `{ asOf, latestByOwner: OwnerSnapshot[], timeseries: OwnerTimeseries[], rawRowCount }`.
+---
 
-Diagnostic: `scripts/diagnose-epoch-chipowners.ts`.
+## Removed features (do NOT re-add without discussion)
+
+### Velocity toggle
+Deleted `src/services/velocity.ts`, `VelocityMode` type, all store/hash/UI references. Showed annualized growth rate (×/yr) per lab — confusing, rarely used, replaced the main chart entirely. The absolute chart is cleaner.
+
+### YoY growth stats
+Showed per-lab year-over-year multipliers in StatCards and FrontierOutlookCard. Removed because satellite data structurally undercounts cloud tenants (see "Satellite data limitations" section above). OpenAI showed 28× from a misleadingly low base.
+
+### Analyst estimates in Leaderboard
+SemiAnalysis/ArtAnalysis cross-check numbers. Stale Q1 2026 snapshots — redundant when they agreed, confusing when they differed. `ANALYST_ESTIMATES` data still exists in `projections.ts` but is not imported.
+
+### LEAD CHANGES stat card
+Removed alongside YoY. StatCards now shows 3 cards: LEADER TODAY, TOTAL COMPUTE, TOTAL POWER.
 
 ---
 
 ## Gotchas (do NOT re-discover)
 
 ### Chart.js controllers must be explicitly registered
-`BaseChart.tsx` registers all controllers. Vite tree-shakes implicit imports in prod → `"line" is not a registered controller` in prod only. Register any new chart type controller.
+Vite tree-shakes in prod. Register any new chart type controller in `BaseChart.tsx`.
 
 ### StrictMode-safe data fetching
-`useEpochData` and `useEpochChipOwners` use **module-level** `bootstrapStarted` flags, NOT cleanup `cancelled` flags. StrictMode's unmount/remount trips cleanup flags and prevents `setData`. Don't revert to `let cancelled = false`.
+Use **module-level** `bootstrapStarted` flags, NOT cleanup `cancelled` flags.
 
 ### Module-level singleton fetch dedupe
-`useEpochChipOwners` stores `inflightFetch: Promise | null` at module scope — one ZIP download even if mounted from multiple components.
+`useEpochChipOwners` stores `inflightFetch` at module scope — one ZIP download even from multiple components.
 
 ### `dataVersion` / `chipOwnersVersion` memo invalidation
-Slices bump a version on hydrate. `useMemo` deps should use the version number, NOT the object reference (with eslint-disable for exhaustive-deps).
+`useMemo` deps should use the version number, NOT the object reference.
 
 ### Epoch CSV schema drift — facility coordinates
-Epoch dropped Lat/Lng columns. `FACILITY_COORDS` in `src/data/facilities.ts` compensates with short-name aliases + `FACILITY_COORD_OVERRIDES`. If map shows <22 facilities, check for missing handles.
+`FACILITY_COORDS` in `src/data/facilities.ts` compensates with short-name aliases + `FACILITY_COORD_OVERRIDES`. Fluidstack Lake Mariner was corrected from lake water to actual site [43.358, -78.604].
 
 ### vite.config.js shadowing
-`tsconfig.node.json` has `outDir: ./node_modules/.cache/tsconfig-node` to prevent `tsc -b` from emitting a `.js` that shadows the `.ts`. Don't remove.
-
-### Panel→table click-through requires rAF defer
-`OwnershipSidePanel.tsx` handler: `setHighlightedOwner(null)` first (re-fire same card), then `requestAnimationFrame` for the actual set (waits for OwnershipTable mount). Without rAF, cold-jumps from ACCESS mode silently fail.
+`tsconfig.node.json` has `outDir: ./node_modules/.cache/tsconfig-node`. Don't remove.
 
 ### Legacy HTML at `public/ai-arms-race.html`
 Needed for old backlinks. Don't delete.
 
 ### High-res PNG exports
-`useChartExport` captures at `devicePixelRatio * 2` (or 3200px width). Low-res is a regression.
-
-### `<ol>` markers leak with `display: grid`
-Use `<div role="list">` / `<div role="listitem">` for ranked lists with grid items to avoid doubled markers.
-
-### Epoch ZIP timeseries edge cases
-1. **Trailing missing quarters**: forward-fill from last known cumulative (don't collapse to 0). Real revisions ARE preserved.
-2. **Leading zeros**: drop via `findIndex(v => v > 0)` so late-founded labs use full sparkline width.
+`useChartExport` captures at `devicePixelRatio * 2`. Low-res is a regression.
 
 ### Body text: use direct rgba, not dim tokens
-`--color-text-tertiary` (0.3 alpha) and `--color-text-quaternary` (0.15) are too dim for body text. Use `rgba(255,255,255, 0.55–0.85)` for readable content.
+`--color-text-tertiary` (0.3) and `--color-text-quaternary` (0.15) are too dim for body text. Use `rgba(255,255,255, 0.55–0.85)`.
 
 ### TruthModal lives in DataBanner, not Nav
-Single owner of trigger + modal. To open from elsewhere, hoist state to a `uiSlice` — don't add a duplicate trigger.
+Single owner of trigger + modal. Don't add a duplicate trigger.
 
 ### DataBanner sticky background
-Uses `rgba(4,6,16,0.88)` + `backdrop-filter`. Don't revert to translucent — content becomes unreadable when scrolling under.
+Uses `rgba(4,6,16,0.88)` + `backdrop-filter`. Don't revert to translucent.
 
 ### ACCESS/OWNERSHIP toggle — both setters fire
-Handler always calls `setScope('fleet')` then `setRaceMode(...)` — intentional because `setScope` auto-resets `raceMode` when leaving fleet.
+Handler always calls `setScope('fleet')` then `setRaceMode(...)` — intentional.
 
 ### localStorage preferences — synchronous useState init
-Read localStorage in `useState(() => readValue())`, NOT in `useEffect`. Avoids visible flash of wrong state.
-Keys: `hardwareRealityCheckDismissed_v1`, `knownLeasesCardCollapsed_v1`, `epochChipOwnersCache_v1`.
+Keys: `hardwareRealityCheckDismissed_v1`, `knownLeasesCardCollapsed_v1`, `firstPrinciplesCollapsed_v1`, `epochChipOwnersCache_v1`.
 
-### OwnershipTable footer → Truth modal
-Footer has 3 lines only. All methodology/override caveats live in TruthModal. Don't re-add inline copies.
-
-### LabBadge `.badge` resets `text-transform: none`
-Parent `.ownerLab` is `uppercase` — without the reset, pills render as "PURE OWNER" at 8px.
-
-### `color-mix(in oklab)` per-card tinting
-`OwnershipSidePanel.module.css` derives all accents from `--card-color`. Browser support fine (2023+). No fallback needed.
+### `color-mix(in oklab)` tinting pattern
+Used in `OwnershipTable`, `FrontierOutlookCard`, `ComputeBreakdownCard`, `FirstPrinciples`, and `OwnershipSidePanel`. Browser support fine (2023+).
 
 ### OwnershipTable row order
-Frontier-anchored owners first (by H100e desc), then non-frontier. Frontier = `OWNER_TO_LAB[owner] != null`.
+Frontier-anchored owners first (by H100e desc), then non-frontier.
 
 ---
 
@@ -169,14 +221,15 @@ Frontier-anchored owners first (by H100e desc), then non-frontier. Frontier = `O
 | Param | Values | Default |
 |-------|--------|---------|
 | `metric` | `h100e`, `power` | `h100e` |
-| `scope` | `tracked`, `fleet` | `tracked` |
+| `scope` | `tracked`, `fleet` | `fleet` |
 | `mode` | `effective`, `ownership` | `effective` (only when scope=fleet) |
 | `proj` | `current`, `2029` | `current` |
-| `scatter` | `observed`, `projected` | `observed` |
-| `velocity` | `absolute`, `velocity` | `absolute` |
+| `scatter` | `observed`, `projected` | `observed` | (legacy — toggle removed from UI but state still in store)
 | `lab` | lab name | `ALL` |
 
 `setScope` auto-resets `raceMode` → `'effective'` when leaving `'fleet'`.
+
+Note: `velocity` param was removed from hash state (velocity toggle deleted).
 
 ---
 
@@ -188,19 +241,14 @@ React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Lea
 
 ## Architecture Principles
 
-1. **Feature-sliced sections** — each section (`features/race`, `map`, `intel`, `models`) is self-contained. Features never import from other features.
-2. **Downward-only deps** — `features → components → services → types/config/data`. Never sideways.
-3. **Config vs data separation** — `config/` = structural constants (rarely change), `data/` = updatable values (model scores, fleet estimates, coordinates).
-4. **Centralized types** — all interfaces in `types/`. No inline type definitions.
-5. **Pure data layer** — `services/` functions are pure (no DOM, no React, no state).
-6. **Thin chart abstraction** — `BaseChart.tsx` standardizes Chart.js config. Individual charts pass only unique data/options.
-7. **Store slices per feature** — each feature reads shared data from `dataSlice`, writes only to its own slice.
-8. **ErrorBoundary per section** — one section crash doesn't break others.
-
-**App-shell sticky stack** (top → bottom):
-- `Nav` (fixed, top: 0, z-index: 1000, 48px)
-- `DataBanner` (sticky, top: 48px, z-index: 900) — owns TruthModal
-- Section content scrolls under both
+1. **Feature-sliced sections** — each section is self-contained. Features never import from other features.
+2. **Downward-only deps** — `features → components → services → types/config/data`.
+3. **Config vs data separation** — `config/` = structural constants, `data/` = updatable values.
+4. **Centralized types** — all interfaces in `types/`.
+5. **Pure data layer** — `services/` functions are pure.
+6. **Thin chart abstraction** — `BaseChart.tsx` standardizes Chart.js config.
+7. **Store slices per feature** — each feature reads shared data, writes only to its own slice.
+8. **ErrorBoundary per section** — one crash doesn't break others.
 
 ---
 
@@ -216,38 +264,14 @@ React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Lea
 
 **Interpolation:** Ease-out `1-(1-t)^1.8`. **Uncertainty:** ±8% base + 6%/yr → ~±24% by Jan 2029.
 
-## Construction Signals
-
-| Signal | Meaning | Significance |
-|--------|---------|-------------|
-| 🗼 X towers | Cooling towers | Each ≈ 30MW |
-| ❄️ X units | Air-cooled chillers | Alt cooling |
-| 🏗️ Complete | Roof finished | ~5-7mo to operational |
-| ⚡ Installed | Backup generators | Nearing power-on |
-| 🔌 Connected | Grid substation live | Power flowing |
-| 🔥 On-site | Gas turbines | Dedicated power |
-| ⚠️ Noted | Delay/pause | Timeline risk |
-
 ---
 
 ## 6 Sections
 
-1. **THE RACE** (#race) — H100e/Power time series, ACCESS/OWNERSHIP modes, leaderboard, 2029 projections. Export: CSV/JSON/PNG.
+1. **THE RACE** (#race) — Key Insights card → ACCESS/OWNERSHIP tabs → stat cards (3: leader, compute, power) → FrontierOutlookCard → toggles → hero chart + leaderboard (min 65vh) → ComputeBreakdownCard (with source bar) → KnownLeasesCard → ProjectionPanel → bridge to #models.
 2. **GEO MAP** (#geomap) — Leaflet + ESRI satellite tiles, lab-colored pins, region jump, satellite preview.
-3. **INTEL** (#sites) — Sortable facility table, filters, drawer with satellite + timeline, signal legend. Export: CSV.
-4. **COMPUTE vs PERFORMANCE** (within #models) — Scatter: H100e × AA Index, bubbles by GW, OLS trend. Export: PNG.
-5. **MODELS** (#models) — Benchmark head-to-head, 2-3 models, gold/silver/bronze. Export: CSV.
-6. **METR TIME HORIZONS** (within #models) — Scatter 2019-2026, exponential trend. Export: PNG.
-
----
-
-## Design Principles
-- Dark space aesthetic — deep navy, monospace numbers, lab-colored accents
-- Satellite-grounded — ESRI imagery for every facility
-- Source transparency — every data point traceable to named source
-- Graceful degradation — fetch failure never breaks the page (fallback data + error boundaries)
-- Power-constrained projections — targets from Epoch + sourced fleet, not compound growth
-- Type safety — all data shapes in `types/`, no `any`
+3. **INTEL** (#sites) — Sortable facility table, filters, drawer with satellite + timeline, signal legend.
+4. **MODELS** (#models) — Key Takeaways → Training Compute Growth scatter (21 models, ~5×/yr trend) → Within-Lab Scaling (GPT + Claude dual-axis) → FirstPrinciples explainer → transition callout → BenchmarkTable (head-to-head) → METR Time Horizons.
 
 ---
 
@@ -255,3 +279,5 @@ React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Lea
 1. METR data from secondary sources (LessWrong/OfficeChai, not primary YAML)
 2. ESRI API unauthenticated — rate-limited under traffic
 3. METR tooltip stickiness in 2025-2026 cluster
+4. Anthropic 25% override in `LAB_OWNERSHIP_CONFIG` may need updating as Epoch data catches up
+5. `ANALYST_ESTIMATES` in `projections.ts` is stale (Q1 2026) — no longer displayed but data remains
