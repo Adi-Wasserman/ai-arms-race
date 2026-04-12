@@ -407,6 +407,12 @@ export function BenchmarkTable(): JSX.Element {
           );
         })}
       </div>
+
+      <div className={styles.dataSources}>
+        DATA: Artificial Analysis v4.0 (Intelligence Index, speed, pricing) · GPQA
+        Diamond · SWE-bench Verified · ARC-AGI-2 · HLE · OSWorld + provider system
+        cards. Scores are a snapshot — updated per new model release.
+      </div>
     </div>
   );
 }
