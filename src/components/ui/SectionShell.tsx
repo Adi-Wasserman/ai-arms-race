@@ -9,6 +9,8 @@ export interface SectionShellProps {
   title: string;
   /** Small eyebrow subtitle shown beneath the title. */
   subtitle?: string;
+  /** Optional contextual note shown below the subtitle in a muted style. */
+  note?: string;
   children: ReactNode;
   className?: string;
 }
@@ -21,6 +23,7 @@ export function SectionShell({
   id,
   title,
   subtitle,
+  note,
   children,
   className,
 }: SectionShellProps): JSX.Element {
@@ -31,6 +34,7 @@ export function SectionShell({
     >
       <span className={styles.title}>{title}</span>
       {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+      {note && <span className={styles.note}>{note}</span>}
       <div className={styles.content}>{children}</div>
     </section>
   );

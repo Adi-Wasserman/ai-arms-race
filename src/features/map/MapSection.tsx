@@ -110,6 +110,7 @@ export function MapSection(): JSX.Element {
       id="geomap"
       title="GEO MAP"
       subtitle="WHERE AI INFRASTRUCTURE IS BEING BUILT · HOVER OR CLICK ANY PIN"
+      note="New-construction AI data centers from Epoch AI satellite imagery. Lab colors reflect editorial attribution — hyperscaler facilities (Microsoft, Amazon, Google) serve multiple tenants simultaneously. Only Meta and xAI are fully self-operated dedicated sites."
     >
       <MapSectionInner />
     </SectionShell>

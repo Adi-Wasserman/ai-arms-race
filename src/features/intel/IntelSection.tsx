@@ -75,6 +75,7 @@ export function IntelSection(): JSX.Element {
       id="sites"
       title="INTEL"
       subtitle="SATELLITE-DERIVED CONSTRUCTION ANALYSIS · WHO'S BUILDING WHAT, AND HOW FAST"
+      note="Satellite-verified facilities from Epoch AI. Lab assignment is editorial — hyperscaler sites share capacity across Azure/AWS/GCP tenants and internal products. Only Meta and xAI facilities are dedicated single-lab operations."
     >
       <IntelSectionInner />
     </SectionShell>

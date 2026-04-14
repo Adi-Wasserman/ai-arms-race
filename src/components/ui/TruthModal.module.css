@@ -392,6 +392,210 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* ─── Methodology toggle + collapsible body ───── */
+.methodologyToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+}
+
+.methodologyToggle:hover .sectionTitle,
+.methodologyToggle:focus-visible .sectionTitle {
+  color: rgba(77, 142, 234, 0.95);
+}
+
+.chevron {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.chevron[data-open='true'] {
+  transform: rotate(90deg);
+}
+
+.methodologyBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+  animation: methodFadeIn 0.18s ease-out;
+}
+
+@keyframes methodFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Confidence tiers ── */
+.tierBlock {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.tierHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tierBadgePrimary,
+.tierBadgeSecondary,
+.tierBadgeSupp {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tierBadgePrimary {
+  color: rgba(0, 255, 135, 0.95);
+  background: rgba(0, 255, 135, 0.08);
+  border: 1px solid rgba(0, 255, 135, 0.28);
+}
+
+.tierBadgeSecondary {
+  color: rgba(77, 142, 234, 0.95);
+  background: rgba(77, 142, 234, 0.08);
+  border: 1px solid rgba(77, 142, 234, 0.28);
+}
+
+.tierBadgeSupp {
+  color: rgba(255, 170, 0, 0.85);
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.28);
+}
+
+.tierLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tierDesc {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.tierNote {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* ── Lease-leg breakdown ── */
+.leaseLegList {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.leaseLegItem {
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+}
+
+.leaseLegRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.leaseLegName {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.leaseLegH100e {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(77, 142, 234, 0.95);
+  white-space: nowrap;
+}
+
+.leaseLegMeta {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 2px;
+}
+
+/* ── Key limitations ── */
+.limitationsBlock {
+  padding: 12px 14px;
+  background: rgba(255, 170, 0, 0.04);
+  border: 1px solid rgba(255, 170, 0, 0.15);
+  border-radius: var(--radius-md);
+}
+
+.limitationsTitle {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgba(255, 170, 0, 0.85);
+  text-transform: uppercase;
+}
+
+.limitationsList {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.limitationsList > li {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Cite link ── */
+.citeLink {
+  color: rgba(77, 142, 234, 0.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(77, 142, 234, 0.35);
+  text-underline-offset: 2px;
+}
+
+.citeLink:hover {
+  color: #ffffff;
+}
+
 /* ─── Data sources by section ──────────────────── */
 .sectionBlock {
   margin-bottom: 16px;

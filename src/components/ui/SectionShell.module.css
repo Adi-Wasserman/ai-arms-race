@@ -24,6 +24,16 @@
   margin-bottom: var(--space-md);
 }
 
+.note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.45);
+  display: block;
+  margin-top: -4px;
+  margin-bottom: var(--space-md);
+  max-width: 720px;
+}
+
 .content {
   margin-top: var(--space-sm);
 }

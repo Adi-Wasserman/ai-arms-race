@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 
 import { LAB_OWNERSHIP_CONFIG } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
+import { FLEET_ESTIMATES } from '@/data/fleet';
 
 import styles from './TruthModal.module.css';
 
@@ -311,6 +312,282 @@ const UNCERTAINTY_NOTES: readonly UncertaintyNote[] = [
   },
 ];
 
+/* ── Derive live conversion ratios from fleet.ts ── */
+
+interface LeaseLeg {
+  label: string;
+  handle: string;
+  lab: string;
+  h100eRatio: string;
+  chipType: string;
+  latestH100e: number;
+}
+
+const LEASE_LEGS: readonly LeaseLeg[] = [
+  {
+    label: 'Anthropic on AWS — Trainium2 chip (Project Rainier program)',
+    handle: 'EAI-AWS',
+    lab: 'Anthropic',
+    h100eRatio: '0.93 H100e/Trn2',
+    chipType: 'Trainium2 (Amazon custom chip)',
+    latestH100e: Math.max(
+      ...FLEET_ESTIMATES.filter(([, h]) => h === 'EAI-AWS').map(([, , v]) => v),
+    ),
+  },
+  {
+    label: 'Anthropic on Google Cloud — TPU v6e / Ironwood chips',
+    handle: 'EAI-GCP',
+    lab: 'Anthropic',
+    h100eRatio: '~1.4 H100e/chip (blended v6e + Ironwood)',
+    chipType: 'TPU v6e / Ironwood (Google custom chips)',
+    latestH100e: Math.max(
+      ...FLEET_ESTIMATES.filter(([, h]) => h === 'EAI-GCP').map(([, , v]) => v),
+    ),
+  },
+  {
+    label: 'Anthropic on Microsoft Azure — GB200 chip (NVIDIA Grace Blackwell)',
+    handle: 'EAI-AZR',
+    lab: 'Anthropic',
+    h100eRatio: '~2.5 H100e/GB200',
+    chipType: 'GB200 (NVIDIA Grace Blackwell)',
+    latestH100e: Math.max(
+      ...FLEET_ESTIMATES.filter(([, h]) => h === 'EAI-AZR').map(([, , v]) => v),
+    ),
+  },
+  {
+    label: 'Gemini on Google internal — TPU v4/v5/v6 chips',
+    handle: 'EGC',
+    lab: 'Gemini',
+    h100eRatio: '~1.2 H100e/chip (older v4/v5 fleet avg)',
+    chipType: 'TPU v4/v5/v6 (Google custom chips)',
+    latestH100e: Math.max(
+      ...FLEET_ESTIMATES.filter(([, h]) => h === 'EGC').map(([, , v]) => v),
+    ),
+  },
+];
+
+function formatH100e(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  return `${Math.round(n / 1000)}K`;
+}
+
+/* ── Methodology & Limitations (collapsible inner section) ── */
+
+function MethodologySection(): JSX.Element {
+  return (
+    <section className={styles.section}>
+      <h3 className={styles.sectionTitle}>
+        4 · Methodology &amp; Limitations
+      </h3>
+      <div className={styles.methodologyBody}>
+          {/* ── Confidence tier 1: self-operated ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadgePrimary}>HIGH CONFIDENCE</span>
+              <span className={styles.tierLabel}>
+                Self-operated labs (Meta, xAI)
+              </span>
+            </div>
+            <p className={styles.tierDesc}>
+              Meta and xAI built and operate their own dedicated facilities —
+              Colossus 1+2 (xAI), Hyperion, Prometheus, Temple (Meta). The
+              operator <em>is</em> the lab, so 100% of satellite-verified
+              capacity maps directly to frontier model training. Epoch AI
+              confirms physical capacity via satellite imagery + power signals
+              → facility MW → H100e (typical 2–2.5× overhead). Accuracy:
+              ~90–95% within Epoch&apos;s ±1.4× capacity bands.
+            </p>
+          </div>
+
+          {/* ── Confidence tier 2: hyperscaler-attributed ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadgeSecondary}>
+                EDITORIAL ATTRIBUTION
+              </span>
+              <span className={styles.tierLabel}>
+                Satellite-tracked facilities → frontier lab mapping
+              </span>
+            </div>
+            <p className={styles.tierDesc}>
+              For <strong>OpenAI</strong>, <strong>Anthropic</strong>, and{' '}
+              <strong>Gemini</strong>, Epoch&apos;s satellite data tells us the{' '}
+              <em>total physical capacity</em> of each new-construction AI data
+              center — but not how that capacity splits between tenants. These
+              are purpose-built AI facilities, but they are owned and operated
+              by cloud providers (Microsoft, Amazon, Google) that also serve
+              their own products and cloud customers from the same sites.
+              The dashboard attributes 100% of each facility to a single
+              frontier lab based on editorial judgment:
+            </p>
+            <ul className={styles.limitationsList}>
+              <li>
+                <strong>Microsoft / Oracle facilities → OpenAI</strong> — but
+                Microsoft also serves Azure AI customers, Copilot, and Bing
+                from the same campuses.
+              </li>
+              <li>
+                <strong>Amazon facilities → Anthropic</strong> — based on the
+                Project Rainier partnership, but Amazon serves all AWS customers
+                from shared infrastructure.
+              </li>
+              <li>
+                <strong>Google facilities → Gemini</strong> — but Google uses
+                these TPU clusters for Search, YouTube, Ads, Cloud customers,
+                and Gemini simultaneously. Only a fraction goes to frontier
+                training.
+              </li>
+            </ul>
+            <p className={styles.tierNote}>
+              This editorial 100% attribution likely{' '}
+              <strong>over-attributes</strong> frontier-training compute because
+              hyperscaler facilities also serve Copilot, Search, YouTube, Ads,
+              general cloud customers, and other internal workloads. The true
+              per-tenant allocation is proprietary.
+            </p>
+          </div>
+
+          {/* ── Confidence tier 3: cloud-lease estimates ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadgeSecondary}>ESTIMATE RANGE</span>
+              <span className={styles.tierLabel}>
+                Cloud-lease adjustments
+              </span>
+            </div>
+            <p className={styles.tierDesc}>
+              Cloud tenants also train on chips housed in{' '}
+              <strong>pre-existing hyperscaler facilities</strong> — data
+              centers that were not purpose-built for AI. These campuses host a
+              mix of AI accelerators alongside traditional cloud infrastructure
+              (storage, networking, general compute) serving many customers and
+              workloads. The AI chips inside them are shared across frontier
+              training, inference, and cloud-customer jobs — the
+              frontier-dedicated fraction is itself an estimate.
+            </p>
+            <p className={styles.tierDesc}>
+              We attempt to count only the capacity{' '}
+              <strong>not already captured</strong> by the satellite-tracked
+              facilities above. For example, Epoch already tracks some Project
+              Rainier sites (New Carlisle, Canton, Ridgeland) — our AWS
+              cloud-lease leg tries to add only the distributed capacity beyond
+              those. But this boundary is editorial, not verified — we cannot
+              confirm exactly what Epoch has already counted vs. what remains
+              invisible.
+            </p>
+            <p className={styles.tierDesc}>
+              We estimate from public announcements and convert to H100e using
+              published specs. <strong>Note:</strong> the names below refer to
+              chip architectures and partnership programs, not physical
+              facilities. The specific data centers hosting this capacity are
+              not publicly disclosed.
+            </p>
+            <ul className={styles.leaseLegList}>
+              {LEASE_LEGS.map((leg) => (
+                <li key={leg.handle} className={styles.leaseLegItem}>
+                  <div className={styles.leaseLegRow}>
+                    <span className={styles.leaseLegName}>{leg.label}</span>
+                    <span className={styles.leaseLegH100e}>
+                      → {formatH100e(leg.latestH100e)} H100e
+                    </span>
+                  </div>
+                  <div className={styles.leaseLegMeta}>
+                    {leg.lab} · {leg.chipType} · {leg.h100eRatio}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className={styles.tierNote}>
+              None of these H100e numbers are directly stated in announcements.
+              We convert using estimated ratios and interpolate ramp schedules
+              from <code className={styles.code}>fleet.ts</code>.
+            </p>
+          </div>
+
+          {/* ── Double-count risk ── */}
+          <div className={styles.limitationsBlock}>
+            <h4 className={styles.limitationsTitle}>
+              Potential double-count risk
+            </h4>
+            <p className={styles.tierDesc}>
+              Anthropic&apos;s Google Cloud TPU lease (EAI-GCP) could physically
+              reside inside the same Google facilities we attribute to Gemini
+              (New Albany, Council Bluffs, Cedar Rapids, etc.). If so, some
+              capacity would be counted twice — once as Gemini satellite-tracked
+              and again as Anthropic cloud-lease. We cannot verify this from
+              public data. The same risk applies to any Amazon facility
+              attributed to Anthropic that also serves general AWS workloads.
+            </p>
+          </div>
+
+          {/* ── Projections ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadgeSupp}>PROJECTION</span>
+              <span className={styles.tierLabel}>
+                2029 targets
+              </span>
+            </div>
+            <p className={styles.tierDesc}>
+              Power-constrained linear interpolation of Epoch ramps + announced
+              cloud growth. Ease-out curve (1-(1-t)^1.8) with ±8% base + 6%/yr
+              uncertainty → displayed as ±20–24% bands by Jan 2029.
+            </p>
+          </div>
+
+          {/* ── Key limitations ── */}
+          <div className={styles.limitationsBlock}>
+            <h4 className={styles.limitationsTitle}>
+              Key limitations (not fixable with public data)
+            </h4>
+            <ul className={styles.limitationsList}>
+              <li>
+                Exact chip allocation between tenants inside hyperscaler
+                facilities is proprietary — no public source breaks this out.
+              </li>
+              <li>
+                Satellite-tracked capacity is attributed 100% to a single
+                frontier lab per facility, even when the operator serves
+                multiple tenants and its own products.
+              </li>
+              <li>Facility timelines have ±6 months uncertainty.</li>
+              <li>Non-U.S. and smaller sites are underrepresented in satellite data.</li>
+              <li>
+                Future efficiency gains, cancellations, or new partnerships
+                could shift numbers materially.
+              </li>
+            </ul>
+          </div>
+
+          {/* ── How to cite ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierLabel}>How to cite</span>
+            </div>
+            <p className={styles.tierDesc}>
+              AI Arms Race Dashboard by Adi Wasserman. Primary data: Epoch AI
+              (live-fetched). Methodology &amp; Limitations last updated April
+              2026. Full sources in this modal.{' '}
+              <a
+                href="https://adi-wasserman.github.io/ai-arms-race/"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.citeLink}
+              >
+                adi-wasserman.github.io/ai-arms-race
+              </a>
+            </p>
+          </div>
+
+          <p className={styles.tierNote}>
+            All raw sources and Epoch methodology links are listed in section 5
+            below. Data refreshes on every page load.
+          </p>
+      </div>
+    </section>
+  );
+}
+
 export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | null {
   // Escape-key dismissal + body-scroll lock while open.
   useEffect(() => {
@@ -536,9 +813,12 @@ export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | nu
             </ul>
           </section>
 
+          {/* ─── Methodology & Limitations (collapsible) ─── */}
+          <MethodologySection />
+
           {/* ─── Data sources by section ─── */}
           <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>4 · Data Sources by Section</h3>
+            <h3 className={styles.sectionTitle}>5 · Data Sources by Section</h3>
             {SECTION_SOURCES.map((s) => (
               <div key={s.anchor} className={styles.sectionBlock}>
                 <h4 className={styles.sectionBlockTitle}>

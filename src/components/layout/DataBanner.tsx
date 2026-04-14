@@ -108,7 +108,7 @@ export function DataBanner(): JSX.Element {
             title="Sources, override table, uncertainty notes"
             aria-haspopup="dialog"
           >
-            ⓘ ABOUT THIS DATA
+            ⓘ DATA &amp; METHODOLOGY
           </button>
           <button type="button" className={styles.button} onClick={handleRefresh}>
             ↻ REFRESH DATA
