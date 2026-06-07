@@ -23,12 +23,12 @@ function ModelsSectionInner(): JSX.Element {
   return (
     <>
       <div className={styles.takeaways}>
-        <h3 className={styles.takeawaysTitle}>KEY TAKEAWAYS — APRIL 2026</h3>
+        <h3 className={styles.takeawaysTitle}>KEY TAKEAWAYS — JUNE 2026</h3>
         <ul className={styles.takeawaysList}>
           <li>
-            <strong>No single model dominates.</strong> Among public models,
-            GPT-5.4 and Claude Opus 4.6 each lead 4 benchmarks, Gemini 3.1
-            Pro leads 2.
+            <strong>No single model dominates.</strong> Claude Opus 4.8 leads
+            AA Index (61) and SWE-bench (88.6%), GPT-5.5 leads ARC-AGI-2 (85%),
+            Gemini 3.1 Pro leads GPQA (94.3%).
           </li>
           <li>
             <strong>More compute still produces better frontier models.</strong>{' '}

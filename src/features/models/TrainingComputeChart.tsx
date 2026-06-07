@@ -63,11 +63,11 @@ const MODELS: readonly ModelPoint[] = [
   { name: 'Grok 3', lab: 'xAI', year: 2025.15, flops: 2.5e25, color: LAB_COLOR.xAI, estimated: true },
 
   // ── 2026 frontier ──
-  { name: 'Gemini 3.1 Pro', lab: 'Google', year: 2026.0, flops: 1.5e26, color: LAB_COLOR.Google, estimated: true },
-  { name: 'Claude Opus 4.6', lab: 'Anthropic', year: 2026.08, flops: 2e26, color: LAB_COLOR.Anthropic, estimated: true },
-  { name: 'GPT-5.4', lab: 'OpenAI', year: 2026.13, flops: 1.8e26, color: LAB_COLOR.OpenAI, estimated: true },
-  { name: 'Grok 4', lab: 'xAI', year: 2026.25, flops: 5e26, color: LAB_COLOR.xAI, estimated: true },
+  { name: 'Gemini 3.1 Pro', lab: 'Google', year: 2026.14, flops: 1.5e26, color: LAB_COLOR.Google, estimated: true },
   { name: 'Muse Spark', lab: 'Meta', year: 2026.27, flops: 2e25, color: LAB_COLOR.Meta, estimated: true },
+  { name: 'GPT-5.5', lab: 'OpenAI', year: 2026.31, flops: 2.5e26, color: LAB_COLOR.OpenAI, estimated: true },
+  { name: 'Grok 4.3', lab: 'xAI', year: 2026.33, flops: 5e26, color: LAB_COLOR.xAI, estimated: true },
+  { name: 'Claude Opus 4.8', lab: 'Anthropic', year: 2026.41, flops: 2.8e26, color: LAB_COLOR.Anthropic, estimated: true },
 ];
 
 /**

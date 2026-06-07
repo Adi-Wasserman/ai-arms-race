@@ -12,12 +12,12 @@ import styles from './MetrChart.module.css';
 
 const DOT_COLOR = '#2d8a4e';
 
-/** Human-readable time horizon reference tasks, pinned to Y values. */
+/** Human-readable time horizon reference tasks, pinned to Y values (hours). */
 const TASKS: readonly { h: number; text: string }[] = [
   { h: 1, text: 'Fix bugs in small Python libraries' },
-  { h: 2.5, text: 'Exploit a buffer overflow in libiec61850' },
   { h: 4, text: 'Train adversarially robust image model' },
-  { h: 8, text: 'Exploit a vulnerable Ethereum smart contract' },
+  { h: 24, text: '~1 day: full feature implementation' },
+  { h: 168, text: '~1 week: complex multi-file refactor' },
 ];
 
 /** Shape of each METR scatter point after enrichment. */
@@ -47,11 +47,11 @@ function MetrChartInner(
     }));
     const radii = points.map((p) => (p.showLabel ? 7 : 5));
 
-    // Exponential trend anchored at GPT-5 (Aug 2025, 137 min),
-    // doubling every 150 days — matches the METR page curve.
-    const anchorDate = new Date('2025-08-06').getTime();
-    const anchorVal = 137 / 60;
-    const doublingMs = 150 * 86_400_000;
+    // Exponential trend anchored at GPT-5 (Aug 2025, 7849 min),
+    // doubling every 129 days — matches the METR TH 1.1 fit.
+    const anchorDate = new Date('2025-08-07').getTime();
+    const anchorVal = 7849 / 60; // hours
+    const doublingMs = 129 * 86_400_000;
     const trendData: { x: string; y: number }[] = [];
     for (
       let d = new Date('2019-01-01');
@@ -60,14 +60,11 @@ function MetrChartInner(
     ) {
       const elapsed = d.getTime() - anchorDate;
       const val = anchorVal * Math.pow(2, elapsed / doublingMs);
-      if (val <= 16) {
+      if (val >= 0.01 && val <= 2000) {
         trendData.push({ x: d.toISOString().slice(0, 10), y: val });
       }
     }
 
-    // Mixed chart — scatter points + a line overlay for the exponential
-    // trend. Cast at this single boundary since Chart.js's TS types
-    // don't model per-dataset type overrides.
     const chartData = {
       datasets: [
         {
@@ -82,7 +79,7 @@ function MetrChartInner(
           order: 1,
         },
         {
-          label: 'Exponential trend',
+          label: 'Exponential trend (~129-day doubling)',
           type: 'line',
           data: trendData,
           borderColor: 'rgba(45, 138, 78, 0.4)',
@@ -103,7 +100,6 @@ function MetrChartInner(
     // Model name labels — only the "featured" rows.
     points.forEach((pt, i) => {
       if (!pt.showLabel) return;
-      const isHigh = pt.y > 3;
       annotations[`m${i}`] = {
         type: 'label',
         xValue: pt.x,
@@ -112,7 +108,7 @@ function MetrChartInner(
         color: 'rgba(255, 255, 255, 0.8)',
         font: { size: 11, weight: 600 },
         xAdjust: 14,
-        yAdjust: isHigh ? -14 : 8,
+        yAdjust: -14,
         backgroundColor: 'transparent',
         textAlign: 'left',
       };
@@ -151,19 +147,18 @@ function MetrChartInner(
           ticks: { color: 'rgba(255, 255, 255, 0.4)', font: { size: 12 } },
         },
         y: {
-          type: 'linear',
-          min: -0.5,
-          max: 16,
+          type: 'logarithmic',
+          min: 0.03,
+          max: 1500,
           ticks: {
             color: 'rgba(255, 255, 255, 0.45)',
-            font: { size: 12, weight: 600 },
-            stepSize: 1,
+            font: { size: 11, weight: 600 },
             callback: (v) => {
               const n = Number(v);
-              if (n < 0) return '';
-              if (n === 0) return '0';
-              if (n === 0.5) return '30 min';
-              return `${n}${n === 1 ? ' hour' : ' hours'}`;
+              if (n < 1) return `${Math.round(n * 60)} min`;
+              if (n < 24) return `${n} hr`;
+              if (n < 168) return `${Math.round(n / 24)}d`;
+              return `${Math.round(n / 168)}w`;
             },
           },
         },
@@ -203,7 +198,8 @@ function MetrChartInner(
               const pt = ctx.raw as MetrPoint;
               const m = pt.rawMin;
               let str: string;
-              if (m >= 60) str = `${(m / 60).toFixed(1)} hours`;
+              if (m >= 1440) str = `${(m / 1440).toFixed(1)} days`;
+              else if (m >= 60) str = `${(m / 60).toFixed(1)} hours`;
               else if (m >= 1) str = `${Math.round(m)} minutes`;
               else str = `${Math.round(m * 60)} seconds`;
               return `Task Length: ${str}`;
@@ -225,10 +221,12 @@ function MetrChartInner(
         WITH 50% RELIABILITY?
       </div>
       <div className={styles.intro}>
-        AI task-completion ability is <strong>doubling roughly every 4 months</strong>.
-        In early 2023, models could handle tasks taking a human ~1 minute. By early
-        2026, Claude Opus 4.6 reached <strong>14.5 hours</strong> — completing work
-        that would take a human expert most of two business days.
+        AI task-completion ability is <strong>doubling roughly every 4 months</strong>{' '}
+        (129 days, 95% CI: 104–158). In early 2023, GPT-4 could handle tasks
+        taking a human ~4 hours. By early 2026, Claude Opus 4.6 reached{' '}
+        <strong>~30 days</strong> — and Claude Mythos Preview is already
+        at ~17 hours on the newer TH 1.1 suite (which recalibrated estimates
+        significantly upward for recent models).
       </div>
       <div className={styles.wrapper}>
         <BaseChart<'scatter'>

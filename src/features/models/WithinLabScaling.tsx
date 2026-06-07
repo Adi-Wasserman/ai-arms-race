@@ -29,14 +29,14 @@ const GPT_FAMILY: readonly ModelGen[] = [
   { label: 'GPT-3',   flops: 3.14e23, score: 22 },
   { label: 'GPT-4',   flops: 2.1e25,  score: 42 },
   { label: 'GPT-4o',  flops: 6.4e25,  score: 52 },
-  { label: 'GPT-5.4', flops: 1.8e26,  score: 60 },
+  { label: 'GPT-5.5', flops: 2.5e26,  score: 60 },
 ];
 
 const CLAUDE_FAMILY: readonly ModelGen[] = [
   { label: 'Claude 2',       flops: 5e23,  score: 20 },
   { label: 'Claude 3 Opus',  flops: 1.8e25, score: 40 },
   { label: 'Claude Opus 4',  flops: 8e25,  score: 50 },
-  { label: 'Claude Opus 4.6', flops: 2e26,  score: 55 },
+  { label: 'Claude Opus 4.8', flops: 2.8e26,  score: 61 },
 ];
 
 const COLOR_GPT = '#00ff87';
