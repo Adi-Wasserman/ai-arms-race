@@ -282,8 +282,9 @@ const UNCERTAINTY_NOTES: readonly UncertaintyNote[] = [
     band: 'analyst estimate',
     source:
       'Sourced from announced multi-cloud agreements (AWS Trainium, ' +
-      'Google + Broadcom multi-GW TPU deal, Azure Stargate). Not satellite-' +
-      'verifiable — treat as a rough envelope, not a precise number.',
+      'Google + Broadcom multi-GW TPU deal, Azure Stargate) plus 2026 ' +
+      'Colossus rental contracts (Anthropic $1.25B/mo, Google $920M/mo). ' +
+      'Not satellite-verifiable — treat as a rough envelope, not a precise number.',
   },
   {
     metric: '2029 projections',
@@ -504,6 +505,39 @@ function MethodologySection(): JSX.Element {
             </p>
           </div>
 
+          {/* ── Recent major compute contracts ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadgeSecondary}>NEW — 2026</span>
+              <span className={styles.tierLabel}>
+                Recent major compute contracts
+              </span>
+            </div>
+            <ul className={styles.limitationsList}>
+              <li>
+                <strong>Anthropic → xAI/Colossus</strong> (announced May 2026):
+                ~$1.25 billion per month through May 2029 for a large block of
+                Colossus capacity (initially ~300 MW, ramping). One of the
+                largest single compute rental agreements in the industry.
+              </li>
+              <li>
+                <strong>Google → SpaceX/xAI</strong> (SEC filing, June 5 2026):
+                ~$920 million per month (Oct 2026 – Jun 2029) for approximately
+                110,000 NVIDIA GPUs housed in SpaceX/xAI data centers, with
+                capacity ramping at a reduced rate through Sep 2026. Tied to
+                SpaceX&apos;s upcoming IPO.
+              </li>
+            </ul>
+            <p className={styles.tierNote}>
+              These long-term rentals are incorporated into fleet estimates where
+              attribution is clear. Lab assignment remains editorial — Colossus
+              hardware is owned by SpaceXAI but capacity is now multi-tenant
+              (xAI, Anthropic, Google, Cursor). H100e conversion for next-gen
+              chips (Rubin / Rubin Ultra) will be added as public specs become
+              available.
+            </p>
+          </div>
+
           {/* ── Double-count risk ── */}
           <div className={styles.limitationsBlock}>
             <h4 className={styles.limitationsTitle}>
@@ -517,6 +551,27 @@ function MethodologySection(): JSX.Element {
               and again as Anthropic cloud-lease. We cannot verify this from
               public data. The same risk applies to any Amazon facility
               attributed to Anthropic that also serves general AWS workloads.
+              The new Colossus multi-tenant arrangements (Anthropic + Google
+              renting from SpaceXAI) create additional attribution complexity —
+              Colossus hardware ownership remains mapped to xAI while tenants
+              access capacity via rental agreements.
+            </p>
+          </div>
+
+          {/* ── Facility coverage ── */}
+          <div className={styles.tierBlock}>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadgeSupp}>COVERAGE</span>
+              <span className={styles.tierLabel}>
+                Facility tracking scope
+              </span>
+            </div>
+            <p className={styles.tierDesc}>
+              The dashboard tracks ~46 frontier-lab-attributed facilities out of
+              Epoch AI&apos;s broader database of 63 data centers. The remaining
+              ~17 are classified as &quot;Other&quot; (neutral cloud providers,
+              international operators) and excluded from lab aggregates and map
+              pins but still contribute to total industry estimates.
             </p>
           </div>
 

@@ -83,13 +83,23 @@ const BULLETS: readonly LeaseBullet[] = [
       'for 2027+ delivery. Not owned.',
   },
   {
-    operator: 'SpaceXAI Colossus (Memphis)',
-    lab: 'Anthropic + Cursor',
-    labColor: LAB_COLORS.xAI,
+    operator: 'SpaceXAI Colossus → Anthropic',
+    lab: 'Anthropic',
+    labColor: LAB_COLORS.Anthropic,
     detail:
-      'Colossus 1 & 2 are owned by SpaceXAI but Epoch lists Anthropic ' +
-      'and Cursor as tenants. xAI retains primary training access. ' +
-      'Hardware ownership mapped to xAI in our charts.',
+      '~$1.25B/month through May 2029 for Colossus capacity (initially ' +
+      '~300 MW, ramping). Announced May 2026. One of the largest single ' +
+      'compute rental agreements in the industry. Hardware ownership ' +
+      'mapped to xAI in our charts.',
+  },
+  {
+    operator: 'SpaceXAI Colossus → Google',
+    lab: 'Gemini',
+    labColor: LAB_COLORS.Gemini,
+    detail:
+      '~$920M/month (Oct 2026 – Jun 2029) for ~110,000 NVIDIA GPUs in ' +
+      'SpaceX/xAI data centers. SEC filing disclosed Jun 5, 2026. Tied ' +
+      'to SpaceX IPO. Capacity ramps at reduced rate through Sep 2026.',
   },
 ];
 
