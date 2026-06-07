@@ -22,7 +22,7 @@ any view is shareable via a copy-paste link.
 
 - **Epoch DB expanded** to 63 data centers (was ~23). All frontier lab sites mapped with coordinates.
 - **Stargate multi-site**: 7 US locations with >9 GW planned capacity by Q4 2028. Abilene operational at ~510K H100e / 590 MW.
-- **Colossus expansion**: SpaceXAI targeting 2 GW across Memphis campus (555K GPUs, MACROHARDRR 3rd building).
+- **Colossus expansion**: SpaceXAI targeting 2 GW across Memphis campus (555K GPUs, MACROHARDRR 3rd building). Colossus capacity now split among tenants: Anthropic ($1.25B/mo, [TechCrunch](https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/)) and Google ($920M/mo for 110K GPUs, [SEC filing](https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm)).
 - **Models updated**: GPT-5.5 (AA 60), Claude Opus 4.8 (AA 61, #1), Grok 4.3, Muse Spark, Claude Mythos (preview).
 - **METR corrected**: Official TH 1.1 data from metr.org replaces secondary-source estimates. Claude Opus 4.6 = ~30 days (was incorrectly ~14.5 hours).
 - **2029 projections refreshed**: OpenAI 15M H100e / 12 GW, Gemini 10M, Meta 7M, xAI 3.5M, Anthropic 10M.
