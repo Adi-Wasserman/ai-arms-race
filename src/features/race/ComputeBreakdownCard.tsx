@@ -264,9 +264,11 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                     </div>
                   )) : (
                     <div className={styles.noLegs}>
-                      {b.lab === 'Meta' || b.lab === 'xAI'
+                      {b.lab === 'Meta'
                         ? 'Owns all hardware — no cloud-lease'
-                        : 'All capacity via satellite'}
+                        : b.lab === 'xAI'
+                          ? 'Owns all hardware — rents capacity to Anthropic ($1.25B/mo) and Google ($920M/mo)'
+                          : 'All capacity via satellite'}
                     </div>
                   )}
                 </div>
