@@ -117,6 +117,18 @@ const SECTION_SOURCES: readonly SectionSources[] = [
         priority: 2,
       },
       {
+        name: 'TechCrunch — Anthropic ↔ xAI Colossus deal (May 2026)',
+        url: 'https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/',
+        desc: 'Anthropic pays ~$1.25B/mo through May 2029 for Colossus 1 capacity (~220K GPUs). Used for COL-ANT fleet leg.',
+        priority: 2,
+      },
+      {
+        name: 'SpaceX SEC filing — Google ↔ SpaceX/xAI GPU deal (Jun 2026)',
+        url: 'https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm',
+        desc: 'Google pays ~$920M/mo (Oct 2026 – Jun 2029) for ~110K NVIDIA GPUs in xAI data centers. Used for COL-GGL fleet leg.',
+        priority: 2,
+      },
+      {
         name: '2029 projection targets',
         desc: 'Per-lab power-constrained H100e + power targets derived from Epoch satellite ramps and announced cloud-lease growth. Ease-out interpolation with ±8% base + 6%/yr uncertainty.',
         priority: 3,
@@ -535,17 +547,30 @@ function MethodologySection(): JSX.Element {
             </div>
             <ul className={styles.limitationsList}>
               <li>
-                <strong>Anthropic → xAI/Colossus</strong> (announced May 2026):
-                ~$1.25 billion per month through May 2029 for a large block of
-                Colossus capacity (initially ~300 MW, ramping). One of the
-                largest single compute rental agreements in the industry.
+                <strong>Anthropic → xAI/Colossus</strong> (
+                <a
+                  href="https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  TechCrunch, May 20
+                </a>
+                ): ~$1.25 billion per month through May 2029 for the entire
+                Colossus 1 output (~220K GPUs, initially ~300 MW, ramping). One
+                of the largest single compute rental agreements in the industry.
               </li>
               <li>
-                <strong>Google → SpaceX/xAI</strong> (SEC filing, June 5 2026):
-                ~$920 million per month (Oct 2026 – Jun 2029) for approximately
-                110,000 NVIDIA GPUs housed in SpaceX/xAI data centers, with
-                capacity ramping at a reduced rate through Sep 2026. Tied to
-                SpaceX&apos;s upcoming IPO.
+                <strong>Google → SpaceX/xAI</strong> (
+                <a
+                  href="https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  SpaceX SEC filing, Jun 5
+                </a>
+                ): ~$920 million per month (Oct 2026 – Jun 2029) for ~110,000
+                NVIDIA GPUs + CPUs/memory in SpaceX/xAI data centers. Total
+                value ~$32B. Tied to SpaceX&apos;s upcoming IPO.
               </li>
             </ul>
             <p className={styles.tierDesc}>

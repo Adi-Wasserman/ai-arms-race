@@ -44,14 +44,16 @@ const FLEET_LEG_INFO: Record<
   },
   'COL-ANT': {
     label: 'xAI Colossus tenant block',
-    source: 'Anthropic ↔ xAI deal (May 2026)',
-    sourceUrl: '',
+    source: 'TechCrunch — Anthropic ↔ xAI (May 2026)',
+    sourceUrl:
+      'https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/',
     conversion: '~300 MW / 1,086 MW × 832K ≈ 230K H100e',
   },
   'COL-GGL': {
     label: 'xAI Colossus tenant block',
-    source: 'Google ↔ SpaceX/xAI (SEC filing Jun 5, 2026)',
-    sourceUrl: '',
+    source: 'SpaceX SEC filing (Jun 5, 2026)',
+    sourceUrl:
+      'https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm',
     conversion: '~110K NVIDIA GPUs ≈ 110K H100e',
   },
   'COL-XAI-ADJ': {
@@ -367,6 +369,22 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                 rel="noreferrer"
               >
                 Fubon Research
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Anthropic ↔ xAI (TechCrunch)
+              </a>
+              <span className={styles.sourceBarSep}>&middot;</span>
+              <a
+                href="https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google ↔ SpaceX (SEC)
               </a>
             </div>
             <div className={styles.sourceBarRow}>
