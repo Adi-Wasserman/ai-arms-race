@@ -12,7 +12,7 @@ import type { MetrDataPoint } from '@/types';
  * recent models shifted up vs TH 1.0.
  */
 export const METR_HORIZONS: readonly MetrDataPoint[] = [
-  ['2019-02-14', 'GPT-2',                       3.2,     1],
+  ['2019-02-14', 'GPT-2',                       3.2,     0],
   ['2022-03-15', 'GPT-3.5 Turbo',              36.0,     0],
   ['2023-03-14', 'GPT-4',                      239.3,     1],
   ['2024-03-04', 'Claude 3 Opus',              237.1,     0],
