@@ -40,8 +40,9 @@ function MapSectionInner(): JSX.Element {
       <div className={styles.intro}>
         Nearly all frontier AI infrastructure is concentrated in the{' '}
         <strong>central and southern United States</strong> — driven by cheap land,
-        available power, and tax incentives. Abu Dhabi is the only major international
-        site, anchoring OpenAI's Stargate expansion.
+        available power, and tax incentives. OpenAI's Stargate portfolio now spans
+        7+ US sites (&gt;9 GW planned) plus Abu Dhabi. International expansion is
+        accelerating (Malaysia, Indonesia, Portugal) but the US remains dominant.
       </div>
 
       <LabLegend label="LAB" />
@@ -110,7 +111,7 @@ export function MapSection(): JSX.Element {
       id="geomap"
       title="GEO MAP"
       subtitle="WHERE AI INFRASTRUCTURE IS BEING BUILT · HOVER OR CLICK ANY PIN"
-      note="New-construction AI data centers from Epoch AI satellite imagery. Lab colors reflect editorial attribution — hyperscaler facilities (Microsoft, Amazon, Google) serve multiple tenants simultaneously. Only Meta and xAI are fully self-operated dedicated sites."
+      note="New-construction AI data centers from Epoch AI satellite imagery. Lab colors reflect editorial attribution — hyperscaler facilities (Microsoft, Amazon, Google) serve multiple tenants simultaneously. Meta is the only fully self-operated lab. xAI (SpaceXAI) owns Colossus but now leases capacity to Anthropic and Cursor."
     >
       <MapSectionInner />
     </SectionShell>
