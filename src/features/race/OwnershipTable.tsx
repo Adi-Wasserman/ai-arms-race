@@ -800,7 +800,15 @@ export function OwnershipTable(): JSX.Element {
         </span>
         <span>
           <span className={styles.metaLabel}>as of </span>
-          <span className={styles.metaValue}>{data.asOf}</span>
+          <span className={styles.metaValue}>
+            {data.asOf
+              ? new Date(data.asOf + 'T00:00:00').toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : '—'}
+          </span>
         </span>
         <span>
           <span className={styles.metaLabel}>updated </span>

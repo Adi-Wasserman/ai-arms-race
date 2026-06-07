@@ -214,11 +214,14 @@ function buildLatestByOwner(
 
   const snapshots: OwnerSnapshot[] = [];
   for (const [owner, rows] of byOwner) {
-    // Find this owner's latest end date.
-    let asOf = rows[0].endDate;
+    // Find this owner's latest PAST end date (exclude future projections).
+    const nowIso = new Date().toISOString().slice(0, 10);
+    let asOf = '';
     for (const r of rows) {
-      if (r.endDate > asOf) asOf = r.endDate;
+      if (r.endDate <= nowIso && r.endDate > asOf) asOf = r.endDate;
     }
+    // Fallback: if all dates are future, use the earliest.
+    if (!asOf) asOf = rows[0].endDate;
     // Sum every chip-type row in that latest quarter.
     const latestRows = rows.filter((r) => r.endDate === asOf);
     let h100e = 0;
@@ -334,10 +337,19 @@ export async function parseChipOwnersZip(
     mfrSet.add(r.manufacturer);
   }
 
-  // Latest end date across the dataset = "as of" stamp.
+  // Latest PAST end date across the dataset = "as of" stamp.
+  // The Epoch CSV includes future quarterly projections — filter to
+  // dates ≤ today so we don't show e.g. "May 2030" as the vintage.
+  const todayIso = new Date().toISOString().slice(0, 10);
   let asOf = '';
   for (const r of cumulativeByChipType) {
-    if (r.endDate > asOf) asOf = r.endDate;
+    if (r.endDate <= todayIso && r.endDate > asOf) asOf = r.endDate;
+  }
+  // Fallback: if no past dates found, use the earliest future date.
+  if (!asOf) {
+    for (const r of cumulativeByChipType) {
+      if (!asOf || r.endDate < asOf) asOf = r.endDate;
+    }
   }
 
   return {
