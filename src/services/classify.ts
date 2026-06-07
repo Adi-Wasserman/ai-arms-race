@@ -7,10 +7,13 @@ import type { ConfidenceTag, LabOrOther } from '@/types';
 export function classifyLab(users: string, owner: string): LabOrOther {
   const s = (users || '').toLowerCase();
   const w = (owner || '').toLowerCase();
+  // Owner-first for SpaceXAI: Colossus 1/2 are xAI facilities even though
+  // their Users column lists Anthropic/Cursor as tenants.
+  if (w.includes('spacexai')) return 'xAI';
   if (s.includes('openai')) return 'OpenAI';
   if (s.includes('google deepmind')) return 'Gemini';
   if (s.includes('meta')) return 'Meta';
-  if (s.includes('xai')) return 'xAI';
+  if (s.includes('xai') || s.includes('spacexai')) return 'xAI';
   if (s.includes('anthropic')) return 'Anthropic';
   if (s.includes('microsoft')) return 'OpenAI';
   if (w.includes('google')) return 'Gemini';

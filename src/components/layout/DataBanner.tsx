@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { TruthModal } from '@/components/ui/TruthModal';
 import { useDashboard } from '@/store';
@@ -18,15 +18,17 @@ function deriveStatus(
   error: string | null,
   dataSource: 'epoch' | 'fallback' | null,
   dataCenters: number,
+  epochVintage: string | null,
 ): StatusDescriptor {
   if (loading) return { status: 'loading', text: 'Loading Epoch data…' };
   if (error && dataSource !== 'epoch') {
     return { status: 'error', text: `Fetch failed — ${error}` };
   }
+  const vintage = epochVintage ? ` · data as of ${epochVintage}` : '';
   if (dataSource === 'fallback') {
-    return { status: 'stale', text: `Fallback data — ${dataCenters} facilities` };
+    return { status: 'stale', text: `Fallback data — ${dataCenters} facilities${vintage}` };
   }
-  return { status: 'ok', text: `Live — Epoch AI · ${dataCenters} facilities` };
+  return { status: 'ok', text: `Live — Epoch AI · ${dataCenters} facilities${vintage}` };
 }
 
 export function DataBanner(): JSX.Element {
@@ -35,8 +37,22 @@ export function DataBanner(): JSX.Element {
   const dataSource = useDashboard((s) => s.dataSource);
   const dataCenters = useDashboard((s) => s.dataCenters.filter((dc) => dc.co !== 'Other').length);
   const lastUpdated = useDashboard((s) => s.lastUpdated);
+  const timeline = useDashboard((s) => s.timeline);
 
-  const { status, text } = deriveStatus(loading, error, dataSource, dataCenters);
+  // Most recent observation date in the dataset — the Epoch data vintage.
+  const epochVintage = useMemo(() => {
+    if (timeline.length === 0) return null;
+    let max = '';
+    for (const e of timeline) {
+      if (e.date > max) max = e.date;
+    }
+    if (!max) return null;
+    // Format as "Jun 6, 2026" from "2026-06-06".
+    const d = new Date(max + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }, [timeline]);
+
+  const { status, text } = deriveStatus(loading, error, dataSource, dataCenters, epochVintage);
 
   const [copied, setCopied] = useState(false);
   const [truthOpen, setTruthOpen] = useState(false);
