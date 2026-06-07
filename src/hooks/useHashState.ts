@@ -31,7 +31,7 @@ type ValidSection = (typeof VALID_SECTIONS)[number];
 
 const DEFAULTS = {
   metric: 'h100e' as MetricMode,
-  scope: 'tracked' as ScopeMode,
+  scope: 'fleet' as ScopeMode,
   projMode: 'current' as ProjMode,
   scatterView: 'observed' as ScatterView,
   labFilter: 'ALL' as LabFilter,

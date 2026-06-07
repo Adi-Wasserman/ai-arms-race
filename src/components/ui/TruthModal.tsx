@@ -192,9 +192,9 @@ const SECTION_SOURCES: readonly SectionSources[] = [
         priority: 1,
       },
       {
-        name: 'METR · Time Horizons',
+        name: 'METR · Time Horizons TH 1.1',
         url: 'https://metr.org/time-horizons/',
-        desc: '50% task-completion time horizon per model. Some data from secondary write-ups (LessWrong, OfficeChai).',
+        desc: '50% task-completion time horizon per model. Official TH 1.1 data (May 2026). 27 models evaluated.',
         priority: 1,
       },
       {
@@ -304,11 +304,11 @@ const UNCERTAINTY_NOTES: readonly UncertaintyNote[] = [
   },
   {
     metric: 'METR Time Horizons',
-    band: 'mixed-source',
+    band: 'TH 1.1 official',
     source:
-      'Some data points come from secondary write-ups (LessWrong, OfficeChai) ' +
-      'rather than the primary METR YAML. Newer measurements (post-2025-Q3) ' +
-      'should be treated as preliminary until back-validated.',
+      'All data points now sourced from official METR TH 1.1 (metr.org/time-horizons/, ' +
+      'last updated May 2026). Doubling time ~129 days (95% CI: 104–158). ' +
+      'TH 1.1 recalibrated estimates significantly upward vs TH 1.0.',
   },
 ];
 
@@ -566,7 +566,7 @@ function MethodologySection(): JSX.Element {
             </div>
             <p className={styles.tierDesc}>
               AI Arms Race Dashboard by Adi Wasserman. Primary data: Epoch AI
-              (live-fetched). Methodology &amp; Limitations last updated April
+              (live-fetched). Methodology &amp; Limitations last updated June
               2026. Full sources in this modal.{' '}
               <a
                 href="https://adi-wasserman.github.io/ai-arms-race/"

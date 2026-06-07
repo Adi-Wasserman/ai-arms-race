@@ -48,8 +48,9 @@ export const LAB_OWNERSHIP_CONFIG: Readonly<Record<Lab, LabOwnershipConfig>> = {
   // Meta operates its own facilities and owns its Nvidia chips.
   Meta: { selfOwned: ['Meta'] },
 
-  // xAI built and operates Colossus 1 + 2 directly.
-  xAI: { selfOwned: ['xAI'] },
+  // xAI/SpaceXAI built and operates Colossus 1 + 2 directly.
+  // Epoch renamed owner from "xAI" to "SpaceXAI" in 2026.
+  xAI: { selfOwned: ['xAI', 'SpaceXAI'] },
 
   // Anthropic is in transition — funding Trainium2 purchases via AWS
   // partnership and starting to take direct ownership of capacity, but
