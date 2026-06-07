@@ -82,6 +82,15 @@ const BULLETS: readonly LeaseBullet[] = [
       'commercial cloud partnership. Multi-GW deal announced Apr 2026 ' +
       'for 2027+ delivery. Not owned.',
   },
+  {
+    operator: 'SpaceXAI Colossus (Memphis)',
+    lab: 'Anthropic + Cursor',
+    labColor: LAB_COLORS.xAI,
+    detail:
+      'Colossus 1 & 2 are owned by SpaceXAI but Epoch lists Anthropic ' +
+      'and Cursor as tenants. xAI retains primary training access. ' +
+      'Hardware ownership mapped to xAI in our charts.',
+  },
 ];
 
 const DISCLAIMER =

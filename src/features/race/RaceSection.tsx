@@ -133,11 +133,11 @@ function RaceSectionInner(): JSX.Element {
   return (
     <>
       <div className={styles.insights}>
-        <h2 className={styles.insightsTitle}>KEY INSIGHTS — APRIL 2026</h2>
+        <h2 className={styles.insightsTitle}>KEY INSIGHTS — JUNE 2026</h2>
         <div className={styles.insightsGrid}>
           <div>
-            <strong>Anthropic leads compute today</strong> (2.0M H100e, 18%
-            ahead) — but the gap is narrowing fast.
+            <strong>Anthropic leads total capacity</strong> (~2M H100e via 3-cloud
+            fleet) — but OpenAI is closing fast with Stargate multi-site ramp.
           </div>
           <div>
             <strong>Compute still rules</strong> — frontier training FLOPs grow
@@ -146,12 +146,13 @@ function RaceSectionInner(): JSX.Element {
           </div>
           <div>
             <strong>Ownership moat matters for 2027+</strong> — Gemini/Meta/xAI
-            own their silicon; OpenAI/Anthropic are cloud tenants.
+            own their silicon; OpenAI/Anthropic are cloud tenants. Frontier
+            labs control &lt;30% of global AI compute (Epoch).
           </div>
           <div>
-            <strong>No single model dominates</strong> — among public models,
-            GPT-5.4 and Claude Opus 4.6 each lead 4 benchmarks, Gemini 3.1
-            Pro leads 2.
+            <strong>No single model dominates</strong> — Claude Opus 4.8 leads
+            AA Index (61) and SWE-bench (88.6%), GPT-5.5 leads ARC-AGI-2
+            (85%), Gemini 3.1 Pro leads GPQA (94.3%).
           </div>
         </div>
       </div>

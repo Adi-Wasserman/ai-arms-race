@@ -11,6 +11,12 @@ import styles from './ProjectionPanel.module.css';
 
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
+/** Format "2026-06-07" → "JUN 2026". */
+function fmtMonthYear(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+}
+
 function rankSymbol(i: number): string {
   if (i === 0) return '🥇';
   if (i === 1) return '🥈';
@@ -75,7 +81,7 @@ export function ProjectionPanel(): JSX.Element | null {
       <div className={styles.columns}>
         <div className={`${styles.column} ${styles.now}`}>
           <div className={`${styles.colHeading} ${styles.now}`}>
-            📊 APR 2026 — OBSERVED
+            📊 {fmtMonthYear(TODAY_ISO)} — OBSERVED
           </div>
           {nowRows.map((r, i) => (
             <div key={r.lab} className={styles.row}>
@@ -151,8 +157,10 @@ export function ProjectionPanel(): JSX.Element | null {
           satellite facility ramps (Layer 1) + sourced cloud-lease fleet growth (Layer
           2). <strong>No speculative new facilities.</strong> Power is the binding
           constraint — new grid capacity requires 2-5 year interconnection queues.
-          Chip efficiency improvements (GB200, Trainium3, Ironwood) are factored into
-          H100e-per-MW ratios. Uncertainty bands widen ±8% base + 6%/year.{' '}
+          Chip efficiency improvements (GB200, Vera Rubin ~3×, Trainium3, Ironwood)
+          are factored into H100e-per-MW ratios. Stargate 7-site pipeline (&gt;9 GW
+          by Q4 2028), Colossus 2 GW expansion included. Uncertainty bands widen
+          ±8% base + 6%/year.{' '}
           <strong>
             These are target-based interpolations, not compound growth forecasts.
           </strong>
