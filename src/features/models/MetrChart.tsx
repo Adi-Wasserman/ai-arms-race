@@ -136,7 +136,7 @@ function MetrChartInner(
 
     const chartOptions: ChartOptions<'scatter'> = {
       interaction: { mode: 'point', intersect: true },
-      layout: { padding: { top: 10, right: 30, bottom: 10 } },
+      layout: { padding: { top: 10, right: 30, bottom: 10, left: 20 } },
       scales: {
         x: {
           type: 'time',
@@ -225,9 +225,8 @@ function MetrChartInner(
         AI task-completion ability is <strong>doubling roughly every 4 months</strong>{' '}
         (129 days, 95% CI: 104–158). In early 2023, GPT-4 could handle tasks
         taking a human ~4 hours. By early 2026, Claude Opus 4.6 reached{' '}
-        <strong>~30 days</strong> — and Claude Mythos Preview is already
-        at ~17 hours on the newer TH 1.1 suite (which recalibrated estimates
-        significantly upward for recent models).
+        <strong>~30 days</strong>. TH 1.1 recalibrated estimates significantly
+        upward for recent models vs earlier secondary-source figures.
       </div>
       <div className={styles.wrapper}>
         <BaseChart<'scatter'>

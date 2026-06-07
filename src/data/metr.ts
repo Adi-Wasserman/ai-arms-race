@@ -38,5 +38,4 @@ export const METR_HORIZONS: readonly MetrDataPoint[] = [
   ['2026-02-05', 'GPT-5.3 Codex',           20971.8,     0],
   ['2026-02-19', 'Gemini 3.1 Pro',          23048.8,     0],
   ['2026-03-05', 'GPT-5.4',                 20504.1,     0],
-  ['2026-04-07', 'Claude Mythos Preview',     1044.8,     1],
 ] as const;
