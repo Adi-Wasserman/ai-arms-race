@@ -39,15 +39,17 @@ export function DataBanner(): JSX.Element {
   const lastUpdated = useDashboard((s) => s.lastUpdated);
   const timeline = useDashboard((s) => s.timeline);
 
-  // Most recent observation date in the dataset — the Epoch data vintage.
+  // Most recent PAST observation date — the Epoch data vintage.
+  // Timeline includes future projections (e.g. 2028+), so we filter
+  // to dates ≤ today to show when the data was last actually observed.
   const epochVintage = useMemo(() => {
     if (timeline.length === 0) return null;
+    const today = new Date().toISOString().slice(0, 10);
     let max = '';
     for (const e of timeline) {
-      if (e.date > max) max = e.date;
+      if (e.date <= today && e.date > max) max = e.date;
     }
     if (!max) return null;
-    // Format as "Jun 6, 2026" from "2026-06-06".
     const d = new Date(max + 'T00:00:00');
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }, [timeline]);
