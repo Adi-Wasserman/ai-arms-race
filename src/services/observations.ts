@@ -82,6 +82,36 @@ export function extractObservations(
     });
   }
 
+  if (allText.includes('permit') && allText.includes('filed')) {
+    obs.push({
+      icon: '📋',
+      category: 'PERMIT',
+      value: 'Filed',
+      meta: 'Construction permit on record',
+      signal: '+',
+    });
+  }
+
+  if (allText.includes('liquid cool') || allText.includes('direct-to-chip')) {
+    obs.push({
+      icon: '💧',
+      category: 'LIQUID COOLING',
+      value: 'Detected',
+      meta: 'Higher rack density',
+      signal: '+',
+    });
+  }
+
+  if (allText.includes('power purchase') || allText.includes('ppa')) {
+    obs.push({
+      icon: '📄',
+      category: 'PPA',
+      value: 'Signed',
+      meta: 'Power secured',
+      signal: '+',
+    });
+  }
+
   if (allText.includes('pause') || allText.includes('delay')) {
     obs.push({
       icon: '⚠️',

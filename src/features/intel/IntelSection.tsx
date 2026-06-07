@@ -32,7 +32,7 @@ function IntelSectionInner(): JSX.Element {
         <strong>satellite imagery, power ramp data, and observation count</strong>.
         Sites with visible cooling towers, completed roofs, and substation connections
         score highest. Timelines carry ±6 months of uncertainty; capacity estimates
-        ±1.4×.
+        are within a factor of ±1.4× at ~80% confidence (Epoch AI methodology).
       </div>
 
       <LabLegend label="" />
@@ -75,7 +75,7 @@ export function IntelSection(): JSX.Element {
       id="sites"
       title="INTEL"
       subtitle="SATELLITE-DERIVED CONSTRUCTION ANALYSIS · WHO'S BUILDING WHAT, AND HOW FAST"
-      note="Satellite-verified facilities from Epoch AI. Lab assignment is editorial — hyperscaler sites share capacity across Azure/AWS/GCP tenants and internal products. Only Meta and xAI facilities are dedicated single-lab operations."
+      note="Satellite-verified facilities from Epoch AI. Lab assignment is editorial — hyperscaler sites share capacity across Azure/AWS/GCP tenants and internal products. Meta is the only fully self-operated lab. xAI (SpaceXAI) owns Colossus but leases capacity to Anthropic and Cursor."
     >
       <IntelSectionInner />
     </SectionShell>

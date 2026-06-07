@@ -147,7 +147,7 @@ export function scoreConfidence(
   let desc = `${past.length} obs, ${future.length} proj. `;
   if (powerPct > 0) desc += `${Math.round(powerPct * 100)}% peak. `;
   if (phase === 0 && currentPower === 0) desc = 'No activity. ';
-  desc += '±6mo/±1.4×.';
+  desc += '±6mo timeline / ±1.4× capacity (Epoch ~80% CI).';
 
   return {
     score,
