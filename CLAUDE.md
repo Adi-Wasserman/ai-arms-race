@@ -8,52 +8,48 @@ A React + Vite dashboard tracking the AI infrastructure race — compute buildou
 
 ---
 
-## Current State (post-migration)
+## Current State (June 2026 refresh)
 
-All 4 sections ship and render from live Epoch AI data with fallback.
+All 4 sections ship and render from live Epoch AI data with fallback. Major June 2026 update: 63 Epoch facilities (was ~23), Stargate 7-site portfolio, Colossus tenant splits, GPT-5.5/Opus 4.8/Grok 4.3 models, official METR TH 1.1 data.
 
 ### Recent feature work
 
-- **Default view is now TOTAL CAPACITY** (was Satellite Only). Scope toggle renamed: `TOTAL CAPACITY | SATELLITE ONLY`. Default `scope: 'fleet'` in `raceSlice.ts`. The ACCESS terminal-tab subtitle reads "Total Capacity — who can train today".
+- **Default view is now TOTAL CAPACITY** (was Satellite Only). Scope toggle renamed: `TOTAL CAPACITY | SATELLITE ONLY`. Default `scope: 'fleet'` in both `raceSlice.ts` AND `useHashState.ts` (bug fix: hash default was previously `'tracked'`).
 
-- **ComputeBreakdownCard** (`src/features/race/ComputeBreakdownCard.tsx`): collapsible card (collapsed by default) below the chart showing per-lab H100e calculation breakdown. 3+2 card layout (top row: Anthropic/Gemini/OpenAI with cloud-lease legs; bottom row: Meta/xAI satellite-only). Each card shows satellite-verified facilities + cloud-lease legs with sources, H100e conversion ratios, and future ramp timelines (solid pills = past, dashed = future). Always visible in both ACCESS and OWNERSHIP modes.
+- **ComputeBreakdownCard** (`src/features/race/ComputeBreakdownCard.tsx`): collapsible card (collapsed by default) below the chart showing per-lab H100e calculation breakdown. 3+2 card layout (top row: Anthropic/Gemini/OpenAI with cloud-lease legs; bottom row: Meta/xAI). Each card shows satellite-verified facilities + cloud-lease legs with sources, H100e conversion ratios, and future ramp timelines (solid pills = past, dashed = future). xAI card now shows Colossus tenant subtraction (COL-XAI-ADJ). Always visible in both ACCESS and OWNERSHIP modes.
 
-- **"Who Trains on Whose Chips"** (renamed from "Known Major Leases"): `KnownLeasesCard.tsx`. Now shown in ALL modes. 5 bullets: Microsoft Azure+Stargate→OpenAI, Google (owns TPUs)→Gemini, AWS Trainium→Anthropic, Microsoft Azure+NVIDIA→Anthropic, Google (TPUs rented via Google Cloud + Broadcom)→Anthropic. localStorage: `knownLeasesCardCollapsed_v1`.
+- **Colossus tenant split** (June 2026): xAI's satellite-verified Colossus capacity is now split among tenants using net-zero fleet entries:
+  - `COL-ANT`: Anthropic Colossus tenant block (~230K H100e, ~300 MW). Source: [$1.25B/mo deal](https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/).
+  - `COL-GGL`: Google/Gemini Colossus tenant block (~110K H100e, 110K GPUs). Source: [SpaceX SEC filing](https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm).
+  - `COL-XAI-ADJ`: Negative balancing entry subtracts rented capacity from xAI. Industry total unchanged.
 
-- **Preview models** (`src/data/models.ts`): `preview: true` flag triggers dashed borders, amber "PREVIEW" badges in `BenchmarkTable.tsx`. Preview models excluded from benchmark leader counts (KEY FINDING). Two preview models:
-  - **Claude Mythos**: unreleased Anthropic model (Project Glasswing). Benchmarks Anthropic-reported, not independently verified.
-  - **Muse Spark**: Meta's frontier flagship (2026-04-08). Per-benchmark scores self-reported, pending independent verification. `aaIndex: 52` independently measured by AA.
-  - Both render on a dedicated 2-column row in the notes grid, separate from verified models.
+- **"Who Trains on Whose Chips"** (renamed from "Known Major Leases"): `KnownLeasesCard.tsx`. Now shown in ALL modes. 7 bullets: Microsoft Azure+Stargate→OpenAI, Google (owns TPUs)→Gemini, AWS Trainium→Anthropic, Microsoft Azure+NVIDIA→Anthropic, Google (TPUs rented via Google Cloud + Broadcom)→Anthropic, SpaceXAI Colossus→Anthropic ($1.25B/mo), SpaceXAI Colossus→Google ($920M/mo). localStorage: `knownLeasesCardCollapsed_v1`.
 
-- **Hardware Ownership view** (Race → OWNERSHIP tab): `OwnershipTable` sourced from `useEpochChipOwners` (Epoch ZIP, JSZip + PapaParse, localStorage 24h TTL). **Auto-refreshes every 5 minutes**.
+- **Frontier models** (`src/data/models.ts`): snapshot June 2026. 4 verified + 2 preview:
+  - **GPT-5.5** (OpenAI, 2026-04-23): AA Index 60, ARC-AGI-2 85%, SWE-bench 82.6%. $5/$30. 922K context.
+  - **Gemini 3.1 Pro** (Google, 2026-02-19): AA Index 57, GPQA 94.3%. $2/$12. 2M context.
+  - **Claude Opus 4.8** (Anthropic, 2026-05-28): AA Index 61 (#1), SWE-bench 88.6%, OSWorld 83.4%. $5/$25. 1M context.
+  - **Grok 4.3** (xAI, 2026-04-30): AA Index 53, fastest at 194 tok/s. $1.25/$2.50. 1M context.
+  - **Muse Spark** (Meta, preview): AA Index 52, self-reported scores.
+  - **Claude Mythos** (Anthropic, preview): SWE-bench 93.9%, invitation-only via Project Glasswing. Public release confirmed "coming weeks" (May 28).
 
-- **OwnershipTable**: editorial lede "3 of 5 labs self-operated, 2 tenants". SELF-OPERATED = Google, Meta, xAI. SHARED HOST = Microsoft (OpenAI), Amazon (Anthropic). Lab-colored rows, H100e MEDIAN column, chip mix bars. `table-layout: fixed`.
+- **METR Time Horizons** (`src/data/metr.ts`): Official TH 1.1 data from metr.org (27 models). Linear Y-axis (hours). Doubling time ~129 days (95% CI: 104–158). Claude Opus 4.6 = ~30 days. GPT-2 label hidden (overlaps Y-axis at linear scale).
 
-- **FrontierOutlookCard**: renders only under OWNERSHIP tab (not ACCESS). Shows % owned ranking with proof text. Consolidated footnote: override caveat + Broadcom deal inline link. No growth figures (redundant with OwnershipTable).
+- **Hardware Ownership view** (Race → OWNERSHIP tab): `OwnershipTable` sourced from `useEpochChipOwners` (Epoch ZIP, JSZip + PapaParse, localStorage 24h TTL). **Auto-refreshes every 5 minutes**. `asOf` date now filters to past dates only (was showing future projections like "May 2030").
 
-- **Leaderboard**: single metrics line per lab: `2.0M H100e · 1.91 GW · 25% owned`. No analyst estimates. Wider (320px), larger fonts. Chart height hero-sized: `min-height: max(560px, 65vh)`. 2029 projection lines at 12px font.
+- **DataBanner**: facility count filters out "Other" labs. Shows Epoch data vintage (most recent past observation date) and fetch timestamp. Both fully dynamic.
 
-- **DataBanner**: facility count filters out "Other" labs to match Geo Map pin count.
+- **Training Compute Growth chart**: 23 model releases across 5 labs (GPT-3 through Opus 4.8) by year vs training FLOPs (log scale) with ~5x/year trend.
 
-- **BenchmarkTable data sources**: linked list of all 10 benchmarks below notes grid (AA v4.0, GPQA Diamond, SWE-bench Verified, ARC-AGI-2, AIME '25, MMMU-Pro, HLE, GDPval, OSWorld, BrowseComp).
+- **Within-Lab Scaling chart**: dual-axis line chart. GPT family: GPT-3→GPT-4→GPT-4o→GPT-5.5 (+38 pts). Claude family: Claude 2→3 Opus→Opus 4→Opus 4.8 (+41 pts).
 
-- **TruthModal data sources**: all benchmarks and cloud-lease sources have clickable URLs. Includes Broadcom TPU deal (Apr 2026).
+- **Observation signals** (`src/services/observations.ts`): 10 signal types — cooling towers, chillers, roof, generators, substation, turbines, permits, liquid cooling, PPAs, delays.
 
-- **Race section DATA footer**: lists all 7 cloud-lease sources with links (Amazon, Anthropic GCP TPU, Anthropic Broadcom, NVIDIA, SemiAnalysis, Google Cloud, Fubon Research).
-
-- **Key Insights card** at top of Race section: 2×2 grid, green accent border. No meta line.
-
-- **Subtitle**: "POST-CHATGPT MOMENT (2024–)" (was ERA).
-
-- **Training Compute Growth chart** (`src/features/models/TrainingComputeChart.tsx`): 21 model releases across 5 labs by year vs training FLOPs (log scale) with ~5x/year trend.
-
-- **Within-Lab Scaling chart** (`src/features/models/WithinLabScaling.tsx`): dual-axis line chart (GPT + Claude families). Left Y = FLOPs (log), Right Y = performance score.
-
-- **FirstPrinciples explainer** (`src/features/models/FirstPrinciples.tsx`): collapsible editorial card explaining 6 drivers of frontier model quality. localStorage: `firstPrinciplesCollapsed_v1`.
+- **TruthModal** (`src/components/ui/TruthModal.tsx`): 5 sections. Includes "Recent Major Compute Contracts (2026)" with linked sources for Anthropic/Google Colossus deals. Methodology last updated June 2026. METR uncertainty note corrected to "TH 1.1 official".
 
 ### Editorial framing — operator vs lab (DO NOT REVERT)
 
-Epoch reports **operators**, not labs. Google/Meta/xAI are self-operated. OpenAI and Anthropic are cloud tenants. Don't treat `Microsoft H100e` as `OpenAI H100e`.
+Epoch reports **operators**, not labs. Google/Meta are self-operated. xAI/SpaceXAI owns Colossus but rents capacity to Anthropic and Google. OpenAI and Anthropic are cloud tenants. Don't treat `Microsoft H100e` as `OpenAI H100e`.
 
 ### Satellite data limitations for cloud tenants (DO NOT add per-lab YoY)
 
@@ -66,30 +62,42 @@ Do not attempt to compute per-lab YoY growth — it will produce misleading figu
 ### Key files
 
 ```
-src/features/race/ComputeBreakdownCard.tsx    # per-lab H100e breakdown (collapsed by default)
-src/features/race/KnownLeasesCard.tsx         # "Who Trains on Whose Chips" (5 bullets, all modes)
-src/features/race/OwnershipTable.tsx          # ownership view (3 self-operated, 2 shared host)
+src/features/race/ComputeBreakdownCard.tsx    # per-lab H100e breakdown (Colossus tenant legs)
+src/features/race/KnownLeasesCard.tsx         # "Who Trains on Whose Chips" (7 bullets, all modes)
+src/features/race/OwnershipTable.tsx          # ownership view, asOf filters past dates only
 src/features/race/FrontierOutlookCard.tsx     # "2027+" (OWNERSHIP tab only)
 src/features/race/Leaderboard.tsx             # single-line per lab, 2029 projections at 12px
-src/features/race/RaceSection.tsx             # master toggle + scope default
+src/features/race/RaceSection.tsx             # master toggle + scope default, Key Insights June 2026
 src/features/race/RaceChart.tsx               # hero-sized chart, starts 2024
 src/features/race/StatCards.tsx               # 3 cards: leader, compute, power
-src/features/models/TrainingComputeChart.tsx  # 21-model FLOPs scatter
-src/features/models/WithinLabScaling.tsx      # dual-axis GPT/Claude scaling chart
+src/features/race/ProjectionPanel.tsx         # dynamic month/year label, Stargate/Colossus notes
+src/features/models/TrainingComputeChart.tsx  # 23-model FLOPs scatter (through Opus 4.8)
+src/features/models/WithinLabScaling.tsx      # dual-axis GPT-5.5/Opus 4.8 scaling chart
+src/features/models/MetrChart.tsx             # METR TH 1.1, linear Y-axis, 27 models
 src/features/models/FirstPrinciples.tsx       # 6 first-principles explainer
 src/features/models/BenchmarkTable.tsx        # preview model support, linked data sources
 src/features/models/ScatterPlot.tsx           # OLD — exists but NOT imported
-src/data/models.ts                            # MODEL_SPECS (Mythos + Muse Spark = preview)
-src/data/fleet.ts                             # cloud-lease estimates with ramp schedules
-src/data/facilities.ts                        # FACILITY_COORDS + LAB_MAP (Coreweave=OpenAI)
+src/data/models.ts                            # MODEL_SPECS (6 models: GPT-5.5, Opus 4.8, etc.)
+src/data/metr.ts                              # METR TH 1.1 official data (27 models)
+src/data/fleet.ts                             # cloud-lease + Colossus tenant entries with ramps
+src/data/facilities.ts                        # FACILITY_COORDS (80+) + LAB_MAP (76 handles)
+src/data/projections.ts                       # 2029 targets (June 2026 refresh)
 src/store/slices/raceSlice.ts                 # default scope='fleet', no velocityMode
 src/hooks/useEpochChipOwners.ts               # 5min auto-refresh, force-refresh on mount
+src/hooks/useHashState.ts                     # default scope='fleet' (was 'tracked' — fixed)
+src/services/chipOwners.ts                    # asOf filters past dates only (was showing 2030)
+src/services/classify.ts                      # SpaceXAI owner-first check for Colossus
+src/services/confidence.ts                    # ±1.4× capacity (Epoch ~80% CI)
+src/services/observations.ts                  # 10 signal types incl. permit, liquid cooling, PPA
 src/services/ownershipMath.ts                 # computePctOwned, computeOwnedH100e
-src/config/labOwnershipMapping.ts             # LAB_OWNERSHIP_CONFIG
+src/config/labOwnershipMapping.ts             # LAB_OWNERSHIP_CONFIG (xAI selfOwned: ['xAI','SpaceXAI'])
+src/config/labs.ts                            # LAB_CHIPS: Ironwood, GB200, Trainium2
+src/config/signals.ts                         # 10 construction signals (added permit, liquid, PPA)
+src/config/benchmarks.ts                      # 11 benchmarks, 7 domain groups
 src/types/benchmark.ts                        # Model type + preview?: boolean
 src/components/ui/OwnershipSidePanel.tsx       # EXISTS but NOT rendered
-src/components/ui/TruthModal.tsx              # 4 sections incl. Data Sources (all linked)
-src/components/layout/DataBanner.tsx           # sticky bar, filters "Other" from count
+src/components/ui/TruthModal.tsx              # 5 sections, Colossus contracts, methodology June 2026
+src/components/layout/DataBanner.tsx           # sticky bar, vintage filters past dates only
 ```
 
 ### Cloud-lease calculation transparency
@@ -97,14 +105,22 @@ src/components/layout/DataBanner.tsx           # sticky bar, filters "Other" fro
 The `ComputeBreakdownCard` shows how each lab's total H100e is computed:
 - **Satellite-verified** = Epoch AI live CSV (high confidence)
 - **Cloud-lease legs** = our estimates from public announcements with H100e conversion ratios (estimated confidence)
+- **Colossus tenant legs** = capacity split from xAI to Anthropic/Google based on rental contracts (net zero)
 
 Cloud-lease legs in `src/data/fleet.ts`:
 - `EAI-AWS`: Anthropic on AWS Trainium2 (0.93 H100e/Trn2)
 - `EAI-GCP`: Anthropic on Google Cloud TPUs (blended ~1.4 H100e/chip)
 - `EAI-AZR`: Anthropic on Azure/NVIDIA (GB200 ≈ 2.5 H100e)
 - `EGC`: Estimated Gemini internal TPU fleet (~1.2 H100e/chip)
+- `COL-ANT`: Anthropic Colossus tenant block (~230K H100e from ~300 MW / 1,086 MW × 832K)
+- `COL-GGL`: Google/Gemini Colossus tenant block (~110K H100e from 110K GPUs × 1.0)
+- `COL-XAI-ADJ`: Negative adjustment to xAI (subtracts COL-ANT + COL-GGL to avoid double-count)
 
 **None of these H100e numbers are directly stated in announcements.** We convert using estimated ratios and interpolate ramp schedules. The calculations card makes this transparent.
+
+Sources for Colossus tenant deals:
+- Anthropic: [TechCrunch (May 20, 2026)](https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/)
+- Google: [SpaceX SEC filing (Jun 5, 2026)](https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm)
 
 ---
 
@@ -131,10 +147,12 @@ Parsed by filename suffix (not hard-coded names).
 
 **3 CSV files:** `cumulative_by_designer.csv`, `cumulative_by_chip_type.csv`, `quarters_by_chip_type.csv`.
 
-**8 owners:** Microsoft, Meta, Amazon, Google, Oracle, xAI, China, Other.
+**8 owners:** Microsoft, Meta, Amazon, Google, Oracle, xAI/SpaceXAI, China, Other.
 **5 manufacturers:** Nvidia, Google, Amazon, AMD, Huawei. ~24 chip types.
 
 **`OWNER_TO_LAB`** (in `src/types/chipOwners.ts`): Microsoft→OpenAI, Amazon→Anthropic, Google→Gemini, Meta→Meta, xAI→xAI (approximate).
+
+**IMPORTANT:** The chip owners CSV contains future quarterly projections (endDates extending to 2030+). The `asOf` computation in `chipOwners.ts` must filter to `endDate <= today` to avoid showing future dates in the UI. Same pattern in `DataBanner.tsx` for the timeline vintage date.
 
 ---
 
@@ -169,7 +187,13 @@ Use **module-level** `bootstrapStarted` flags, NOT cleanup `cancelled` flags.
 `useMemo` deps should use the version number, NOT the object reference.
 
 ### Epoch CSV schema drift — facility coordinates
-`FACILITY_COORDS` in `src/data/facilities.ts` compensates with short-name aliases + `FACILITY_COORD_OVERRIDES`.
+Epoch removed `Latitude`/`Longitude` columns in early 2026. `FACILITY_COORDS` in `src/data/facilities.ts` is now the canonical source for pin placement (80+ entries covering both legacy long names and Epoch short names). `FACILITY_COORD_OVERRIDES` corrects Epoch-published points that are >2 km off.
+
+### Epoch CSV column names
+DC CSV uses `Name` (not `Handle`). Timeline CSV uses `Data center` (not `Handle`). Parser column candidates handle both. Epoch owner field changed from `xAI` to `SpaceXAI` — `classifyLab` checks owner-first for SpaceXAI.
+
+### Future dates in Epoch data (CRITICAL)
+Both the timeline CSV and chip owners ZIP contain future projections. Any `asOf` / vintage date computation MUST filter to `<= today` to avoid showing dates like "May 2030". This was a live bug fixed in June 2026.
 
 ### vite.config.js shadowing
 `tsconfig.node.json` has `outDir: ./node_modules/.cache/tsconfig-node`. Don't remove.
@@ -201,6 +225,9 @@ Used in `OwnershipTable`, `FrontierOutlookCard`, `ComputeBreakdownCard`, `FirstP
 ### OwnershipTable row order
 Frontier-anchored owners first (by H100e desc), then non-frontier.
 
+### METR chart linear scale
+User prefers linear Y-axis (not logarithmic). GPT-2 label hidden because its value (~3 min) is invisible at the 0–800 hr scale. Do not switch to log scale.
+
 ---
 
 ## URL hash state
@@ -215,11 +242,13 @@ Frontier-anchored owners first (by H100e desc), then non-frontier.
 
 `setScope` auto-resets `raceMode` → `'effective'` when leaving `'fleet'`.
 
+**IMPORTANT:** The default scope in `useHashState.ts` MUST match `raceSlice.ts` (`'fleet'`). A mismatch caused a bug where visiting `#race` showed satellite-only instead of total capacity.
+
 ---
 
 ## Tech Stack
 
-React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Leaflet + react-leaflet, PapaParse, date-fns, CSS Modules + design tokens. Deployed to GitHub Pages.
+React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Leaflet + react-leaflet, PapaParse, JSZip, date-fns, CSS Modules + design tokens. Deployed to GitHub Pages.
 
 ---
 
@@ -236,32 +265,35 @@ React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Lea
 
 ---
 
-## 2029 Projection Engine
+## 2029 Projection Engine (June 2026 refresh)
 
-| Lab | Today | 2029 Target | Growth | Basis |
-|-----|-------|-------------|--------|-------|
-| OpenAI | 1.6M | 12M | ~7.5× | Stargate + GB200 |
-| Gemini | 454K | 9M | ~20× | Epoch sat + Ironwood TPU |
-| Meta | 761K | 6M | ~7.9× | Epoch sat, owned infra |
-| xAI | 557K | 2.2M | ~3.9× | Colossus 1+2 |
-| Anthropic | 1.8M | 9M | ~5× | Epoch sat + 3-cloud fleet + Google/Broadcom TPU |
+| Lab | 2029 Target | Power | Basis |
+|-----|-------------|-------|-------|
+| OpenAI | 15M | 12 GW | Stargate 7-site (>9 GW by Q4 2028) + Azure fleet + GB200/Vera Rubin |
+| Gemini | 10M | 5.5 GW | Epoch satellite (14 sites) + Ironwood TPU fleet + Colossus tenant (110K GPUs) |
+| Meta | 7M | 4.2 GW | Epoch satellite only (6 owned sites). No cloud-lease. |
+| xAI | 3.5M | 2.5 GW | Colossus 2 GW expansion (minus tenant allocations) |
+| Anthropic | 10M | 6 GW | Epoch satellite + 3-cloud fleet + Broadcom TPU deal + Colossus tenant (~230K) |
 
 **Interpolation:** Ease-out `1-(1-t)^1.8`. **Uncertainty:** ±8% base + 6%/yr → ~±24% by Jan 2029.
+
+Chip efficiency improvements factored in: GB200 ~2.5× H100e, Vera Rubin ~3× (2027+), Trainium3 ~1.5× Trn2, TPU Ironwood ~2.3×. Rubin Ultra H100e conversion pending public specs.
 
 ---
 
 ## 4 Sections
 
-1. **THE RACE** (#race) — Key Insights card → ACCESS/OWNERSHIP tabs → stat cards (3) → hero chart + leaderboard → ComputeBreakdownCard (collapsed) → KnownLeasesCard → ProjectionPanel → DATA footer (7 sources linked) → bridge to #models. OWNERSHIP tab adds: FrontierOutlookCard + OwnershipTable.
-2. **GEO MAP** (#geomap) — Leaflet + ESRI satellite tiles, lab-colored pins, region jump, satellite preview.
-3. **INTEL** (#sites) — Sortable facility table, filters, drawer with satellite + timeline, signal legend.
-4. **MODELS** (#models) — Key Takeaways → Training Compute Growth scatter (21 models, ~5x/yr trend) → Within-Lab Scaling (GPT + Claude dual-axis) → FirstPrinciples explainer → BenchmarkTable (verified models + preview row) → linked data sources → METR Time Horizons.
+1. **THE RACE** (#race) — Key Insights (June 2026) → ACCESS/OWNERSHIP tabs → stat cards (3) → hero chart + leaderboard → ComputeBreakdownCard (collapsed, with Colossus tenant legs) → KnownLeasesCard (7 bullets) → ProjectionPanel → DATA footer (9 sources linked) → bridge to #models. OWNERSHIP tab adds: FrontierOutlookCard + OwnershipTable.
+2. **GEO MAP** (#geomap) — Leaflet + ESRI satellite tiles, ~46 frontier pins (of 63 Epoch total), lab-colored (LIVE/BUILDING/PLANNED), region jump (US/UAE), satellite preview. Stargate 7-site portfolio + Colossus 1+2.
+3. **INTEL** (#sites) — Sortable facility table (~46 frontier facilities), 10 signal types, confidence scoring (Epoch ~80% CI ±1.4×), drawer with satellite + timeline.
+4. **MODELS** (#models) — Key Takeaways (June 2026) → Training Compute Growth scatter (23 models, ~5x/yr trend) → Within-Lab Scaling (GPT-5.5 + Opus 4.8) → FirstPrinciples explainer → BenchmarkTable (4 verified + 2 preview) → linked data sources → METR Time Horizons TH 1.1 (27 models, linear scale).
 
 ---
 
 ## Known Issues
-1. METR data from secondary sources (LessWrong/OfficeChai, not primary YAML)
-2. ESRI API unauthenticated — rate-limited under traffic
-3. METR tooltip stickiness in 2025-2026 cluster
-4. Anthropic 25% override in `LAB_OWNERSHIP_CONFIG` may need updating as Epoch data catches up
-5. `ANALYST_ESTIMATES` in `projections.ts` is stale (Q1 2026) — no longer displayed but data remains
+1. ESRI API unauthenticated — rate-limited under traffic
+2. METR tooltip stickiness in 2025-2026 cluster (many models at similar dates)
+3. Anthropic 25% override in `LAB_OWNERSHIP_CONFIG` may need updating as Epoch data catches up
+4. `ANALYST_ESTIMATES` in `projections.ts` is stale (Q1 2026) — no longer displayed but data remains
+5. Colossus tenant split (COL-ANT/COL-GGL/COL-XAI-ADJ) assumes MW-share and 1:1 GPU ratio — actual allocation may differ
+6. Epoch may rename owners again (SpaceXAI → something else post-IPO) — check `classifyLab` and `LAB_OWNERSHIP_CONFIG.selfOwned`
