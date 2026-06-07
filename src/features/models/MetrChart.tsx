@@ -14,10 +14,9 @@ const DOT_COLOR = '#2d8a4e';
 
 /** Human-readable time horizon reference tasks, pinned to Y values (hours). */
 const TASKS: readonly { h: number; text: string }[] = [
-  { h: 1, text: 'Fix bugs in small Python libraries' },
-  { h: 4, text: 'Train adversarially robust image model' },
   { h: 24, text: '~1 day: full feature implementation' },
   { h: 168, text: '~1 week: complex multi-file refactor' },
+  { h: 720, text: '~1 month: end-to-end project' },
 ];
 
 /** Shape of each METR scatter point after enrichment. */
@@ -60,7 +59,7 @@ function MetrChartInner(
     ) {
       const elapsed = d.getTime() - anchorDate;
       const val = anchorVal * Math.pow(2, elapsed / doublingMs);
-      if (val >= 0.01 && val <= 2000) {
+      if (val >= 0.01 && val <= 850) {
         trendData.push({ x: d.toISOString().slice(0, 10), y: val });
       }
     }
@@ -147,15 +146,17 @@ function MetrChartInner(
           ticks: { color: 'rgba(255, 255, 255, 0.4)', font: { size: 12 } },
         },
         y: {
-          type: 'logarithmic',
-          min: 0.03,
-          max: 1500,
+          type: 'linear',
+          min: -20,
+          max: 800,
           ticks: {
             color: 'rgba(255, 255, 255, 0.45)',
-            font: { size: 11, weight: 600 },
+            font: { size: 12, weight: 600 },
+            stepSize: 100,
             callback: (v) => {
               const n = Number(v);
-              if (n < 1) return `${Math.round(n * 60)} min`;
+              if (n < 0) return '';
+              if (n === 0) return '0';
               if (n < 24) return `${n} hr`;
               if (n < 168) return `${Math.round(n / 24)}d`;
               return `${Math.round(n / 168)}w`;
