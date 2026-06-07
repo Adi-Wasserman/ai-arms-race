@@ -42,14 +42,32 @@ const FLEET_LEG_INFO: Record<
       'https://cloud.google.com/blog/products/ai-machine-learning/ironwood-tpu-age-of-inference',
     conversion: 'Blended ~1.2 H100e/chip',
   },
+  'COL-ANT': {
+    label: 'xAI Colossus tenant block',
+    source: 'Anthropic ↔ xAI deal (May 2026)',
+    sourceUrl: '',
+    conversion: '~300 MW / 1,086 MW × 832K ≈ 230K H100e',
+  },
+  'COL-GGL': {
+    label: 'xAI Colossus tenant block',
+    source: 'Google ↔ SpaceX/xAI (SEC filing Jun 5, 2026)',
+    sourceUrl: '',
+    conversion: '~110K NVIDIA GPUs ≈ 110K H100e',
+  },
+  'COL-XAI-ADJ': {
+    label: 'Rented to Anthropic + Google (subtracted)',
+    source: 'Balancing entry — avoids double-count',
+    sourceUrl: '',
+    conversion: '−(COL-ANT + COL-GGL)',
+  },
 };
 
 const LAB_FLEET_HANDLES: Record<Lab, string[]> = {
   OpenAI: [],
-  Anthropic: ['EAI-AWS', 'EAI-GCP', 'EAI-AZR'],
-  Gemini: ['EGC'],
+  Anthropic: ['EAI-AWS', 'EAI-GCP', 'EAI-AZR', 'COL-ANT'],
+  Gemini: ['EGC', 'COL-GGL'],
   Meta: [],
-  xAI: [],
+  xAI: ['COL-XAI-ADJ'],
 };
 
 interface FleetStep {
@@ -266,9 +284,7 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                     <div className={styles.noLegs}>
                       {b.lab === 'Meta'
                         ? 'Owns all hardware — no cloud-lease'
-                        : b.lab === 'xAI'
-                          ? 'Owns all hardware — rents capacity to Anthropic ($1.25B/mo) and Google ($920M/mo)'
-                          : 'All capacity via satellite'}
+                        : 'All capacity via satellite'}
                     </div>
                   )}
                 </div>

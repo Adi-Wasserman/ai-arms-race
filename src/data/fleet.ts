@@ -61,4 +61,31 @@ export const FLEET_ESTIMATES: readonly FleetEntry[] = [
   ['2026-09-01', 'EGC', 1500000, 653],
   ['2026-12-01', 'EGC', 2500000, 1080],
   ['2027-06-01', 'EGC', 3070000, 1330],
+
+  // ── COL-ANT: Anthropic tenant allocation on xAI Colossus ──
+  // Source: ~$1.25B/mo deal announced May 2026, ~300 MW initially, ramping.
+  // Conversion: 300 MW / 1,086 MW total Colossus × 832K H100e ≈ 230K.
+  // Power: 300 MW initial block, growing with Colossus expansion.
+  // NOTE: This capacity is ALREADY in xAI's satellite total — COL-XAI-ADJ
+  // subtracts it from xAI to avoid double-counting.
+  ['2026-06-01', 'COL-ANT', 230000, 170],
+  ['2027-01-01', 'COL-ANT', 300000, 220],
+  ['2027-06-01', 'COL-ANT', 380000, 280],
+
+  // ── COL-GGL: Google/Gemini tenant allocation on xAI Colossus ──
+  // Source: SEC filing Jun 5 2026, ~$920M/mo, ~110K NVIDIA GPUs.
+  // Conversion: 110K GPUs × 1.0 H100e/GPU = 110K H100e (conservative,
+  // assumes H100/H200 mix — actual may be higher if GB200s).
+  // Timeline: reduced rate through Sep 2026, full from Oct 2026.
+  ['2026-10-01', 'COL-GGL', 110000, 77],
+  ['2027-01-01', 'COL-GGL', 110000, 77],
+
+  // ── COL-XAI-ADJ: Subtract rented Colossus capacity from xAI ──
+  // This is the balancing entry — ensures the H100e rented to Anthropic
+  // and Google are not double-counted under xAI's satellite total.
+  // Values are negative: -(COL-ANT + COL-GGL) at each date.
+  ['2026-06-01', 'COL-XAI-ADJ', -230000, -170],
+  ['2026-10-01', 'COL-XAI-ADJ', -340000, -247],
+  ['2027-01-01', 'COL-XAI-ADJ', -410000, -297],
+  ['2027-06-01', 'COL-XAI-ADJ', -490000, -357],
 ] as const;

@@ -235,6 +235,10 @@ export function parseEpochData(
   labMap['EAI-AWS'] = 'Anthropic';
   labMap['EAI-GCP'] = 'Anthropic';
   labMap['EAI-AZR'] = 'Anthropic';
+  // Colossus tenant allocation handles (split xAI capacity to tenants).
+  labMap['COL-ANT'] = 'Anthropic';
+  labMap['COL-GGL'] = 'Gemini';
+  labMap['COL-XAI-ADJ'] = 'xAI';
 
   const dataCenters: EpochDataCenter[] = dcRows
     .filter((r) => colString(r, DC_HANDLE))

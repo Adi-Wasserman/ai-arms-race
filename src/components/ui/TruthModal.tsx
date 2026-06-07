@@ -365,6 +365,26 @@ const LEASE_LEGS: readonly LeaseLeg[] = [
       ...FLEET_ESTIMATES.filter(([, h]) => h === 'EGC').map(([, , v]) => v),
     ),
   },
+  {
+    label: 'Anthropic on xAI Colossus — NVIDIA GPUs (tenant block)',
+    handle: 'COL-ANT',
+    lab: 'Anthropic',
+    h100eRatio: '300 MW / 1,086 MW × 832K ≈ 230K H100e',
+    chipType: 'NVIDIA H100/H200 (xAI Colossus)',
+    latestH100e: Math.max(
+      ...FLEET_ESTIMATES.filter(([, h]) => h === 'COL-ANT').map(([, , v]) => v),
+    ),
+  },
+  {
+    label: 'Gemini on xAI Colossus — ~110K NVIDIA GPUs (tenant block)',
+    handle: 'COL-GGL',
+    lab: 'Gemini',
+    h100eRatio: '110K GPUs × 1.0 H100e ≈ 110K H100e',
+    chipType: 'NVIDIA GPUs (xAI Colossus, SEC filing)',
+    latestH100e: Math.max(
+      ...FLEET_ESTIMATES.filter(([, h]) => h === 'COL-GGL').map(([, , v]) => v),
+    ),
+  },
 ];
 
 function formatH100e(n: number): string {
@@ -528,13 +548,22 @@ function MethodologySection(): JSX.Element {
                 SpaceX&apos;s upcoming IPO.
               </li>
             </ul>
+            <p className={styles.tierDesc}>
+              <strong>How we handle this in the fleet view:</strong> We split
+              xAI&apos;s satellite-verified Colossus capacity among its tenants.
+              The rented portions (COL-ANT, COL-GGL) are added to
+              Anthropic&apos;s and Gemini&apos;s fleet totals, while a matching
+              negative adjustment (COL-XAI-ADJ) subtracts the same amount from
+              xAI — keeping the industry total unchanged (net zero). This gives
+              a more accurate &quot;who can train today&quot; picture.
+            </p>
             <p className={styles.tierNote}>
-              These long-term rentals are incorporated into fleet estimates where
-              attribution is clear. Lab assignment remains editorial — Colossus
-              hardware is owned by SpaceXAI but capacity is now multi-tenant
-              (xAI, Anthropic, Google, Cursor). H100e conversion for next-gen
-              chips (Rubin / Rubin Ultra) will be added as public specs become
-              available.
+              Assumptions: Anthropic&apos;s ~300 MW allocation converts to ~230K
+              H100e via the MW-share method (300 / 1,086 total Colossus MW ×
+              832K total H100e). Google&apos;s 110K NVIDIA GPUs are treated as
+              ~110K H100e (conservative 1:1 ratio — actual may be higher if
+              GB200s). H100e conversion for next-gen chips (Rubin / Rubin Ultra)
+              will be added as public specs become available.
             </p>
           </div>
 

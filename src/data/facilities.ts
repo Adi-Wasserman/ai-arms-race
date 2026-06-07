@@ -91,6 +91,10 @@ export const LAB_MAP: LabMap = {
   'EAI-AWS': 'Anthropic',
   'EAI-GCP': 'Anthropic',
   'EAI-AZR': 'Anthropic',
+  // ── Colossus tenant allocation handles ─────────────────────
+  'COL-ANT': 'Anthropic',
+  'COL-GGL': 'Gemini',
+  'COL-XAI-ADJ': 'xAI',
 };
 
 /**
