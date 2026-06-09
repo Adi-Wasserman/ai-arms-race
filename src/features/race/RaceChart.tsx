@@ -9,6 +9,7 @@ import { forwardRef, useMemo, useRef, type ForwardedRef, type RefObject } from '
 import { BaseChart } from '@/components/charts/BaseChart';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { PROJ_END } from '@/config/projections';
+import { localTodayIso } from '@/services/dates';
 import { formatAxis, formatH100, formatPower } from '@/services/format';
 import { activeProj, activeSeries, activeSeriesWithProj } from '@/store/selectors';
 import { useDashboard } from '@/store';
@@ -16,7 +17,7 @@ import type { Lab, TimeSeriesPoint } from '@/types';
 
 import styles from './RaceChart.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 /**
  * Chart.js line datasets default to `(number | Point | null)[]` data,
@@ -261,9 +262,10 @@ function RaceChartInner(
   /** Stable ref to the pinned-tooltip DOM element. */
   const tooltipDivRef = useRef<HTMLDivElement>(null);
 
-  const { data, options } = useMemo<{
+  const { data, options, empty } = useMemo<{
     data: LineChartData;
     options: LineChartOptions;
+    empty?: boolean;
   }>(() => {
     const state = useDashboard.getState();
     const is2029 = projMode === '2029';
@@ -274,7 +276,7 @@ function RaceChartInner(
     const d = full.filter((x) => x.date >= '2024-01-01');
 
     if (d.length === 0) {
-      return { data: { datasets: [] }, options: {} };
+      return { data: { datasets: [] }, options: {}, empty: true };
     }
 
     const maxDate = d[d.length - 1].date;
@@ -403,6 +405,20 @@ function RaceChartInner(
     return { data: { datasets }, options: absOptions };
     // dataVersion drives recompute when the store swaps in fresh Epoch data.
   }, [metric, scope, projMode, dataVersion]);
+
+  // Both the Epoch feed and the fallback produced zero usable rows —
+  // say so instead of rendering a blank canvas the user can't interpret.
+  if (empty) {
+    return (
+      <div className={styles.wrapper}>
+        <div className={styles.emptyState} role="status">
+          No compute data available — the live Epoch feed and the built-in
+          fallback both returned no rows. Try reloading; if this persists,
+          the Epoch CSV schema may have changed.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>

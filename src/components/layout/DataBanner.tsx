@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { TruthModal } from '@/components/ui/TruthModal';
+import { localTodayIso } from '@/services/dates';
 import { useDashboard } from '@/store';
 
 import styles from './DataBanner.module.css';
@@ -44,7 +45,7 @@ export function DataBanner(): JSX.Element {
   // to dates ≤ today to show when the data was last actually observed.
   const epochVintage = useMemo(() => {
     if (timeline.length === 0) return null;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localTodayIso();
     let max = '';
     for (const e of timeline) {
       if (e.date <= today && e.date > max) max = e.date;

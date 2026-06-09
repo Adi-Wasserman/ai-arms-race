@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import Papa from 'papaparse';
 
+import { localTodayIso } from '@/services/dates';
 import type {
   ChipOwnerRow,
   ChipTypeRow,
@@ -85,12 +86,28 @@ export async function fetchChipOwnersZip(): Promise<{
 
 type RawCsvRow = Record<string, string | number | boolean | null>;
 
+/**
+ * Columns that already triggered a NaN-coercion warning — warn once per
+ * column, not once per row, so schema drift is loud without flooding
+ * the console.
+ */
+const nanWarnedColumns = new Set<string>();
+
 /** Map an Epoch column header to a numeric value (handles null/undefined). */
 function num(row: RawCsvRow, key: string): number {
   const v = row[key];
   if (v == null || v === '') return 0;
   const n = typeof v === 'number' ? v : Number(v);
-  return Number.isFinite(n) ? n : 0;
+  if (!Number.isFinite(n)) {
+    if (!nanWarnedColumns.has(key)) {
+      nanWarnedColumns.add(key);
+      console.warn(
+        `[chipOwners] Non-numeric value "${String(v)}" in column "${key}" coerced to 0 — possible Epoch schema drift`,
+      );
+    }
+    return 0;
+  }
+  return n;
 }
 
 function str(row: RawCsvRow, key: string): string {
@@ -215,7 +232,9 @@ function buildLatestByOwner(
   const snapshots: OwnerSnapshot[] = [];
   for (const [owner, rows] of byOwner) {
     // Find this owner's latest PAST end date (exclude future projections).
-    const nowIso = new Date().toISOString().slice(0, 10);
+    // Local calendar date — UTC would hide a fresh quarter-end for users
+    // behind UTC (see services/dates.ts).
+    const nowIso = localTodayIso();
     let asOf = '';
     for (const r of rows) {
       if (r.endDate <= nowIso && r.endDate > asOf) asOf = r.endDate;
@@ -340,7 +359,7 @@ export async function parseChipOwnersZip(
   // Latest PAST end date across the dataset = "as of" stamp.
   // The Epoch CSV includes future quarterly projections — filter to
   // dates ≤ today so we don't show e.g. "May 2030" as the vintage.
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = localTodayIso();
   let asOf = '';
   for (const r of cumulativeByChipType) {
     if (r.endDate <= todayIso && r.endDate > asOf) asOf = r.endDate;

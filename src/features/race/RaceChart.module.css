@@ -4,6 +4,22 @@
   position: relative;
 }
 
+/* Shown instead of the chart when both the Epoch feed and the fallback
+   dataset produced zero usable rows. */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+}
+
 /**
  * Pinned chart tooltip — sits in the empty upper-left region of the
  * chart plot area (past the Y-axis labels, above the data lines during

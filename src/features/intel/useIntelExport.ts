@@ -2,10 +2,11 @@ import { useCallback } from 'react';
 
 import { LAB_COLORS } from '@/config/labs';
 import { scoreConfidence } from '@/services/confidence';
+import { localTodayIso } from '@/services/dates';
 import { downloadCSV } from '@/services/export';
 import { useDashboard } from '@/store';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 /**
  * Section-specific CSV export for the Intel table.

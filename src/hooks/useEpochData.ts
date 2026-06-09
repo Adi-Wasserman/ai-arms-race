@@ -92,6 +92,17 @@ export function useEpochData(): UseEpochDataResult {
       .then((raw) => {
         const parsed = parseEpochData(raw.dcRows, raw.tlRows);
 
+        // Schema drift can make the parse "succeed" with zero timeline
+        // rows (e.g. a renamed date or facility column). Treat that as a
+        // failure — otherwise the banner claims "Live — Epoch AI" over a
+        // blank chart.
+        if (parsed.entries.length === 0) {
+          const msg = 'Epoch parse returned no timeline entries (schema drift?)';
+          setError(msg);
+          applyFallback(msg);
+          return;
+        }
+
         // If Epoch returned timelines but no DC rows, parseEpochData gives
         // an empty dataCenters array. In that case synthesize DCs from the
         // timeline using the fallback metadata.

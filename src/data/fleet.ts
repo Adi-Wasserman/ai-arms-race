@@ -89,3 +89,40 @@ export const FLEET_ESTIMATES: readonly FleetEntry[] = [
   ['2027-01-01', 'COL-XAI-ADJ', -410000, -297],
   ['2027-06-01', 'COL-XAI-ADJ', -490000, -357],
 ] as const;
+
+/**
+ * Dev-time guard: the Colossus tenant split must stay net-zero. At every
+ * date where COL-XAI-ADJ has an entry, the negative adjustment must equal
+ * the sum of the latest COL-ANT + COL-GGL values at or before that date —
+ * if an edit lets them drift apart, xAI's total silently absorbs the
+ * imbalance and the lab split is wrong while the industry total looks fine.
+ */
+function validateColossusBalance(): void {
+  const latestAtOrBefore = (handle: string, date: string): number => {
+    let best = 0;
+    let bestDate = '';
+    for (const [d, h, h100e] of FLEET_ESTIMATES) {
+      if (h === handle && d <= date && d > bestDate) {
+        best = h100e;
+        bestDate = d;
+      }
+    }
+    return best;
+  };
+
+  for (const [date, handle, h100e] of FLEET_ESTIMATES) {
+    if (handle !== 'COL-XAI-ADJ') continue;
+    const rented =
+      latestAtOrBefore('COL-ANT', date) + latestAtOrBefore('COL-GGL', date);
+    const imbalance = rented + h100e;
+    if (Math.abs(imbalance) > rented * 0.05) {
+      console.warn(
+        `[fleet] Colossus tenant split out of balance at ${date}: ` +
+          `COL-ANT + COL-GGL = ${rented} H100e but COL-XAI-ADJ = ${h100e} ` +
+          `(off by ${imbalance}). Fix the FLEET_ESTIMATES entries.`,
+      );
+    }
+  }
+}
+
+if (import.meta.env.DEV) validateColossusBalance();

@@ -167,11 +167,27 @@ function colString(row: CsvRow, candidates: readonly string[], fallback = ''): s
   return v == null ? '' : String(v);
 }
 
+/**
+ * Columns that already triggered a NaN-coercion warning — warn once per
+ * column, not once per row, so schema drift is loud without flooding
+ * the console.
+ */
+const nanWarnedColumns = new Set<string>();
+
 function colNumber(row: CsvRow, candidates: readonly string[]): number {
   const v = col(row, candidates, 0);
-  if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
+  const n = typeof v === 'number' ? v : Number(v);
+  if (!Number.isFinite(n)) {
+    const key = candidates[0];
+    if (!nanWarnedColumns.has(key)) {
+      nanWarnedColumns.add(key);
+      console.warn(
+        `[epoch] Non-numeric value "${String(v)}" in column "${key}" coerced to 0 — possible Epoch schema drift`,
+      );
+    }
+    return 0;
+  }
+  return n;
 }
 
 /** Convert DMS ("32°30'00\"N") or a decimal number to decimal degrees. */

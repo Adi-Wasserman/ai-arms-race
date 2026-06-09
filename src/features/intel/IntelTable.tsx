@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { LAB_COLORS } from '@/config/labs';
 import { scoreConfidence } from '@/services/confidence';
+import { localTodayIso } from '@/services/dates';
 import { formatH100, formatPower, shortName } from '@/services/format';
 import { extractObservations } from '@/services/observations';
 import { useDashboard } from '@/store';
@@ -15,7 +16,7 @@ import type {
 
 import styles from './IntelTable.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 interface ColDef {
   key: SortBy;
