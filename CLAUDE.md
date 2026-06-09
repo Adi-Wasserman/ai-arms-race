@@ -172,6 +172,10 @@ Parsed by filename suffix (not hard-coded names).
 
 **IMPORTANT:** The chip owners CSV contains future quarterly projections (endDates extending to 2030+). The `asOf` computation in `chipOwners.ts` must filter to `endDate <= today` to avoid showing future dates in the UI. Same pattern in `DataBanner.tsx` for the timeline vintage date.
 
+### Epoch snapshot archive (June 2026)
+
+Epoch only publishes CURRENT state — each release overwrites the last. A scheduled GitHub Action (`.github/workflows/archive-epoch.yml`, daily 06:17 UTC + manual dispatch) fetches the two DC CSVs + chip-owners ZIP and commits a dated `archive/<YYYY-MM-DD>/` snapshot to the deploy repo **only when the CSV contents actually changed** (content hash incl. inside the ZIP). `archive/index.json` lists snapshot dates + latest hash so the app can discover history via raw GitHub URLs without the API. `deploy.yml` ignores `archive/**` pushes (no redeploy on bot commits). This archive is the foundation for future time-scrubber/replay views, release-diff changelogs, and a projection-accuracy ledger.
+
 ---
 
 ## Removed features (do NOT re-add without discussion)
