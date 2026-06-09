@@ -20,10 +20,11 @@ import {
   getValue,
 } from '@/store/selectors';
 import type { Lab, ScopeMode } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './Leaderboard.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 const SCOPE_OPTIONS = [
   { value: 'fleet' as const, label: 'TOTAL CAPACITY' },

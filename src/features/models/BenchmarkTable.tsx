@@ -6,10 +6,11 @@ import { MODEL_SPECS } from '@/data/models';
 import { useDashboard } from '@/store';
 import { activeSeries } from '@/store/selectors';
 import type { BenchmarkKey, Lab, Model } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './BenchmarkTable.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 /** All benchmark keys across every domain group, flattened + deduped. */
 const ALL_BENCHMARK_KEYS: readonly BenchmarkKey[] = Array.from(
@@ -418,7 +419,7 @@ export function BenchmarkTable(): JSX.Element {
                 <span className={styles.previewPill}>PREVIEW</span>
               </div>
               <div className={styles.noteSub}>
-                {m.lab} · {m.name === 'Claude Mythos' ? 'Unreleased — Project Glasswing' : `Released ${m.released} — scores self-reported`}
+                {m.lab} · Released {m.released} — scores self-reported
               </div>
               <div className={styles.noteBody}>{m.notes}</div>
             </div>

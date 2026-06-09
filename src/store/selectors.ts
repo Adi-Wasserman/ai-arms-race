@@ -3,11 +3,12 @@ import { EASE_OUT_EXPONENT, PROJ_END, PROJ_UNCERTAINTY } from '@/config/projecti
 import { PROJ_2029_TARGETS } from '@/data/projections';
 import { buildProjections2029 } from '@/services/projections';
 import type { Lab, ProjectionBands, TimeSeriesPoint } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import type { DashboardState } from './index';
 
 /** "Today" anchor used by the projection engine. */
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = localTodayIso();
 
 /* ─────────────────────────────────────────────────────────────
    Derived selectors. Pure functions of DashboardState.

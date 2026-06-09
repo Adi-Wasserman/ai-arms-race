@@ -8,8 +8,9 @@ import { downloadCSV, downloadJSON } from '@/services/export';
 import { useDashboard } from '@/store';
 import { activeProj, activeSeries, activeSeriesWithProj } from '@/store/selectors';
 import { OWNER_TO_LAB } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 export interface UseRaceExportResult {
   /** Time-series CSV (effective fleet view). */

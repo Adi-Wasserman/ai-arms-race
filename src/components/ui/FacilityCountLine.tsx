@@ -3,10 +3,11 @@ import { useMemo } from 'react';
 import { LAB_COLORS } from '@/config/labs';
 import { scoreConfidence } from '@/services/confidence';
 import { useDashboard } from '@/store';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './FacilityCountLine.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 /**
  * Shared facility count line used by Geo Map and Intel sections.

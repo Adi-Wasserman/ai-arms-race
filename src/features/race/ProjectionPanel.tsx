@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { PROJ_2029_TARGETS } from '@/data/projections';
+import { localTodayIso } from '@/services/dates';
 import { formatH100, formatPower } from '@/services/format';
 import { useDashboard } from '@/store';
 import { activeProj, activeSeries, getValue } from '@/store/selectors';
@@ -9,7 +10,7 @@ import type { Lab, TimeSeriesPoint } from '@/types';
 
 import styles from './ProjectionPanel.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 /** Format "2026-06-07" → "JUN 2026". */
 function fmtMonthYear(iso: string): string {

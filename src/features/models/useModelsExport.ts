@@ -6,8 +6,9 @@ import { BENCHMARK_META, DOMAIN_GROUPS } from '@/config/benchmarks';
 import { MODEL_SPECS } from '@/data/models';
 import { downloadCSV } from '@/services/export';
 import type { BenchmarkKey } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 export interface UseModelsExportResult {
   exportBenchmarksCSV: () => void;

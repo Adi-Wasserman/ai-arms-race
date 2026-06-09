@@ -17,7 +17,8 @@ All 4 sections ship and render from live Epoch AI data with fallback. Major June
 - **June 2026 hardening pass** (full review + fixes shipped):
   - **Code-splitting**: the 4 sections lazy-load via `React.lazy` + `Suspense` in `App.tsx` (main bundle 892 KB → ~333 KB; Chart.js and Leaflet live in lazy chunks). Suspense fallbacks carry the section anchor ids so `#models`-style deep links resolve at first paint.
   - **Data-pipeline guards**: empty Epoch parse → fallback + error (no more "Live" over a blank chart); `RaceChart` renders an explicit empty state; NaN CSV values warn once per column; dev-mode assertion that the Colossus split nets to zero (`fleet.ts`).
-  - **Local-calendar dates**: all "today" comparisons use `localTodayIso()` from `src/services/dates.ts` — never `toISOString().slice(0,10)` (UTC can hide a fresh quarter-end for users behind UTC).
+  - **Local-calendar dates**: all "today" comparisons use `localTodayIso()` from `src/services/dates.ts` — never `toISOString().slice(0,10)` (UTC can hide a fresh quarter-end for users behind UTC). Swept across ALL module-level `TODAY_ISO` constants (June 2026).
+  - **Dynamic month headers**: "KEY INSIGHTS — {month}" / "KEY TAKEAWAYS — {month}" compute the month at render; never hardcode a month name in user-visible copy.
   - **Test suite**: 61 Vitest tests in `src/services/__tests__/` (parsers, ownership math, projections, confidence, Colossus balance). `npm test` runs them; **CI runs them between type-check and build**, so failures block deploys.
   - **Keyboard a11y**: TruthModal focus trap + restore, FacilityDrawer focus management, IntelTable sort headers/rows keyboard-operable with `aria-sort`, `:focus-visible` outlines, `role="img"` on charts.
   - **Auto-refresh pause**: the 5-min chip-owners refetch skips ticks while `document.hidden`, with a catch-up refresh on tab return.
@@ -41,7 +42,7 @@ All 4 sections ship and render from live Epoch AI data with fallback. Major June
   - **Claude Opus 4.8** (Anthropic, 2026-05-28): AA Index 61 (#1), SWE-bench 88.6%, OSWorld 83.4%. $5/$25. 1M context.
   - **Grok 4.3** (xAI, 2026-04-30): AA Index 53, fastest at 194 tok/s. $1.25/$2.50. 1M context.
   - **Muse Spark** (Meta, preview): AA Index 52, self-reported scores.
-  - **Claude Mythos** (Anthropic, preview): SWE-bench 93.9%, invitation-only via Project Glasswing. Public release confirmed "coming weeks" (May 28).
+  - **Claude Fable 5** (Anthropic, 2026-06-09, preview-flagged): the public Mythos-class release. SWE-bench Verified 95.0%, SWE-bench Pro 80.0%. $10/$50. 1M context, 128K output. High-risk requests (<5% of sessions) auto-fall back to Opus 4.8. Claude Mythos 5 = same model with safeguards lifted, Glasswing-restricted. Launch-day scores Anthropic-reported; AA Index pending.
 
 - **METR Time Horizons** (`src/data/metr.ts`): Official TH 1.1 data from metr.org (27 models). Linear Y-axis (hours). Doubling time ~129 days (95% CI: 104–158). Claude Opus 4.6 = ~30 days. GPT-2 label hidden (overlaps Y-axis at linear scale).
 

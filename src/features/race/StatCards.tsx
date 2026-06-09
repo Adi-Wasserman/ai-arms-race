@@ -11,10 +11,11 @@ import {
   getValue,
 } from '@/store/selectors';
 import type { Lab } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './StatCards.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 interface Stats {
   current: ReturnType<typeof activeSeries>[number] | null;

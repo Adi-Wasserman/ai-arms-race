@@ -8,10 +8,11 @@ import { extractObservations } from '@/services/observations';
 import { satelliteImgURL } from '@/services/satellite';
 import { useDashboard } from '@/store';
 import type { Lab } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './MapPreview.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 export function MapPreview(): JSX.Element {
   const selected = useDashboard((s) => s.selectedFacility);

@@ -9,11 +9,12 @@ import { scoreConfidence } from '@/services/confidence';
 import { shortName } from '@/services/format';
 import { useDashboard } from '@/store';
 import type { EpochDataCenter, Lab, RegionKey } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import { buildLabMarkerIcon } from './LabMarker';
 import styles from './GeoMap.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 interface RegionView {
   center: [number, number];

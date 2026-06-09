@@ -12,6 +12,11 @@ import { TrainingComputeChart } from './TrainingComputeChart';
 import { useModelsExport } from './useModelsExport';
 import { WithinLabScaling } from './WithinLabScaling';
 
+/** "JUNE 2026" — dynamic so the takeaways header never silently rots. */
+const MONTH_YEAR = new Date()
+  .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  .toUpperCase();
+
 function ModelsSectionInner(): JSX.Element {
   const computeRef = useRef<ChartJS<'scatter'> | null>(null);
   const metrRef = useRef<ChartJS<'scatter'> | null>(null);
@@ -23,12 +28,13 @@ function ModelsSectionInner(): JSX.Element {
   return (
     <>
       <div className={styles.takeaways}>
-        <h3 className={styles.takeawaysTitle}>KEY TAKEAWAYS — JUNE 2026</h3>
+        <h3 className={styles.takeawaysTitle}>KEY TAKEAWAYS — {MONTH_YEAR}</h3>
         <ul className={styles.takeawaysList}>
           <li>
-            <strong>No single model dominates.</strong> Claude Opus 4.8 leads
-            AA Index (61) and SWE-bench (88.6%), GPT-5.5 leads ARC-AGI-2 (85%),
-            Gemini 3.1 Pro leads GPQA (94.3%).
+            <strong>No single model dominates.</strong> Claude Fable 5 leads
+            SWE-bench (95%, Anthropic-reported at launch), Claude Opus 4.8
+            leads AA Index (61), GPT-5.5 leads ARC-AGI-2 (85%), Gemini 3.1 Pro
+            leads GPQA (94.3%).
           </li>
           <li>
             <strong>More compute still produces better frontier models.</strong>{' '}

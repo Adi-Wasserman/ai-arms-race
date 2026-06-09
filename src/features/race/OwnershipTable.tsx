@@ -13,6 +13,7 @@ import {
   type PctOwnedResult,
 } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
+import { localTodayIso } from '@/services/dates';
 import {
   type ChipManufacturer,
   type EpochChipOwnersData,
@@ -23,7 +24,7 @@ import {
 
 import styles from './OwnershipTable.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 /* ─────────────────────────────────────────────────────────────
    Chip-mix color palette.

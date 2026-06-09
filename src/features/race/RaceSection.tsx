@@ -22,6 +22,11 @@ import styles from './RaceSection.module.css';
 import { StatCards } from './StatCards';
 import { useRaceExport } from './useRaceExport';
 
+/** "JUNE 2026" — dynamic so the insights header never silently rots. */
+const MONTH_YEAR = new Date()
+  .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  .toUpperCase();
+
 const METRIC_OPTS = [
   { value: 'h100e' as const, label: 'H100e' },
   { value: 'power' as const, label: 'POWER' },
@@ -133,7 +138,7 @@ function RaceSectionInner(): JSX.Element {
   return (
     <>
       <div className={styles.insights}>
-        <h2 className={styles.insightsTitle}>KEY INSIGHTS — JUNE 2026</h2>
+        <h2 className={styles.insightsTitle}>KEY INSIGHTS — {MONTH_YEAR}</h2>
         <div className={styles.insightsGrid}>
           <div>
             <strong>Anthropic leads total capacity</strong> (~2M H100e via 3-cloud
@@ -150,9 +155,10 @@ function RaceSectionInner(): JSX.Element {
             labs control &lt;30% of global AI compute (Epoch).
           </div>
           <div>
-            <strong>No single model dominates</strong> — Claude Opus 4.8 leads
-            AA Index (61) and SWE-bench (88.6%), GPT-5.5 leads ARC-AGI-2
-            (85%), Gemini 3.1 Pro leads GPQA (94.3%).
+            <strong>No single model dominates</strong> — Claude Fable 5 leads
+            SWE-bench (95%, Anthropic-reported at launch), Claude Opus 4.8
+            leads AA Index (61), GPT-5.5 leads ARC-AGI-2 (85%), Gemini 3.1
+            Pro leads GPQA (94.3%).
           </div>
         </div>
       </div>

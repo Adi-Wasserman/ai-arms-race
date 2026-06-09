@@ -5,10 +5,11 @@ import { FLEET_ESTIMATES } from '@/data/fleet';
 import { formatH100 } from '@/services/format';
 import { useDashboard } from '@/store';
 import type { EpochDataCenter, Lab } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './ComputeBreakdownCard.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 const FLEET_LEG_INFO: Record<
   string,

@@ -16,6 +16,7 @@ import {
   type PctOwnedResult,
 } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
+import { localTodayIso } from '@/services/dates';
 import {
   type EpochChipOwnersData,
   type Lab,
@@ -44,7 +45,7 @@ import styles from './OwnershipTable.module.css';
             | Chip Mix | % of Global | 2029 Projection | % Owned
    ───────────────────────────────────────────────────────────── */
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 const TOOLTIP_TEXT =
   'Pure-Epoch lab view. Every number is pulled directly from the live ' +

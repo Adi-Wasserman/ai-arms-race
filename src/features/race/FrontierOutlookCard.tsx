@@ -6,6 +6,7 @@ import { formatH100 } from '@/services/format';
 import { computePctOwned, type PctOwnedResult } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
 import type { Lab } from '@/types';
+import { localTodayIso } from '@/services/dates';
 
 import styles from './FrontierOutlookCard.module.css';
 
@@ -24,7 +25,7 @@ import styles from './FrontierOutlookCard.module.css';
    — for OpenAI and Anthropic we display "N/A — cloud-dependent".
    ───────────────────────────────────────────────────────────── */
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 const EPOCH_BLOG_URL =
   'https://epoch.ai/blog/introducing-the-ai-chip-owners-explorer';
