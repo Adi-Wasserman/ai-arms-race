@@ -40,6 +40,8 @@ let inflightFetch: Promise<void> | null = null;
 /** Module-level guard so the StrictMode double-mount doesn't double-fetch. */
 let bootstrapStarted = false;
 
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
 export function useEpochChipOwners(): UseEpochChipOwnersResult {
   const data = useDashboard((s) => s.chipOwners);
   const loading = useDashboard((s) => s.chipOwnersLoading);
@@ -105,13 +107,34 @@ export function useEpochChipOwners(): UseEpochChipOwnersResult {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-refresh every 5 minutes so live data stays current
-  // without any manual intervention.
+  // Auto-refresh every 5 minutes so live data stays current without
+  // manual intervention — but only while the tab is visible. A hidden
+  // tab skips ticks (no point re-downloading the ZIP for a page nobody
+  // is looking at); returning to the tab catches up immediately if a
+  // tick was missed.
   useEffect(() => {
+    let missedWhileHidden = false;
+
     const interval = window.setInterval(() => {
+      if (document.hidden) {
+        missedWhileHidden = true;
+        return;
+      }
       void runLoad(true);
-    }, 5 * 60 * 1000);
-    return () => window.clearInterval(interval);
+    }, REFRESH_INTERVAL_MS);
+
+    const onVisibilityChange = (): void => {
+      if (!document.hidden && missedWhileHidden) {
+        missedWhileHidden = false;
+        void runLoad(true);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [runLoad]);
 
   const fromCache =
