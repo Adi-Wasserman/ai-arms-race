@@ -155,10 +155,11 @@ function RaceSectionInner(): JSX.Element {
             labs control &lt;30% of global AI compute (Epoch).
           </div>
           <div>
-            <strong>No single model dominates</strong> — Claude Fable 5 leads
-            SWE-bench (95%, Anthropic-reported at launch), Claude Opus 4.8
-            leads AA Index (61), GPT-5.5 leads ARC-AGI-2 (85%), Gemini 3.1
-            Pro leads GPQA (94.3%).
+            <strong>The frontier is splintering</strong> — Anthropic leads
+            code (Fable 5: SWE-bench 95%, Anthropic-reported), OpenAI leads
+            abstract reasoning (ARC-AGI-2 85%), Google leads science knowledge
+            (GPQA 94.3%). Full benchmark table in{' '}
+            <a href="#models">Models</a>.
           </div>
         </div>
       </div>
@@ -326,10 +327,12 @@ function RaceSectionInner(): JSX.Element {
         <br />
         Labs are pouring billions into these facilities because scaling laws
         (Kaplan 2020, Chinchilla 2022, Epoch AI) still hold: more training
-        FLOPs → predictably better models <em>within each lab's lineage</em>.
-        Scroll to the{' '}
-        <a href="#models">Models section</a> for the visual proof — and to see
-        the current three-way frontier contest.
+        FLOPs → predictably better models <em>within each lab's lineage</em> —
+        each lab's newest model trains on roughly 2–3× its predecessor's
+        compute and scores higher. The{' '}
+        <a href="#models">Models section</a> has the visual proof, and the
+        punchline: the length of task AI can complete autonomously is doubling
+        every ~4 months (METR) — faster than the fleet itself grows.
       </div>
     </>
   );

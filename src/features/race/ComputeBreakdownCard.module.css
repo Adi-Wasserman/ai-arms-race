@@ -251,6 +251,23 @@
   font-weight: 600;
 }
 
+/* Hover marker disclosing the load-bearing inference behind a leg's
+   conversion (e.g. the Colossus MW-share assumption). */
+.assumptionBadge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255, 170, 0, 0.85);
+  background: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  border-radius: 3px;
+  cursor: help;
+  white-space: nowrap;
+}
+
 .metaSep {
   margin: 0 5px;
   color: rgba(255, 255, 255, 0.18);

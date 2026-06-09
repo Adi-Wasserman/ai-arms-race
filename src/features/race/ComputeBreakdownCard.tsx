@@ -13,7 +13,14 @@ const TODAY_ISO = localTodayIso();
 
 const FLEET_LEG_INFO: Record<
   string,
-  { label: string; source: string; sourceUrl: string; conversion: string }
+  {
+    label: string;
+    source: string;
+    sourceUrl: string;
+    conversion: string;
+    /** Load-bearing inference disclosed at point-of-use (hover ⓘ). */
+    assumption?: string;
+  }
 > = {
   'EAI-AWS': {
     label: 'AWS Trainium2 (Project Rainier)',
@@ -49,6 +56,8 @@ const FLEET_LEG_INFO: Record<
     sourceUrl:
       'https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/',
     conversion: '~300 MW / 1,086 MW × 832K ≈ 230K H100e',
+    assumption:
+      'MW-share inference: only the ~300 MW power allocation is public, so we assume uniform GPU density across Colossus (300 of 1,086 MW → 230K of 832K H100e). The actual GPU split is not disclosed — the real number could differ materially.',
   },
   'COL-GGL': {
     label: 'xAI Colossus tenant block',
@@ -56,6 +65,8 @@ const FLEET_LEG_INFO: Record<
     sourceUrl:
       'https://www.sec.gov/Archives/edgar/data/0001181412/000162828026041150/spacexagreementfwp.htm',
     conversion: '~110K NVIDIA GPUs ≈ 110K H100e',
+    assumption:
+      'Assumes 1.0 H100e per GPU — conservative, treats the fleet as an H100/H200 mix. If the block includes GB200s the real figure is higher. Actual chip types not disclosed.',
   },
   'COL-XAI-ADJ': {
     label: 'Rented to Anthropic + Google (subtracted)',
@@ -85,6 +96,7 @@ interface FleetLeg {
   source: string;
   sourceUrl: string;
   conversion: string;
+  assumption?: string;
   currentH100e: number;
   steps: FleetStep[];
 }
@@ -271,6 +283,14 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                         )}
                         <span className={styles.metaSep}>·</span>
                         <strong>{leg.conversion}</strong>
+                        {leg.assumption && (
+                          <span
+                            className={styles.assumptionBadge}
+                            title={leg.assumption}
+                          >
+                            ⓘ key assumption
+                          </span>
+                        )}
                       </div>
                       <div className={styles.rampTimeline}>
                         <span className={styles.rampLabel}>Ramp:</span>

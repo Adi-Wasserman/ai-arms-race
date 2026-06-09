@@ -38,7 +38,7 @@ const PRINCIPLES: readonly Principle[] = [
     number: 2,
     title: 'Compute is the Fuel',
     role: 'the optimizer',
-    body: "Performance scales predictably with total training FLOPs (Bitter Lesson + Chinchilla laws). This is why we track the fleet so closely — it's still the single biggest lever.",
+    body: 'Performance scales predictably with total training FLOPs (Bitter Lesson + Chinchilla laws), and compute is the one input labs can directly buy. That dual role — predictive AND controllable — is why we track the fleet so closely.',
     accent: '#ffaa00', // amber — ties to compute/power theme
   },
   {
@@ -112,7 +112,7 @@ export default function FirstPrinciples(): JSX.Element {
           {open ? '▾' : '▸'}
         </span>
         <h3 id="first-principles-title" className={styles.title}>
-          Compute is the biggest single predictor…{' '}
+          Compute is the biggest controllable lever…{' '}
           <span className={styles.titleEm}>but it's not the only one.</span>
         </h3>
         <span className={styles.subtitle}>

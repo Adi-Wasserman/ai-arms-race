@@ -120,6 +120,14 @@ function ModelsSectionInner(): JSX.Element {
       <BenchmarkTable />
 
       {/* ═══ METR Time Horizons ═══ */}
+      <div className={styles.transition}>
+        <strong>Beyond benchmarks, there's a second clock.</strong> The compute
+        race buys capability — METR measures how fast that capability
+        compounds. The length of task frontier models can complete
+        autonomously is doubling roughly every 4 months: faster than the
+        fleet grows, and the single best argument that the buildout above is
+        rational.
+      </div>
       <div className={styles.subsection}>
         <MetrChart ref={metrRef} />
         <div className={styles.fn}>

@@ -25,6 +25,8 @@ interface CellProps {
   dimmed: boolean;
   /** Lower is better (used for cost). */
   lowerBetter?: boolean;
+  /** Score is lab-self-reported (preview models) — flagged at the cell. */
+  preview?: boolean;
 }
 
 function rankClass(rank: number): string {
@@ -49,6 +51,7 @@ function ScoreCell({
   isSelected,
   dimmed,
   lowerBetter = false,
+  preview = false,
 }: CellProps): JSX.Element {
   const tdClass = `${styles.mc} ${dimmed ? styles.dimmed : ''} ${isSelected ? styles.selected : ''}`;
   if (value == null) {
@@ -66,12 +69,22 @@ function ScoreCell({
   const sorted = [...valid].sort(lowerBetter ? (a, b) => a - b : (a, b) => b - a);
   const rank = sorted.indexOf(value) + 1;
   return (
-    <td className={tdClass}>
+    <td
+      className={tdClass}
+      title={
+        preview
+          ? 'Self-reported by the lab — pending independent verification'
+          : undefined
+      }
+    >
       <span className={`${styles.cell} ${rankClass(rank)}`}>
         <span className={styles.cellScore} style={{ color }}>
           {value}
+          {preview && <span className={styles.selfReportedMark}>*</span>}
         </span>
-        <span className={styles.cellRank}>{rankBadge(rank)}</span>
+        <span className={styles.cellRank} style={preview ? { opacity: 0.55 } : undefined}>
+          {rankBadge(rank)}
+        </span>
       </span>
     </td>
   );
@@ -355,6 +368,7 @@ export function BenchmarkTable(): JSX.Element {
                           color={LAB_COLORS[m.lab]}
                           isSelected={isSelected(m.name)}
                           dimmed={isDimmed(m.name)}
+                          preview={!!m.preview}
                         />
                       ))}
                     </tr>
@@ -386,9 +400,15 @@ export function BenchmarkTable(): JSX.Element {
             );
           })}
           . Scores sourced from Artificial Analysis, Epoch AI, GPQA, SWE-bench,
-          ARC Prize, CAIS, and provider system cards (Mar 2026 snapshot).
+          ARC Prize, CAIS, and provider system cards (Jun 2026 snapshot).
         </div>
       )}
+
+      <div className={styles.selfReportedNote}>
+        <span className={styles.selfReportedMark}>*</span> = self-reported by
+        the lab (preview-flagged models) — pending independent verification.
+        Rank badges on these scores are provisional.
+      </div>
 
       {/* ─── Model notes: verified ─── */}
       <div className={styles.notesGrid}>

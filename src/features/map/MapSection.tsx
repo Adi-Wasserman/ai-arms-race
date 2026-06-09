@@ -38,11 +38,15 @@ function MapSectionInner(): JSX.Element {
   return (
     <>
       <div className={styles.intro}>
-        Nearly all frontier AI infrastructure is concentrated in the{' '}
+        The 2029 targets above live or die at these sites. Nearly all frontier
+        AI infrastructure is concentrated in the{' '}
         <strong>central and southern United States</strong> — driven by cheap land,
         available power, and tax incentives. OpenAI's Stargate portfolio now spans
         7+ US sites (&gt;9 GW planned) plus Abu Dhabi. International expansion is
         accelerating (Malaysia, Indonesia, Portugal) but the US remains dominant.
+        {' '}Scope: we track the 5 frontier labs. Epoch also monitors Chinese AI
+        compute (export-variant chips like H20/H800) — a major buildout under
+        different constraints, outside this dashboard's scope.
       </div>
 
       <LabLegend label="LAB" />
