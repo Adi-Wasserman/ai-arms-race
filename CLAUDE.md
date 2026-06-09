@@ -14,6 +14,15 @@ All 4 sections ship and render from live Epoch AI data with fallback. Major June
 
 ### Recent feature work
 
+- **June 2026 hardening pass** (full review + fixes shipped):
+  - **Code-splitting**: the 4 sections lazy-load via `React.lazy` + `Suspense` in `App.tsx` (main bundle 892 KB → ~333 KB; Chart.js and Leaflet live in lazy chunks). Suspense fallbacks carry the section anchor ids so `#models`-style deep links resolve at first paint.
+  - **Data-pipeline guards**: empty Epoch parse → fallback + error (no more "Live" over a blank chart); `RaceChart` renders an explicit empty state; NaN CSV values warn once per column; dev-mode assertion that the Colossus split nets to zero (`fleet.ts`).
+  - **Local-calendar dates**: all "today" comparisons use `localTodayIso()` from `src/services/dates.ts` — never `toISOString().slice(0,10)` (UTC can hide a fresh quarter-end for users behind UTC).
+  - **Test suite**: 61 Vitest tests in `src/services/__tests__/` (parsers, ownership math, projections, confidence, Colossus balance). `npm test` runs them; **CI runs them between type-check and build**, so failures block deploys.
+  - **Keyboard a11y**: TruthModal focus trap + restore, FacilityDrawer focus management, IntelTable sort headers/rows keyboard-operable with `aria-sort`, `:focus-visible` outlines, `role="img"` on charts.
+  - **Auto-refresh pause**: the 5-min chip-owners refetch skips ticks while `document.hidden`, with a catch-up refresh on tab return.
+  - **METR tooltip fix**: `interaction: { mode: 'nearest', intersect: false, axis: 'x' }` — stops flicker in the dense 2025–2026 cluster.
+
 - **Default view is now TOTAL CAPACITY** (was Satellite Only). Scope toggle renamed: `TOTAL CAPACITY | SATELLITE ONLY`. Default `scope: 'fleet'` in both `raceSlice.ts` AND `useHashState.ts` (bug fix: hash default was previously `'tracked'`).
 
 - **ComputeBreakdownCard** (`src/features/race/ComputeBreakdownCard.tsx`): collapsible card (collapsed by default) below the chart showing per-lab H100e calculation breakdown. 3+2 card layout (top row: Anthropic/Gemini/OpenAI with cloud-lease legs; bottom row: Meta/xAI). Each card shows satellite-verified facilities + cloud-lease legs with sources, H100e conversion ratios, and future ramp timelines (solid pills = past, dashed = future). xAI card now shows Colossus tenant subtraction (COL-XAI-ADJ). Always visible in both ACCESS and OWNERSHIP modes.
@@ -76,16 +85,17 @@ src/features/models/WithinLabScaling.tsx      # dual-axis GPT-5.5/Opus 4.8 scali
 src/features/models/MetrChart.tsx             # METR TH 1.1, linear Y-axis, 27 models
 src/features/models/FirstPrinciples.tsx       # 6 first-principles explainer
 src/features/models/BenchmarkTable.tsx        # preview model support, linked data sources
-src/features/models/ScatterPlot.tsx           # OLD — exists but NOT imported
 src/data/models.ts                            # MODEL_SPECS (6 models: GPT-5.5, Opus 4.8, etc.)
 src/data/metr.ts                              # METR TH 1.1 official data (27 models)
 src/data/fleet.ts                             # cloud-lease + Colossus tenant entries with ramps
 src/data/facilities.ts                        # FACILITY_COORDS (80+) + LAB_MAP (76 handles)
 src/data/projections.ts                       # 2029 targets (June 2026 refresh)
 src/store/slices/raceSlice.ts                 # default scope='fleet', no velocityMode
-src/hooks/useEpochChipOwners.ts               # 5min auto-refresh, force-refresh on mount
+src/hooks/useEpochChipOwners.ts               # 5min auto-refresh (paused while tab hidden)
 src/hooks/useHashState.ts                     # default scope='fleet' (was 'tracked' — fixed)
 src/services/chipOwners.ts                    # asOf filters past dates only (was showing 2030)
+src/services/dates.ts                         # localTodayIso() — ALWAYS use for "today" comparisons
+src/services/__tests__/                       # 61 Vitest tests — npm test; CI gate
 src/services/classify.ts                      # SpaceXAI owner-first check for Colossus
 src/services/confidence.ts                    # ±1.4× capacity (Epoch ~80% CI)
 src/services/observations.ts                  # 10 signal types incl. permit, liquid cooling, PPA
@@ -95,7 +105,6 @@ src/config/labs.ts                            # LAB_CHIPS: Ironwood, GB200, Trai
 src/config/signals.ts                         # 10 construction signals (added permit, liquid, PPA)
 src/config/benchmarks.ts                      # 11 benchmarks, 7 domain groups
 src/types/benchmark.ts                        # Model type + preview?: boolean
-src/components/ui/OwnershipSidePanel.tsx       # EXISTS but NOT rendered
 src/components/ui/TruthModal.tsx              # 5 sections, Colossus contracts, methodology June 2026
 src/components/layout/DataBanner.tsx           # sticky bar, vintage filters past dates only
 ```
@@ -131,12 +140,16 @@ Sources for Colossus tenant deals:
 
 ### To ship a change
 1. Edit files under `/Users/adiwasserman/ai-arms-race/src/...`
-2. `npx tsc --noEmit` + `npm run build` (must pass)
+2. `npx tsc --noEmit` + `npm test` + `npm run build` (all must pass)
 3. **`diff -rq /Users/adiwasserman/ai-arms-race/src /tmp/ai-arms-race-deploy/src`** — catch missing files
 4. `cp` changed files → `/tmp/ai-arms-race-deploy/src/...`
 5. `cd /tmp/ai-arms-race-deploy && git add ... && git commit && git push`
 
+CI (`deploy.yml`) runs `npm ci` → `tsc -b` → `npm test` → build → Pages deploy. A failing test blocks the deploy.
+
 **Known footgun:** Skipping the `diff` check has broken CI multiple times. Always diff before committing.
+
+**Known footgun #2 (lockfile):** CI runs Node 20 / npm 10; local is npm 11. The two record optional platform-dep subtrees differently, so a locally-valid `package-lock.json` can fail `npm ci` on CI. After ANY dependency change, validate with `cd /tmp/ai-arms-race-deploy && npx -y npm@10 ci --dry-run` before pushing. Prefer dev deps that dedupe against the project's vite 5 (this is why vitest is pinned to ^3, not 4).
 
 ---
 
@@ -165,10 +178,13 @@ Deleted `src/services/velocity.ts`, `VelocityMode` type, all store/hash/UI refer
 Satellite data structurally undercounts cloud tenants. OpenAI showed 28× from a misleadingly low base.
 
 ### Analyst estimates in Leaderboard
-SemiAnalysis/ArtAnalysis stale Q1 2026 snapshots. `ANALYST_ESTIMATES` data still exists in `projections.ts` but is not imported.
+SemiAnalysis/ArtAnalysis stale Q1 2026 snapshots. `ANALYST_ESTIMATES` and its types were **deleted entirely** (June 2026) — recover from git history if ever needed.
 
 ### LEAD CHANGES stat card
 Removed alongside YoY. StatCards shows 3 cards: LEADER TODAY, TOTAL COMPUTE, TOTAL POWER.
+
+### Dead components (deleted June 2026)
+`ScatterPlot.tsx` (superseded by TrainingComputeChart) and `OwnershipSidePanel.tsx` (built but never mounted) + their CSS modules. Some comments still reference OwnershipSidePanel, and `highlightedOwner` in `raceSlice.ts` is now only read (never set) — fold that cleanup into any future OwnershipTable refactor.
 
 ---
 
@@ -195,6 +211,9 @@ DC CSV uses `Name` (not `Handle`). Timeline CSV uses `Data center` (not `Handle`
 ### Future dates in Epoch data (CRITICAL)
 Both the timeline CSV and chip owners ZIP contain future projections. Any `asOf` / vintage date computation MUST filter to `<= today` to avoid showing dates like "May 2030". This was a live bug fixed in June 2026.
 
+### "Today" must be the LOCAL calendar date
+Use `localTodayIso()` from `src/services/dates.ts`, never `new Date().toISOString().slice(0, 10)` — the UTC date can differ from the user's calendar date near midnight and hide a fresh quarter-end row as a "future projection".
+
 ### vite.config.js shadowing
 `tsconfig.node.json` has `outDir: ./node_modules/.cache/tsconfig-node`. Don't remove.
 
@@ -220,7 +239,7 @@ Handler always calls `setScope('fleet')` then `setRaceMode(...)` — intentional
 `hardwareRealityCheckDismissed_v1`, `knownLeasesCardCollapsed_v1`, `firstPrinciplesCollapsed_v1`, `epochChipOwnersCache_v1`.
 
 ### `color-mix(in oklab)` tinting pattern
-Used in `OwnershipTable`, `FrontierOutlookCard`, `ComputeBreakdownCard`, `FirstPrinciples`, and `OwnershipSidePanel`. Browser support fine (2023+).
+Used in `OwnershipTable`, `FrontierOutlookCard`, `ComputeBreakdownCard`, and `FirstPrinciples`. Browser support fine (2023+).
 
 ### OwnershipTable row order
 Frontier-anchored owners first (by H100e desc), then non-frontier.
@@ -248,7 +267,7 @@ User prefers linear Y-axis (not logarithmic). GPT-2 label hidden because its val
 
 ## Tech Stack
 
-React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Leaflet + react-leaflet, PapaParse, JSZip, date-fns, CSS Modules + design tokens. Deployed to GitHub Pages.
+React 18 + TypeScript, Vite, Zustand (slices), Chart.js 4 + react-chartjs-2, Leaflet + react-leaflet, PapaParse, JSZip, date-fns, CSS Modules + design tokens, Vitest (^3 — see lockfile footgun). Deployed to GitHub Pages.
 
 ---
 
@@ -292,8 +311,6 @@ Chip efficiency improvements factored in: GB200 ~2.5× H100e, Vera Rubin ~3× (2
 
 ## Known Issues
 1. ESRI API unauthenticated — rate-limited under traffic
-2. METR tooltip stickiness in 2025-2026 cluster (many models at similar dates)
-3. Anthropic 25% override in `LAB_OWNERSHIP_CONFIG` may need updating as Epoch data catches up
-4. `ANALYST_ESTIMATES` in `projections.ts` is stale (Q1 2026) — no longer displayed but data remains
-5. Colossus tenant split (COL-ANT/COL-GGL/COL-XAI-ADJ) assumes MW-share and 1:1 GPU ratio — actual allocation may differ
-6. Epoch may rename owners again (SpaceXAI → something else post-IPO) — check `classifyLab` and `LAB_OWNERSHIP_CONFIG.selfOwned`
+2. Anthropic 25% override in `LAB_OWNERSHIP_CONFIG` may need updating as Epoch data catches up
+3. Colossus tenant split (COL-ANT/COL-GGL/COL-XAI-ADJ) assumes MW-share and 1:1 GPU ratio — actual allocation may differ. A dev-mode assertion in `fleet.ts` + tests in `fleet.test.ts` enforce that the entries stay net-zero.
+4. Epoch may rename owners again (SpaceXAI → something else post-IPO) — check `classifyLab` and `LAB_OWNERSHIP_CONFIG.selfOwned`
