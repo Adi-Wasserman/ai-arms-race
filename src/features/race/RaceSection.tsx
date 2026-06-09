@@ -11,6 +11,7 @@ import type {
   ScopeMode,
 } from '@/types';
 
+import { ChipConversionCard } from './ChipConversionCard';
 import { ComputeBreakdownCard } from './ComputeBreakdownCard';
 import { FrontierOutlookCard } from './FrontierOutlookCard';
 import { KnownLeasesCard } from './KnownLeasesCard';
@@ -20,6 +21,7 @@ import { ProjectionPanel } from './ProjectionPanel';
 import { RaceChart } from './RaceChart';
 import styles from './RaceSection.module.css';
 import { StatCards } from './StatCards';
+import { TargetTracker } from './TargetTracker';
 import { useRaceExport } from './useRaceExport';
 
 /** "JUNE 2026" — dynamic so the insights header never silently rots. */
@@ -276,9 +278,11 @@ function RaceSectionInner(): JSX.Element {
       )}
 
       <ComputeBreakdownCard />
+      <ChipConversionCard />
       <KnownLeasesCard />
 
       <ProjectionPanel />
+      <TargetTracker />
 
       <div className={styles.fn}>
         DATA:{' '}

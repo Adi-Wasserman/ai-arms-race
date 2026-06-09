@@ -1,0 +1,193 @@
+.card {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md, 8px);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.labCard {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+}
+
+.labHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.labName {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.statusPill {
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.statusMet {
+  color: #00ff87;
+  background: rgba(0, 255, 135, 0.12);
+  border: 1px solid rgba(0, 255, 135, 0.35);
+}
+
+.statusAhead {
+  color: #00ff87;
+  background: rgba(0, 255, 135, 0.1);
+  border: 1px solid rgba(0, 255, 135, 0.3);
+}
+
+.statusOnPace {
+  color: #7fd87f;
+  background: rgba(127, 216, 127, 0.1);
+  border: 1px solid rgba(127, 216, 127, 0.3);
+}
+
+.statusBehind {
+  color: rgba(255, 170, 0, 0.95);
+  background: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.35);
+}
+
+.statusFarBehind {
+  color: #ff6b5e;
+  background: rgba(255, 107, 94, 0.1);
+  border: 1px solid rgba(255, 107, 94, 0.35);
+}
+
+.statusNoData {
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.statusBasisGap {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  cursor: help;
+}
+
+.basisGapNote {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.noData {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.progressLine {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.now {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.arrow {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.target {
+  font-weight: 700;
+  color: rgba(255, 170, 0, 0.85);
+}
+
+.targetLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.paceLine {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 7px;
+}
+
+.paceLine strong {
+  font-family: var(--font-mono, monospace);
+}
+
+.paceGood {
+  color: #7fd87f;
+}
+
+.paceBad {
+  color: rgba(255, 170, 0, 0.95);
+}
+
+/* Pace bar: fill = trailing/required, scale 0–150%; the tick marks 100%. */
+.ratioTrack {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ratioFill {
+  height: 100%;
+  border-radius: 3px;
+  opacity: 0.85;
+  transition: width 0.25s ease;
+}
+
+.ratioMark {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: 66.67%; /* 100% of required on a 0–150% scale */
+  width: 2px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.footnote {
+  margin: 12px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.45);
+}

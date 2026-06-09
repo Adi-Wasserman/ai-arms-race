@@ -1,3 +1,4 @@
+import { HoverTip } from '@/components/ui/HoverTip';
 import { useCollapsible } from '@/hooks/useCollapsible';
 
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
@@ -285,12 +286,11 @@ export function ComputeBreakdownCard(): JSX.Element | null {
                         <span className={styles.metaSep}>·</span>
                         <strong>{leg.conversion}</strong>
                         {leg.assumption && (
-                          <span
-                            className={styles.assumptionBadge}
-                            title={leg.assumption}
-                          >
-                            ⓘ key assumption
-                          </span>
+                          <HoverTip content={leg.assumption}>
+                            <span className={styles.assumptionBadge} tabIndex={0}>
+                              ⓘ key assumption
+                            </span>
+                          </HoverTip>
                         )}
                       </div>
                       <div className={styles.rampTimeline}>

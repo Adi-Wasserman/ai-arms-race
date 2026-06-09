@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { HoverTip } from '@/components/ui/HoverTip';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { PROJ_2029_TARGETS } from '@/data/projections';
 import { formatH100, formatPower } from '@/services/format';
@@ -201,12 +202,11 @@ export function StatCards(): JSX.Element | null {
           <div className={styles.statLabel}>
             TOTAL COMPUTE
             {scope === 'fleet' && (
-              <span
-                className={styles.estTag}
-                title="Blends satellite-verified Epoch data with our cloud-lease estimates (AWS/GCP/Azure legs, Colossus tenant split). Open COMPUTE BREAKDOWN below for the per-lab split."
-              >
-                INCL. ESTIMATES
-              </span>
+              <HoverTip content="Blends satellite-verified Epoch data with our cloud-lease estimates (AWS/GCP/Azure legs, Colossus tenant split). Open COMPUTE BREAKDOWN below for the per-lab split.">
+                <span className={styles.estTag} tabIndex={0}>
+                  INCL. ESTIMATES
+                </span>
+              </HoverTip>
             )}
           </div>
           <div className={styles.statValue}>
@@ -219,12 +219,11 @@ export function StatCards(): JSX.Element | null {
           <div className={styles.statLabel}>
             TOTAL POWER
             {scope === 'fleet' && (
-              <span
-                className={styles.estTag}
-                title="Blends satellite-verified Epoch data with our cloud-lease estimates."
-              >
-                INCL. ESTIMATES
-              </span>
+              <HoverTip content="Blends satellite-verified Epoch data with our cloud-lease estimates.">
+                <span className={styles.estTag} tabIndex={0}>
+                  INCL. ESTIMATES
+                </span>
+              </HoverTip>
             )}
           </div>
           <div className={styles.statValue}>

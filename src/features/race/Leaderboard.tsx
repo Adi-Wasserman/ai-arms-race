@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { HoverTip } from '@/components/ui/HoverTip';
 import { Toggle } from '@/components/ui/Toggle';
 import { PCT_OWNED_TOOLTIP } from '@/config/labOwnershipMapping';
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
@@ -188,9 +189,11 @@ export function Leaderboard(): JSX.Element | null {
                   <strong>{formatH100(r.h)}</strong>
                   <span className={styles.metricLabel}> H100e</span>
                   {scope === 'fleet' && ESTIMATE_NOTES[r.lab] && (
-                    <span className={styles.estBadge} title={ESTIMATE_NOTES[r.lab]}>
-                      {r.lab === 'xAI' ? 'ADJ' : 'EST'}
-                    </span>
+                    <HoverTip content={ESTIMATE_NOTES[r.lab]}>
+                      <span className={styles.estBadge} tabIndex={0}>
+                        {r.lab === 'xAI' ? 'ADJ' : 'EST'}
+                      </span>
+                    </HoverTip>
                   )}
                   {' · '}
                   <strong>{formatPower(r.p)}</strong>
