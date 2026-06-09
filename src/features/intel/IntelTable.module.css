@@ -36,6 +36,12 @@
   color: var(--color-text-primary);
 }
 
+.th:focus-visible {
+  outline: 2px solid rgba(77, 142, 234, 0.8);
+  outline-offset: -2px;
+  color: var(--color-text-primary);
+}
+
 .th.asc::after {
   content: ' ↑';
   color: var(--color-text-tertiary);
@@ -52,6 +58,12 @@
 }
 
 .row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.row:focus-visible {
+  outline: 2px solid rgba(77, 142, 234, 0.8);
+  outline-offset: -2px;
   background: rgba(255, 255, 255, 0.04);
 }
 

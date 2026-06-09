@@ -1,4 +1,4 @@
-import type { AnalystEstimateMap, ProjectionTargetMap } from '@/types';
+import type { ProjectionTargetMap } from '@/types';
 
 /**
  * 2029 Projection — Power-Constrained Target Model (June 2026 refresh).
@@ -62,35 +62,5 @@ export const PROJ_2029_TARGETS: ProjectionTargetMap = {
   },
 } as const;
 
-/**
- * Analyst cross-check estimates (H100e, Q1 2026).
- * Independent validation against Epoch satellite data.
- * NOTE: Stale as of Q1 2026. Not displayed in UI but kept for reference.
- */
-export const ANALYST_ESTIMATES: AnalystEstimateMap = {
-  OpenAI: {
-    semi: 1_800_000,
-    aa: 1_700_000,
-    note: "Stargate + Azure (SemiAnalysis Q1 '26, AA Q1 '26)",
-  },
-  Gemini: {
-    semi: 2_100_000,
-    aa: null,
-    note: "Incl. TPUv5+ fleet est. (SemiAnalysis Q1 '26)",
-  },
-  Meta: {
-    semi: 900_000,
-    aa: 850_000,
-    note: "Owned infra only (SemiAnalysis Q1 '26, AA Q1 '26)",
-  },
-  xAI: {
-    semi: 600_000,
-    aa: null,
-    note: "Colossus 1+2 (SemiAnalysis Q1 '26)",
-  },
-  Anthropic: {
-    semi: 1_500_000,
-    aa: 1_400_000,
-    note: "3-cloud est. incl. new ~3.5 GW Google/Broadcom TPU deal announced Apr 6 2026 (SemiAnalysis Q1 '26, AA Q1 '26)",
-  },
-} as const;
+/* ANALYST_ESTIMATES (SemiAnalysis/AA Q1 2026 cross-checks) removed —
+   stale and no longer displayed. See git history if ever needed. */

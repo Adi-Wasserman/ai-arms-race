@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import { LAB_OWNERSHIP_CONFIG } from '@/config/labOwnershipMapping';
@@ -698,11 +698,33 @@ function MethodologySection(): JSX.Element {
 }
 
 export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | null {
-  // Escape-key dismissal + body-scroll lock while open.
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Escape-key dismissal, Tab focus trap, body-scroll lock, and focus
+  // restore — keyboard users must not be able to tab behind the modal,
+  // and closing must return focus to whatever opened it.
   useEffect(() => {
     if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !modalRef.current) return;
+      const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKey);
     const previousOverflow = document.body.style.overflow;
@@ -710,6 +732,7 @@ export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | nu
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
     };
   }, [open, onClose]);
 
@@ -722,6 +745,7 @@ export function TruthModal({ open, onClose }: TruthModalProps): JSX.Element | nu
       role="presentation"
     >
       <div
+        ref={modalRef}
         className={styles.modal}
         role="dialog"
         aria-modal="true"

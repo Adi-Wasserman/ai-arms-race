@@ -163,7 +163,8 @@ function BaseChartInner<TType extends ChartType>(
   return (
     <div
       className={`${styles.container}${className ? ` ${className}` : ''}`}
-      aria-label={ariaLabel}
+      role="img"
+      aria-label={ariaLabel ?? 'Chart'}
     >
       <Chart<TType>
         // react-chartjs-2 types the ref as `ChartJSOrUndefined` (ChartJS

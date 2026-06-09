@@ -146,7 +146,22 @@ export function IntelTable(): JSX.Element {
                     width: c.width,
                     textAlign: c.align ?? 'left',
                   }}
+                  scope="col"
+                  tabIndex={0}
+                  aria-sort={
+                    c.key === sortBy
+                      ? sortDir === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : undefined
+                  }
                   onClick={() => toggleSort(c.key)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleSort(c.key);
+                    }
+                  }}
                 >
                   {c.label}
                 </th>
@@ -168,7 +183,14 @@ export function IntelTable(): JSX.Element {
               <tr
                 key={dc.handle}
                 className={`${styles.row}${isSelected ? ` ${styles.selected}` : ''}`}
+                tabIndex={0}
                 onClick={() => setExpandedDC(dc.handle)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setExpandedDC(dc.handle);
+                  }
+                }}
               >
                 <td className={`${styles.td} ${styles.rk}`}>{i + 1}</td>
                 <td className={`${styles.td} ${styles.statusCell}`}>

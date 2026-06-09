@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { LAB_CHIPS, LAB_COLORS } from '@/config/labs';
 import { FACILITY_COORD_OVERRIDES, FACILITY_COORDS } from '@/data/facilities';
 import { scoreConfidence } from '@/services/confidence';
+import { localTodayIso } from '@/services/dates';
 import { formatH100, formatPower, shortName } from '@/services/format';
 import { extractObservations } from '@/services/observations';
 import { satelliteImgURL } from '@/services/satellite';
@@ -11,7 +12,7 @@ import type { Lab } from '@/types';
 
 import styles from './FacilityDrawer.module.css';
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const TODAY_ISO = localTodayIso();
 
 export function FacilityDrawer(): JSX.Element {
   const expandedDC = useDashboard((s) => s.expandedDC);
@@ -28,6 +29,20 @@ export function FacilityDrawer(): JSX.Element {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [expandedDC, setExpandedDC]);
+
+  // Focus management: move focus into the drawer when it opens, and
+  // return it to the triggering element (the table row) on close.
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (expandedDC) {
+      lastFocusedRef.current = document.activeElement as HTMLElement | null;
+      closeBtnRef.current?.focus();
+    } else if (lastFocusedRef.current) {
+      lastFocusedRef.current.focus();
+      lastFocusedRef.current = null;
+    }
+  }, [expandedDC]);
 
   const computed = useMemo(() => {
     if (!expandedDC) return null;
@@ -70,6 +85,7 @@ export function FacilityDrawer(): JSX.Element {
         role="dialog"
         aria-modal={isOpen}
         aria-hidden={!isOpen}
+        aria-label="Facility details"
       >
         {computed && (
           <>
@@ -82,6 +98,7 @@ export function FacilityDrawer(): JSX.Element {
                 {shortName(computed.dc.title)}
               </div>
               <button
+                ref={closeBtnRef}
                 type="button"
                 className={styles.closeBtn}
                 onClick={() => setExpandedDC(null)}

@@ -27,14 +27,6 @@ export interface UncertaintyBand {
   perYear: number;
 }
 
-export interface AnalystEstimate {
-  semi: number | null;
-  aa: number | null;
-  note: string;
-}
-
-export type AnalystEstimateMap = Readonly<Record<Lab, AnalystEstimate>>;
-
 /** Three-band projection output produced by `buildProjections2029`. */
 export interface ProjectionBands {
   central: TimeSeriesPoint[];
