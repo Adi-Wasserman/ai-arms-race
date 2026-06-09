@@ -22,22 +22,12 @@ export interface RaceSlice {
    * swaps in the OwnershipTable sourced from `useEpochChipOwners`.
    */
   raceMode: RaceMode;
-  /**
-   * Owner name (Epoch's vocabulary, e.g. "Google", "Microsoft") that
-   * the OwnershipTable should highlight + scroll-into-view on next
-   * render. Set by the OwnershipSidePanel cards when the user clicks
-   * one. The OwnershipTable consumes it via an effect, scrolls the
-   * matching row, applies a highlight class, and clears it after a
-   * short delay so re-clicking the same card re-triggers the highlight.
-   */
-  highlightedOwner: string | null;
 
   setMetric: (metric: MetricMode) => void;
   setScope: (scope: ScopeMode) => void;
   setProjMode: (projMode: ProjMode) => void;
   setHoveredLab: (lab: Lab | null) => void;
   setRaceMode: (mode: RaceMode) => void;
-  setHighlightedOwner: (owner: string | null) => void;
 }
 
 export const createRaceSlice: StateCreator<
@@ -51,7 +41,6 @@ export const createRaceSlice: StateCreator<
   projMode: 'current',
   hoveredLab: null,
   raceMode: 'effective',
-  highlightedOwner: null,
 
   // scope + metric changes invalidate the projection cache (same rule as
   // the legacy Store.set — see ai-arms-race.html line 1584).
@@ -68,5 +57,4 @@ export const createRaceSlice: StateCreator<
   setProjMode: (projMode) => set({ projMode }),
   setHoveredLab: (hoveredLab) => set({ hoveredLab }),
   setRaceMode: (raceMode) => set({ raceMode }),
-  setHighlightedOwner: (highlightedOwner) => set({ highlightedOwner }),
 });

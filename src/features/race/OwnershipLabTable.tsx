@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 import {
   LAB_OWNERSHIP_CONFIG,
@@ -17,11 +17,7 @@ import {
 } from '@/services/ownershipMath';
 import { useDashboard } from '@/store';
 import { localTodayIso } from '@/services/dates';
-import {
-  type EpochChipOwnersData,
-  type Lab,
-  OWNER_TO_LAB,
-} from '@/types';
+import type { EpochChipOwnersData, Lab } from '@/types';
 
 import styles from './OwnershipTable.module.css';
 
@@ -127,28 +123,6 @@ export function OwnershipLabTable(): JSX.Element {
 
   const seriesFull = useDashboard((s) => s.seriesFull);
   const dataVersion = useDashboard((s) => s.dataVersion);
-  // Owner name set by OwnershipSidePanel cards — we map it to a lab
-  // via OWNER_TO_LAB and highlight that lab's row instead.
-  const highlightedOwner = useDashboard((s) => s.highlightedOwner);
-  const setHighlightedOwner = useDashboard((s) => s.setHighlightedOwner);
-
-  const rowRefs = useRef<Map<Lab, HTMLTableRowElement>>(new Map());
-
-  useEffect(() => {
-    if (!highlightedOwner) return;
-    const mappedLab = OWNER_TO_LAB[
-      highlightedOwner as keyof typeof OWNER_TO_LAB
-    ] as Lab | undefined;
-    if (!mappedLab) return;
-    const row = rowRefs.current.get(mappedLab);
-    if (row) {
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    const t = window.setTimeout(() => {
-      setHighlightedOwner(null);
-    }, 1800);
-    return () => window.clearTimeout(t);
-  }, [highlightedOwner, setHighlightedOwner]);
 
   const rows = useMemo<LabRow[]>(() => {
     if (!data) return [];
@@ -283,20 +257,10 @@ export function OwnershipLabTable(): JSX.Element {
           {rows.map((row) => {
             const labColor = LAB_COLORS[row.lab];
             const isZeroLab = !row.owned.isDerivedFromEpoch;
-            const mappedFromHighlight = highlightedOwner
-              ? (OWNER_TO_LAB[
-                  highlightedOwner as keyof typeof OWNER_TO_LAB
-                ] as Lab | undefined)
-              : undefined;
-            const isHighlighted = mappedFromHighlight === row.lab;
             return (
               <tr
                 key={row.lab}
-                ref={(el) => {
-                  if (el) rowRefs.current.set(row.lab, el);
-                  else rowRefs.current.delete(row.lab);
-                }}
-                className={`${styles.row}${isHighlighted ? ` ${styles.rowHighlight}` : ''}`}
+                className={styles.row}
               >
                 <td className={styles.td}>
                   <div className={`${styles.rank} ${rankClass(row.rank)}`}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCollapsible } from '@/hooks/useCollapsible';
 
 import styles from './FirstPrinciples.module.css';
 
@@ -71,33 +71,8 @@ const PRINCIPLES: readonly Principle[] = [
   },
 ];
 
-function readCollapsed(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function writeCollapsed(v: boolean): void {
-  if (typeof window === 'undefined') return;
-  try {
-    if (v) window.localStorage.setItem(STORAGE_KEY, '1');
-    else window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* localStorage unavailable — silent no-op */
-  }
-}
-
 export default function FirstPrinciples(): JSX.Element {
-  const [collapsed, setCollapsed] = useState<boolean>(() => readCollapsed());
-
-  useEffect(() => {
-    writeCollapsed(collapsed);
-  }, [collapsed]);
-
-  const open = !collapsed;
+  const { open, toggle } = useCollapsible({ storageKey: STORAGE_KEY });
 
   return (
     <section className={styles.card} aria-labelledby="first-principles-title">
@@ -106,7 +81,7 @@ export default function FirstPrinciples(): JSX.Element {
         className={styles.header}
         aria-expanded={open}
         aria-controls="first-principles-body"
-        onClick={() => setCollapsed((v) => !v)}
+        onClick={toggle}
       >
         <span className={styles.chevron} aria-hidden="true">
           {open ? '▾' : '▸'}

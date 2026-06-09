@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCollapsible } from '@/hooks/useCollapsible';
 
 import { LAB_COLORS, LAB_NAMES } from '@/config/labs';
 import { FLEET_ESTIMATES } from '@/data/fleet';
@@ -128,7 +128,8 @@ function fmtDate(iso: string): string {
 export function ComputeBreakdownCard(): JSX.Element | null {
   // Open by default — this card is the confidence-split Rosetta Stone for
   // the leaderboard numbers above; hiding it buried the estimate caveats.
-  const [open, setOpen] = useState(true);
+  // Deliberately NOT persisted: every visit starts with the caveats visible.
+  const { open, toggle } = useCollapsible();
 
   const seriesEpoch = useDashboard((s) => s.seriesEpoch);
   const seriesFull = useDashboard((s) => s.seriesFull);
@@ -195,7 +196,7 @@ export function ComputeBreakdownCard(): JSX.Element | null {
           type="button"
           className={styles.toggleBtn}
           aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
+          onClick={toggle}
         >
           <span className={styles.chevron}>{open ? '▾' : '▸'}</span>
           <h3 className={styles.title}>How We Calculate Each Lab's H100e</h3>

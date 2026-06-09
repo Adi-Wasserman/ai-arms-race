@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-
 import { LAB_COLORS } from '@/config/labs';
+import { useCollapsible } from '@/hooks/useCollapsible';
 
 import styles from './KnownLeasesCard.module.css';
 
@@ -107,33 +106,8 @@ const DISCLAIMER =
   "Exact fractional allocation of each hyperscaler's chips to each lab " +
   'is proprietary and not published by Epoch.';
 
-function readCollapsed(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function writeCollapsed(v: boolean): void {
-  if (typeof window === 'undefined') return;
-  try {
-    if (v) window.localStorage.setItem(STORAGE_KEY, '1');
-    else window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* localStorage unavailable — silent no-op */
-  }
-}
-
 export function KnownLeasesCard(): JSX.Element {
-  const [collapsed, setCollapsed] = useState<boolean>(() => readCollapsed());
-
-  useEffect(() => {
-    writeCollapsed(collapsed);
-  }, [collapsed]);
-
-  const open = !collapsed;
+  const { open, toggle } = useCollapsible({ storageKey: STORAGE_KEY });
   return (
     <section
       className={styles.card}
@@ -144,7 +118,7 @@ export function KnownLeasesCard(): JSX.Element {
         className={styles.header}
         aria-expanded={open}
         aria-controls="known-leases-body"
-        onClick={() => setCollapsed((v) => !v)}
+        onClick={toggle}
       >
         <span className={styles.chevron} aria-hidden="true">
           {open ? '▾' : '▸'}

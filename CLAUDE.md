@@ -76,7 +76,9 @@ Do not attempt to compute per-lab YoY growth — it will produce misleading figu
 ```
 src/features/race/ComputeBreakdownCard.tsx    # per-lab H100e breakdown (Colossus tenant legs)
 src/features/race/KnownLeasesCard.tsx         # "Who Trains on Whose Chips" (7 bullets, all modes)
-src/features/race/OwnershipTable.tsx          # ownership view, asOf filters past dates only
+src/features/race/OwnershipTable.tsx          # ownership view (split June 2026: ~330 lines)
+src/features/race/ownershipTableData.ts       # CHIP_COLORS palette + deriveOwnershipRows (pure)
+src/features/race/OwnershipChipMix.tsx        # chip-mix cell + portal tooltip
 src/features/race/FrontierOutlookCard.tsx     # "2027+" (OWNERSHIP tab only)
 src/features/race/Leaderboard.tsx             # single-line per lab, 2029 projections at 12px
 src/features/race/RaceSection.tsx             # master toggle + scope default, Key Insights June 2026
@@ -187,7 +189,7 @@ SemiAnalysis/ArtAnalysis stale Q1 2026 snapshots. `ANALYST_ESTIMATES` and its ty
 Removed alongside YoY. StatCards shows 3 cards: LEADER TODAY, TOTAL COMPUTE, TOTAL POWER.
 
 ### Dead components (deleted June 2026)
-`ScatterPlot.tsx` (superseded by TrainingComputeChart) and `OwnershipSidePanel.tsx` (built but never mounted) + their CSS modules. Some comments still reference OwnershipSidePanel, and `highlightedOwner` in `raceSlice.ts` is now only read (never set) — fold that cleanup into any future OwnershipTable refactor.
+`ScatterPlot.tsx` (superseded by TrainingComputeChart) and `OwnershipSidePanel.tsx` (built but never mounted) + their CSS modules. The orphaned `highlightedOwner` store state was removed in the OwnershipTable split, along with the never-triggered OwnedMedianTooltip, the unrendered pctOwned/ownedH100eEpoch row fields, and the unrendered LabBadge taxonomy. Collapsible cards share `src/hooks/useCollapsible.ts` (storage semantics: key='1' means collapsed).
 
 ---
 
