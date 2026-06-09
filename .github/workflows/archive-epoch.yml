@@ -1,0 +1,84 @@
+name: Archive Epoch snapshots
+
+on:
+  # Epoch releases on their own schedule — check daily, commit only on change.
+  schedule:
+    - cron: '17 6 * * *'
+
+  # Allow manual runs (also used to seed the first snapshot).
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: epoch-archive
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch current Epoch data
+        run: |
+          mkdir -p /tmp/fetch
+          curl -fsSL --max-time 60 https://epoch.ai/data/data_centers/data_centers.csv -o /tmp/fetch/data_centers.csv
+          curl -fsSL --max-time 60 https://epoch.ai/data/data_centers/data_center_timelines.csv -o /tmp/fetch/data_center_timelines.csv
+          curl -fsSL --max-time 60 https://epoch.ai/data/ai_chip_owners.zip -o /tmp/fetch/ai_chip_owners.zip
+          # Sanity: reject obviously-truncated/error responses.
+          [ "$(stat -c%s /tmp/fetch/data_centers.csv)" -gt 5000 ] || { echo "data_centers.csv too small"; exit 1; }
+          [ "$(stat -c%s /tmp/fetch/data_center_timelines.csv)" -gt 5000 ] || { echo "timelines.csv too small"; exit 1; }
+          [ "$(stat -c%s /tmp/fetch/ai_chip_owners.zip)" -gt 5000 ] || { echo "chip owners zip too small"; exit 1; }
+          unzip -o -q /tmp/fetch/ai_chip_owners.zip -d /tmp/fetch/zip_contents
+
+      - name: Compare content hash against last snapshot
+        id: diff
+        run: |
+          # Hash the CSV CONTENTS (incl. inside the ZIP) in a fixed order —
+          # re-zipped-but-identical data must not create junk snapshots.
+          NEW_HASH=$(cat /tmp/fetch/data_centers.csv /tmp/fetch/data_center_timelines.csv $(ls /tmp/fetch/zip_contents/*.csv | sort) | sha256sum | cut -d' ' -f1)
+          LAST_HASH=$(jq -r '.latestHash // ""' archive/index.json 2>/dev/null || echo "")
+          echo "new=$NEW_HASH last=$LAST_HASH"
+          if [ "$NEW_HASH" = "$LAST_HASH" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "hash=$NEW_HASH" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit dated snapshot
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          DATE=$(date -u +%F)
+          mkdir -p "archive/$DATE"
+          cp /tmp/fetch/data_centers.csv /tmp/fetch/data_center_timelines.csv /tmp/fetch/ai_chip_owners.zip "archive/$DATE/"
+          # Maintain archive/index.json: latest content hash + snapshot list,
+          # so the app can discover snapshots without the GitHub API.
+          python3 - "$DATE" "${{ steps.diff.outputs.hash }}" <<'EOF'
+          import json, sys, os
+          date, new_hash = sys.argv[1], sys.argv[2]
+          path = 'archive/index.json'
+          idx = {'latestHash': '', 'snapshots': []}
+          if os.path.exists(path):
+              with open(path) as f:
+                  idx = json.load(f)
+          if date not in idx['snapshots']:
+              idx['snapshots'].append(date)
+          idx['snapshots'].sort()
+          idx['latestHash'] = new_hash
+          with open(path, 'w') as f:
+              json.dump(idx, f, indent=2)
+              f.write('\n')
+          EOF
+          git config user.name "epoch-archive-bot"
+          git config user.email "actions@github.com"
+          git add archive
+          git commit -m "Archive Epoch snapshot $DATE"
+          git push
+
+      - name: No change
+        if: steps.diff.outputs.changed == 'false'
+        run: echo "Epoch data unchanged since last snapshot — nothing to archive."
