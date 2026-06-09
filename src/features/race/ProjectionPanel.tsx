@@ -105,7 +105,7 @@ export function ProjectionPanel(): JSX.Element | null {
 
         <div className={`${styles.column} ${styles.future}`}>
           <div className={`${styles.colHeading} ${styles.future}`}>
-            ⚡ JAN 2029 — PROJECTED
+            ⚡ JAN 2029 — ANNOUNCED TARGETS
           </div>
           {projRows.map((r, i) => (
             <div key={r.lab} className={`${styles.row} ${styles.future}`}>

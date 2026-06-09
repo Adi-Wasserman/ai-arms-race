@@ -30,6 +30,22 @@ const SCOPE_OPTIONS = [
   { value: 'tracked' as const, label: 'SATELLITE ONLY' },
 ];
 
+/**
+ * Labs whose TOTAL CAPACITY number includes estimate legs from
+ * src/data/fleet.ts (cloud-lease conversions / Colossus tenant split)
+ * rather than pure satellite-verified Epoch data. Drives the inline
+ * EST badge so the estimate-vs-observed split is visible at the
+ * point of reading the number, not just in the breakdown card.
+ */
+const ESTIMATE_NOTES: Partial<Record<Lab, string>> = {
+  Anthropic:
+    'Majority ESTIMATED — AWS Trainium, Google Cloud TPU and Azure cloud-lease legs plus the Colossus tenant block are our conversions from announcements, not satellite-verified. See COMPUTE BREAKDOWN below.',
+  Gemini:
+    'Partially ESTIMATED — includes the estimated internal TPU fleet (EGC) and the Colossus tenant block. See COMPUTE BREAKDOWN below.',
+  xAI:
+    'ADJUSTED — satellite-verified Colossus minus estimated tenant allocations rented to Anthropic and Google. See COMPUTE BREAKDOWN below.',
+};
+
 interface Row {
   lab: Lab;
   h: number;
@@ -170,6 +186,11 @@ export function Leaderboard(): JSX.Element | null {
                 <div className={styles.metrics}>
                   <strong>{formatH100(r.h)}</strong>
                   <span className={styles.metricLabel}> H100e</span>
+                  {scope === 'fleet' && ESTIMATE_NOTES[r.lab] && (
+                    <span className={styles.estBadge} title={ESTIMATE_NOTES[r.lab]}>
+                      {r.lab === 'xAI' ? 'ADJ' : 'EST'}
+                    </span>
+                  )}
                   {' · '}
                   <strong>{formatPower(r.p)}</strong>
                   {r.pctOwned != null && (
@@ -219,7 +240,9 @@ export function Leaderboard(): JSX.Element | null {
       )}
       {scope === 'fleet' && (
         <div className={styles.disclaimer}>
-          ⚠ Includes cloud-lease estimates. See calculations below.
+          <span className={styles.estBadge}>EST</span> = includes our cloud-lease /
+          tenant-split estimates — not satellite-verified. Hover a badge or open
+          COMPUTE BREAKDOWN below for the per-lab split.
         </div>
       )}
     </div>

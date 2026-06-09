@@ -20,6 +20,7 @@ function deriveStatus(
   dataSource: 'epoch' | 'fallback' | null,
   dataCenters: number,
   epochVintage: string | null,
+  scope: 'tracked' | 'fleet',
 ): StatusDescriptor {
   if (loading) return { status: 'loading', text: 'Loading Epoch data…' };
   if (error && dataSource !== 'epoch') {
@@ -28,6 +29,15 @@ function deriveStatus(
   const vintage = epochVintage ? ` · data as of ${epochVintage}` : '';
   if (dataSource === 'fallback') {
     return { status: 'stale', text: `Fallback data — ${dataCenters} facilities${vintage}` };
+  }
+  // "Live — Epoch AI" alone would overclaim for the default fleet scope,
+  // where the displayed totals blend live Epoch data with our hardcoded
+  // cloud-lease estimates. Say so in the banner itself.
+  if (scope === 'fleet') {
+    return {
+      status: 'ok',
+      text: `Live Epoch AI + cloud-lease estimates · ${dataCenters} facilities${vintage}`,
+    };
   }
   return { status: 'ok', text: `Live — Epoch AI · ${dataCenters} facilities${vintage}` };
 }
@@ -39,6 +49,7 @@ export function DataBanner(): JSX.Element {
   const dataCenters = useDashboard((s) => s.dataCenters.filter((dc) => dc.co !== 'Other').length);
   const lastUpdated = useDashboard((s) => s.lastUpdated);
   const timeline = useDashboard((s) => s.timeline);
+  const scope = useDashboard((s) => s.scope);
 
   // Most recent PAST observation date — the Epoch data vintage.
   // Timeline includes future projections (e.g. 2028+), so we filter
@@ -55,7 +66,14 @@ export function DataBanner(): JSX.Element {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }, [timeline]);
 
-  const { status, text } = deriveStatus(loading, error, dataSource, dataCenters, epochVintage);
+  const { status, text } = deriveStatus(
+    loading,
+    error,
+    dataSource,
+    dataCenters,
+    epochVintage,
+    scope,
+  );
 
   const [copied, setCopied] = useState(false);
   const [truthOpen, setTruthOpen] = useState(false);

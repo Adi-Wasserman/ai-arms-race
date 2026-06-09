@@ -208,7 +208,9 @@ function buildProjectionDatasets(
         pointHitRadius: 0,
         stepped: false,
         fill: '+1',
-        backgroundColor: `${color}12`,
+        // ±20–24% uncertainty band. 0x26 ≈ 15% opacity — visible on the
+        // dark background so the projection reads as a range, not a line.
+        backgroundColor: `${color}26`,
       });
       datasets.push({
         label: `${c} proj-low`,

@@ -104,6 +104,23 @@
   letter-spacing: 0.03em;
 }
 
+/* Inline estimate marker — flags numbers that include cloud-lease /
+   tenant-split estimates at the point of reading them. */
+.estBadge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 1px 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 170, 0, 0.9);
+  background: rgba(255, 170, 0, 0.12);
+  border: 1px solid rgba(255, 170, 0, 0.35);
+  border-radius: 3px;
+  vertical-align: 1px;
+  cursor: help;
+}
+
 .ownedInline {
   cursor: help;
 }

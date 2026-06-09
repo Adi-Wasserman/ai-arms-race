@@ -113,7 +113,9 @@ function fmtDate(iso: string): string {
 }
 
 export function ComputeBreakdownCard(): JSX.Element | null {
-  const [open, setOpen] = useState(false);
+  // Open by default — this card is the confidence-split Rosetta Stone for
+  // the leaderboard numbers above; hiding it buried the estimate caveats.
+  const [open, setOpen] = useState(true);
 
   const seriesEpoch = useDashboard((s) => s.seriesEpoch);
   const seriesFull = useDashboard((s) => s.seriesFull);

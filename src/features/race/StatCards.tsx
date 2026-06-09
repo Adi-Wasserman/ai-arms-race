@@ -119,21 +119,22 @@ export function StatCards(): JSX.Element | null {
         <>
           ⚡{' '}
           <strong className={styles.projection}>
-            2029 PROJECTION (power-constrained):
+            JAN 2029 — ANNOUNCED TARGETS (power-constrained):
           </strong>{' '}
           <strong style={{ color: projLeader ? LAB_COLORS[projLeader] : undefined }}>
             {projLeader}
           </strong>{' '}
-          is projected to lead by Jan 2029 with{' '}
+          leads the announced buildouts at{' '}
           <strong>
             {formatH100(projMax)} {unit}
           </strong>
-          . Total industry compute grows <strong>~{totalGrowth}×</strong> from{' '}
-          {formatH100(nowTotal)} to {formatH100(projTotal)}.{' '}
+          . If every lab hits its target, industry compute grows{' '}
+          <strong>~{totalGrowth}×</strong> from {formatH100(nowTotal)} to{' '}
+          {formatH100(projTotal)}.{' '}
           <span className={styles.muted}>
-            Targets derived from Epoch satellite ramps (Layer 1) + sourced cloud-lease
-            fleet growth (Layer 2). No speculative facilities. Power is the binding
-            constraint. ±20% uncertainty.
+            These are what the labs have announced and sourced — interpolated to Jan
+            2029, not forecast. Assumes power interconnection, chip-efficiency gains
+            (GB200/Ironwood/Rubin), and lease ramps all hold. ±20–24% bands.
           </span>
         </>
       );
@@ -161,9 +162,18 @@ export function StatCards(): JSX.Element | null {
         )}
         . The lead has changed <strong>{stats.pastLeadChanges} times</strong> since 2024
         — and {stats.futureLeadChanges} more projected shifts are ahead.
+        {scope === 'fleet' && (
+          <span className={styles.muted}>
+            {' '}
+            Totals blend satellite-verified facilities with our cloud-lease estimates —
+            satellite alone undercounts cloud tenants. Toggle SATELLITE ONLY for the
+            verified floor.
+          </span>
+        )}
       </>
     );
-  }, [stats, metric, projMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stats, metric, projMode, scope]);
 
   if (!stats.current || !stats.leader) return null;
 
@@ -187,15 +197,37 @@ export function StatCards(): JSX.Element | null {
           </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>TOTAL COMPUTE</div>
+          <div className={styles.statLabel}>
+            TOTAL COMPUTE
+            {scope === 'fleet' && (
+              <span
+                className={styles.estTag}
+                title="Blends satellite-verified Epoch data with our cloud-lease estimates (AWS/GCP/Azure legs, Colossus tenant split). Open COMPUTE BREAKDOWN below for the per-lab split."
+              >
+                INCL. ESTIMATES
+              </span>
+            )}
+          </div>
           <div className={styles.statValue}>
+            {scope === 'fleet' && '≈'}
             {formatH100(stats.current.tH)}
             <span className={styles.statSub}>H100e</span>
           </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>TOTAL POWER</div>
+          <div className={styles.statLabel}>
+            TOTAL POWER
+            {scope === 'fleet' && (
+              <span
+                className={styles.estTag}
+                title="Blends satellite-verified Epoch data with our cloud-lease estimates."
+              >
+                INCL. ESTIMATES
+              </span>
+            )}
+          </div>
           <div className={styles.statValue}>
+            {scope === 'fleet' && '≈'}
             {formatPower(stats.current.tP)}
             <span className={styles.statSub}>all labs</span>
           </div>
