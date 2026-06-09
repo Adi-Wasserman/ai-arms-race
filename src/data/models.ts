@@ -70,7 +70,7 @@ export const MODEL_SPECS: readonly Model[] = [
     costOut: 25.0,
     context: 1000,
     notes:
-      'Highest AA Intelligence Index (61). Leads SWE-bench Verified (88.6%) and OSWorld (83.4%). 128K max output. 1M context window. Adaptive thinking replaces extended thinking.',
+      'Highest AA Intelligence Index (61). SWE-bench Verified 88.6%, OSWorld 83.4% — led both among GA models until Claude Fable 5 (Jun 2026). 128K max output. 1M context window. Adaptive thinking replaces extended thinking.',
   },
   {
     name: 'Grok 4.3',
@@ -128,16 +128,16 @@ export const MODEL_SPECS: readonly Model[] = [
     arcAgi2: null,
     aime: null,
     mmmuPro: null,
-    hle: null,
+    hle: 64.5,
     gdpval: null,
-    osworld: null,
+    osworld: 85.0,
     browsecomp: null,
     speed: null,
     costIn: 10,
     costOut: 50,
     context: 1000,
     notes:
-      'Public Mythos-class model released Jun 9 2026 — Anthropic\'s most capable generally available model. Leads SWE-bench Verified (95.0%) and SWE-bench Pro (80.0%). 1M context, 128K max output. High-risk requests (cyber/bio/chem/distillation, <5% of sessions) auto-fall back to Opus 4.8. Claude Mythos 5 is the same underlying model with safeguards lifted in some areas, restricted to Project Glasswing partners (10,000+ critical vulnerabilities found by partner orgs). Launch-day scores Anthropic-reported; AA Index and independent verification pending.',
+      'Public Mythos-class model released Jun 9 2026 — Anthropic\'s most capable generally available model. Leads SWE-bench Verified (95.0%), SWE-bench Pro (80.0%), OSWorld-Verified (85.0%) and HLE (64.5% with tools). Terminal-Bench 2.1 84.3% effective. GDPval reported as Elo (1932), not %, so omitted here. GPQA not published at launch. 1M context, 128K max output. High-risk requests (cyber/bio/chem/distillation, <5% of sessions) auto-fall back to Opus 4.8. Claude Mythos 5 is the same underlying model with safeguards lifted, restricted to Project Glasswing partners. Launch-day scores Anthropic-reported; some launch-table rows report the shared Mythos-class run — Fable deployments can score lower where safety fallbacks trigger. AA Index pending.',
     preview: true,
   },
 ] as const;
