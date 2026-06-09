@@ -135,7 +135,10 @@ function MetrChartInner(
     });
 
     const chartOptions: ChartOptions<'scatter'> = {
-      interaction: { mode: 'point', intersect: true },
+      // Nearest-x snapping instead of exact point intersection — the
+      // 2025–2026 cluster packs many models at similar dates, and
+      // point/intersect made the tooltip flicker between neighbors.
+      interaction: { mode: 'nearest', intersect: false, axis: 'x' },
       layout: { padding: { top: 10, right: 30, bottom: 10, left: 20 } },
       scales: {
         x: {
