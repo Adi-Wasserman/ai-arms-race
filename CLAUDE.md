@@ -19,7 +19,7 @@ All 4 sections ship and render from live Epoch AI data with fallback. Major June
   - **Data-pipeline guards**: empty Epoch parse → fallback + error (no more "Live" over a blank chart); `RaceChart` renders an explicit empty state; NaN CSV values warn once per column; dev-mode assertion that the Colossus split nets to zero (`fleet.ts`).
   - **Local-calendar dates**: all "today" comparisons use `localTodayIso()` from `src/services/dates.ts` — never `toISOString().slice(0,10)` (UTC can hide a fresh quarter-end for users behind UTC). Swept across ALL module-level `TODAY_ISO` constants (June 2026).
   - **Dynamic month headers**: "KEY INSIGHTS — {month}" / "KEY TAKEAWAYS — {month}" compute the month at render; never hardcode a month name in user-visible copy.
-  - **Test suite**: 61 Vitest tests in `src/services/__tests__/` (parsers, ownership math, projections, confidence, Colossus balance). `npm test` runs them; **CI runs them between type-check and build**, so failures block deploys.
+  - **Test suite**: 67 Vitest tests in `src/services/__tests__/` (parsers, ownership math, projections, confidence, Colossus balance, pace tracker). `npm test` runs them; **CI runs them between type-check and build**, so failures block deploys.
   - **Keyboard a11y**: TruthModal focus trap + restore, FacilityDrawer focus management, IntelTable sort headers/rows keyboard-operable with `aria-sort`, `:focus-visible` outlines, `role="img"` on charts.
   - **Auto-refresh pause**: the 5-min chip-owners refetch skips ticks while `document.hidden`, with a catch-up refresh on tab return.
   - **METR tooltip fix**: `interaction: { mode: 'nearest', intersect: false, axis: 'x' }` — stops flicker in the dense 2025–2026 cluster.
@@ -103,7 +103,12 @@ src/hooks/useEpochChipOwners.ts               # 5min auto-refresh (paused while 
 src/hooks/useHashState.ts                     # default scope='fleet' (was 'tracked' — fixed)
 src/services/chipOwners.ts                    # asOf filters past dates only (was showing 2030)
 src/services/dates.ts                         # localTodayIso() — ALWAYS use for "today" comparisons
-src/services/__tests__/                       # 61 Vitest tests — npm test; CI gate
+src/services/__tests__/                       # 67 Vitest tests — npm test; CI gate
+src/services/paceTracker.ts                   # 2029 pace math (required vs trailing per quarter)
+src/features/race/TargetTracker.tsx           # 2029 accountability verdicts (OpenAI = BASIS GAP)
+src/features/race/ChipConversionCard.tsx      # spec-derived chip→H100e reference (NOT adjustable)
+src/components/ui/HoverTip.tsx                # instant tooltip — use instead of native title=
+src/hooks/useCollapsible.ts                   # shared collapse + localStorage hook
 src/services/classify.ts                      # SpaceXAI owner-first check for Colossus
 src/services/confidence.ts                    # ±1.4× capacity (Epoch ~80% CI)
 src/services/observations.ts                  # 10 signal types incl. permit, liquid cooling, PPA
@@ -256,6 +261,12 @@ Used in `OwnershipTable`, `FrontierOutlookCard`, `ComputeBreakdownCard`, and `Fi
 ### OwnershipTable row order
 Frontier-anchored owners first (by H100e desc), then non-frontier.
 
+### Native `title` tooltips — don't use
+The OS imposes a ~1s hover delay and the box is unstyleable. Use `HoverTip` from `src/components/ui/HoverTip.tsx` (instant, portal-based, `TipHeader`/`TipRow` for structured content) for any informational hover.
+
+### Mid-session file deletions break HMR
+Deleting a file the dev server's module graph still references leaves the browser tab with dead event handlers even after later edits succeed — symptoms look like "interactions stopped working." Restart vite with `--force` and hard-refresh.
+
 ### METR chart linear scale
 User prefers linear Y-axis (not logarithmic). GPT-2 label hidden because its value (~3 min) is invisible at the 0–800 hr scale. Do not switch to log scale.
 
@@ -314,7 +325,7 @@ Chip efficiency improvements factored in: GB200 ~2.5× H100e, Vera Rubin ~3× (2
 
 ## 4 Sections
 
-1. **THE RACE** (#race) — Key Insights (June 2026) → ACCESS/OWNERSHIP tabs → stat cards (3) → hero chart + leaderboard → ComputeBreakdownCard (collapsed, with Colossus tenant legs) → KnownLeasesCard (7 bullets) → ProjectionPanel → DATA footer (9 sources linked) → bridge to #models. OWNERSHIP tab adds: FrontierOutlookCard + OwnershipTable.
+1. **THE RACE** (#race) — Key Insights (dynamic month) → ACCESS/OWNERSHIP tabs → stat cards (3, EST-tagged) → hero chart + leaderboard (EST/ADJ badges) → ComputeBreakdownCard (open by default, Colossus tenant legs + assumption hovers) → ChipConversionCard (spec-derived ratios, collapsed) → KnownLeasesCard (7 bullets) → ProjectionPanel (ANNOUNCED TARGETS) → TargetTracker (2029 accountability verdicts) → DATA footer (9 sources linked) → bridge to #models. OWNERSHIP tab adds: FrontierOutlookCard + OwnershipTable.
 2. **GEO MAP** (#geomap) — Leaflet + ESRI satellite tiles, ~46 frontier pins (of 63 Epoch total), lab-colored (LIVE/BUILDING/PLANNED), region jump (US/UAE), satellite preview. Stargate 7-site portfolio + Colossus 1+2.
 3. **INTEL** (#sites) — Sortable facility table (~46 frontier facilities), 10 signal types, confidence scoring (Epoch ~80% CI ±1.4×), drawer with satellite + timeline.
 4. **MODELS** (#models) — Key Takeaways (June 2026) → Training Compute Growth scatter (23 models, ~5x/yr trend) → Within-Lab Scaling (GPT-5.5 + Opus 4.8) → FirstPrinciples explainer → BenchmarkTable (4 verified + 2 preview) → linked data sources → METR Time Horizons TH 1.1 (27 models, linear scale).
